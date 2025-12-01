@@ -1,5 +1,6 @@
-# Aidsfuscator
+# Aidsfuscator (OLD, USE ONLY AS STARTER BASE)
 
+Join the [discord server](https://discord.gg/fSAv9jwJ5J)!
 This is a new java obfuscator im writing. Although not everything here is stable (for now), this will continue to improve and get updated. Any contribution would be nice.
 
 # How to use?
