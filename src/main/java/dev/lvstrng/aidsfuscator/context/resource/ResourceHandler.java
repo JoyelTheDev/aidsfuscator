@@ -1,0 +1,52 @@
+package dev.lvstrng.aidsfuscator.context.resource;
+
+import dev.lvstrng.aidsfuscator.context.Context;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
+
+public class ResourceHandler {
+    private final Context context;
+    private final Map<String, byte[]> resources = new HashMap<>();
+
+    private final Map<String, HandledResource> handledResources = Map.of();
+
+    public ResourceHandler(Context context) {
+        this.context = context;
+    }
+
+    public void handle(JarOutputStream jos) throws IOException {
+        for(var resource : resources.entrySet()) {
+            var name = resource.getKey();
+            var bytes = resource.getValue();
+
+            var handled = false;
+            for(var k : handledResources.keySet()) {
+                if(name.endsWith(k)) {
+                    handledResources.get(k).handle(context, jos, name, bytes);
+
+                    handled = true;
+                    break;
+                }
+            }
+
+            if(handled)
+                continue;
+
+            jos.putNextEntry(new ZipEntry(name));
+            jos.write(bytes);
+            jos.closeEntry();
+        }
+    }
+
+    public void add(String name, byte[] bytes) {
+        resources.put(name, bytes);
+    }
+
+    public Map<String, byte[]> resources() {
+        return resources;
+    }
+}

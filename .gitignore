@@ -1,42 +1,38 @@
-# Project settings
-.vs/
-.vscode/
-.idea/
-.settings/
-
-# Build systems
-.m2/
-.gradle/
-
-# Project files
-.classpath
-.project
-*.iml
-*.jar
-*.txt
-
-# Common compiler output directories
 target/
-!src/**/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 build/
-!src/**/build/
-out/
-!src/**/out/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Common working directories
-run/
-!src/**/run/
-test_run/
-!src/**/test_run/
-work/
-!src/**/work/
-workspace/
-!src/**/workspace/
+### VS Code ###
+.vscode/
 
-# Ignored by default
-*.class
-*.log
-
-# JVM Crash Logs
-hs_err_pid*
-replay_pid*
+### Mac OS ###
+.DS_Store
