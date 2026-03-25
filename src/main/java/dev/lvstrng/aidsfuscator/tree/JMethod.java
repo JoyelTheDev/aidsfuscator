@@ -1,14 +1,17 @@
 package dev.lvstrng.aidsfuscator.tree;
 
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleInterpreter;
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
+import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.Frame;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A MethodNode wrapper for easier use.
@@ -110,6 +113,24 @@ public class JMethod {
         return core.instructions;
     }
 
+    public Map<AbstractInsnNode, Frame<SimpleValue>> frames(Context context) {
+        try {
+            var frameArr = new Analyzer<>(new SimpleInterpreter(context)).analyzeAndComputeMaxs(owner.name(), core);
+            var frames = new HashMap<AbstractInsnNode, Frame<SimpleValue>>();
+
+            for(int i = 0; i < insns().size(); i++) {
+                var insn = insns().get(i);
+                var frame = frameArr[i];
+
+                frames.put(insn, frame);
+            }
+
+            return frames;
+        } catch (AnalyzerException e) {
+            Logger.error("Error analyzing frames: %s", e.getLocalizedMessage());
+            return null;
+        }
+    }
 
     public String fullName() {
         return "%s.%s%s".formatted(owner, name(), desc());

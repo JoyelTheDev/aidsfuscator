@@ -49,6 +49,12 @@ public class JClass {
         return properties;
     }
 
+    public boolean isAssignableFrom(JClass clazz) {
+        if(this == clazz)
+            return true;
+        return clazz.parents.contains(this);
+    }
+
     public JMethod findMethodFull(Context context, String name, String desc) {
         var method = findMethod(name, desc).orElse(null);
         if(method != null)

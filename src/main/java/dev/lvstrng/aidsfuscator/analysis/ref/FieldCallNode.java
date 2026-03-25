@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.analysis.call;
+package dev.lvstrng.aidsfuscator.analysis.ref;
 
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;

@@ -1,6 +1,6 @@
 package dev.lvstrng.aidsfuscator.context;
 
-import dev.lvstrng.aidsfuscator.analysis.call.ReferenceGraph;
+import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
