@@ -126,8 +126,8 @@ public class Context {
             Logger.error("Error writing output JAR: %s", e);
         }
 
-        Logger.info("Exported JAR successfully!");
-        Logger.info("%s (%skb) -> %s (%skb)",
+        Logger.success("Exported JAR successfully!");
+        Logger.success("%s (%skb) -> %s (%skb)",
                 input, Utils.bytesToKB(new File(input).length()),
                 output, Utils.bytesToKB(outputFile.length())
         );

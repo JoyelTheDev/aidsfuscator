@@ -12,7 +12,11 @@ public class Logger {
     };
 
     private static void log(LogLevel level, String msg, Object... args) {
-        System.out.printf(String.format("%s %s %s%n", timeString.get(), level.tag(), msg), args);
+        System.out.printf(String.format("%s%s %s %s%s%n", level.color(), timeString.get(), level.tag(), msg, ConsoleColors.RESET), args);
+    }
+
+    public static void success(String msg, Object... args) {
+        log(LogLevel.SUCCESS, msg, args);
     }
 
     public static void warn(String msg, Object... args) {
