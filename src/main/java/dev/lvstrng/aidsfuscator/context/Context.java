@@ -30,6 +30,7 @@ public class Context {
     private String input, output, libPath;
     private final Map<String, JClass> classes, artificials, libraries, excluded;
     private int writerFlags;
+    private boolean computeFrames;
 
     private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
@@ -116,7 +117,7 @@ public class Context {
         for(var transformer : transformers) {
             Logger.info("Running '%s'", transformer.name());
             transformer.transform(this);
-            Logger.info("Completed '%s' with %s changes", transformer.name(), transformer.changes());
+            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
             Logger.info("");
         }
         return this;
@@ -196,6 +197,18 @@ public class Context {
         return new File("workspace/" + item);
     }
 
+    public String in() {
+        return input;
+    }
+
+    public String out() {
+        return output;
+    }
+
+    public String libs() {
+        return libPath;
+    }
+
     // -----------------
     // ---- CLASSES ----
     // -----------------
@@ -250,6 +263,10 @@ public class Context {
         return excluded;
     }
 
+    public boolean doesComputeFrames() {
+        return computeFrames;
+    }
+
     // -----------------
     // ---- BUILDER ----
     // -----------------
@@ -274,6 +291,7 @@ public class Context {
     }
 
     public Context computeFrames() {
+        this.computeFrames = true;
         this.writerFlags |= ClassWriter.COMPUTE_FRAMES;
         return this;
     }

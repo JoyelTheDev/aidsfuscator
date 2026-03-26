@@ -14,9 +14,9 @@ import java.util.List;
  */
 public final class TransformerOrder {
     private static final List<Transformer> transformers = List.of(
-            new ClassRenameTransformer(),
             new FieldRenameTransformer(),
             new MethodRenameTransformer(),
+            new ClassRenameTransformer(),
 
             new LocalVariableNameTransformer(),
             new MethodSaltTransformer()

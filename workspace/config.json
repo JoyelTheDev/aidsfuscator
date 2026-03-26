@@ -1,5 +1,5 @@
 {
-  "in": "in.jar",
+  "in": "eval.jar",
   "out": "out.jar",
   "libs": "libs/",
   "computeFrames": true,
@@ -13,13 +13,11 @@
     "renameClasses": {
       "enabled": true
     },
-
     "localNames": {
       "enabled": true
     },
-
     "methodSalting": {
-      "enabled": true
+      "enabled": false
     }
   }
 }

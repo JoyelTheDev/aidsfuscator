@@ -20,7 +20,7 @@ public class ConfigLoader {
     public void load() {
         var file = Context.getFromWorkspace(configPath);
         if(!file.exists()) {
-            Logger.error("No config found.");
+            Logger.warn("No config file found. Running with no obfuscation.");
             throw new RuntimeException();
         }
         Logger.info("Loading config (%s)...", configPath);

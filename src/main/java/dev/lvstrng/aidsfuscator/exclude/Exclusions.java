@@ -4,10 +4,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public enum Exclusions {
     GLOBAL("global", true, false, false),
@@ -36,6 +33,10 @@ public enum Exclusions {
         this.classExclusions = new HashSet<>();
         this.fieldExclusions = new HashSet<>();
         this.methodExclusions = new HashSet<>();
+    }
+
+    public static Exclusions fromKey(String key) {
+        return Arrays.stream(values()).filter(e -> e.key().equals(key)).findFirst().orElse(null);
     }
 
     public boolean excluded(JClass clazz) {
