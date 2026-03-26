@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 
 public class FieldRenameTransformer extends Transformer {
     public FieldRenameTransformer() {
-        super("Rename Fields");
+        super("Rename Fields", "renameFields");
     }
 
     @Override

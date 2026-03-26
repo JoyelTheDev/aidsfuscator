@@ -3,6 +3,7 @@ package dev.lvstrng.aidsfuscator.context;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
+import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
 import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
@@ -19,6 +20,7 @@ import org.objectweb.asm.ClassWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -110,6 +112,16 @@ public class Context {
         return this;
     }
 
+    public Context transform() {
+        for(var transformer : transformers) {
+            Logger.info("Running '%s'", transformer.name());
+            transformer.transform(this);
+            Logger.info("Completed '%s' with %s changes", transformer.name(), transformer.changes());
+            Logger.info("");
+        }
+        return this;
+    }
+
     @SuppressWarnings("all")
     public Context exportJar() {
         Logger.info("Exporting JAR...");
@@ -142,7 +154,6 @@ public class Context {
     // ----   MISC  ----
     // -----------------
 
-
     public List<Transformer> transformers() {
         return transformers;
     }
@@ -169,6 +180,20 @@ public class Context {
 
     public int writerFlags() {
         return writerFlags;
+    }
+
+    public static String readWorkspaceString(String item) {
+        try {
+            return Files.readString(getFromWorkspace(item).toPath());
+        } catch (IOException _) {
+            var e = new MissingWorkspaceItemException(item);
+            Logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    public static File getFromWorkspace(String item) {
+        return new File("workspace/" + item);
     }
 
     // -----------------

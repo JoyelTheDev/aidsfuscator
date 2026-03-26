@@ -7,7 +7,7 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 
 public class ClassRenameTransformer extends Transformer {
     public ClassRenameTransformer() {
-        super("Rename Classes");
+        super("Rename Classes", "renameClasses");
     }
 
     @Override

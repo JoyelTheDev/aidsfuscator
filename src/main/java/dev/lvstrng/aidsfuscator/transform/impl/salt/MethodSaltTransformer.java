@@ -22,7 +22,7 @@ public class MethodSaltTransformer extends Transformer {
     private final Map<JMethod, List<AbstractInsnNode>> seedInsns;
 
     public MethodSaltTransformer() {
-        super("Method Salting");
+        super("Method Salting", "methodSalting");
         this.seedInsns = new HashMap<>();
     }
 

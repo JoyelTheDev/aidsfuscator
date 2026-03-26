@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.asm.RemapperImpl;
+import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import org.objectweb.asm.Opcodes;
@@ -10,16 +11,21 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.lang.reflect.Modifier;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class Transformer implements Opcodes {
-    private final String name;
+    private final String name, key;
     protected final SecureRandom random;
+    private final List<Setting<?>> settings;
     private int changes;
 
-    public Transformer(String name) {
+    public Transformer(String name, String key) {
         this.name = name;
+        this.key = key;
         this.random = new SecureRandom();
+        this.settings = new ArrayList<>();
     }
 
     public abstract void transform(Context context);
@@ -28,12 +34,20 @@ public abstract class Transformer implements Opcodes {
         return name;
     }
 
+    public String key() {
+        return key;
+    }
+
     public void markChange() {
         changes++;
     }
 
     public int changes() {
         return changes;
+    }
+
+    public List<Setting<?>> settings() {
+        return settings;
     }
 
     public void remap(Context context) {

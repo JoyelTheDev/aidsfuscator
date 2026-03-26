@@ -1,0 +1,25 @@
+{
+  "in": "in.jar",
+  "out": "out.jar",
+  "libs": "libs.jar",
+  "computeFrames": true,
+  "transformers": {
+    "renameFields": {
+      "enabled": true
+    },
+    "renameMethods": {
+      "enabled": true
+    },
+    "renameClasses": {
+      "enabled": true
+    },
+
+    "localNames": {
+      "enabled": true
+    },
+
+    "methodSalting": {
+      "enabled": true
+    }
+  }
+}

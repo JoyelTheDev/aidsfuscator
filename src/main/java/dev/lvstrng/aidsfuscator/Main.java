@@ -1,29 +1,21 @@
 package dev.lvstrng.aidsfuscator;
 
-import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.lvstrng.aidsfuscator.config.ConfigLoader;
+import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class Main {
     public static void main(String[] args) {
-        Context.newInstance()
-                .computeFrames()
-                .in("eval.jar")
-                .libs("libs/")
-                .out("out.jar")
-                .initialize()
-                .transform(
-                        new LocalVariableNameTransformer(),
+        Logger.info("Current version: %s", AidsfuscatorInfo.versionText());
+        if(args.length < 1) {
+            Logger.error("Specify a config path in the 'workspace' directory. Usage: java -jar aidsfuscator.jar config.json");
+            return;
+        }
 
-                        new FieldRenameTransformer(),
-                        new MethodRenameTransformer(),
-                        new ClassRenameTransformer(),
+        var loader = new ConfigLoader(args[0]);
+        loader.load();
 
-                        new MethodSaltTransformer()
-                )
+        loader.result().initialize()
+                .transform()
                 .exportJar();
     }
 }

@@ -40,5 +40,12 @@
             <artifactId>asm-analysis</artifactId>
             <version>9.8</version>
         </dependency>
+        <!-- json cuz idk how to do yaml shit -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

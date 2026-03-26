@@ -5,7 +5,7 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 
 public class LocalVariableNameTransformer extends Transformer {
     public LocalVariableNameTransformer() {
-        super("Remove Local Names");
+        super("Remove Local Names", "localNames");
     }
 
     @Override

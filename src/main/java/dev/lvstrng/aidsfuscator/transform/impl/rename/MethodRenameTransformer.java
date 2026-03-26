@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 
 public class MethodRenameTransformer extends Transformer {
     public MethodRenameTransformer() {
-        super("Rename Methods");
+        super("Rename Methods", "renameMethods");
     }
 
     @Override
