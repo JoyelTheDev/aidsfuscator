@@ -1,1 +1,7 @@
-{}
+{
+  "renameMethod": {
+    "method": [
+      "*.main([Ljava/lang/String;)V"
+    ]
+  }
+}
