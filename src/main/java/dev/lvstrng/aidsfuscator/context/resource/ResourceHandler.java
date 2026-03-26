@@ -1,10 +1,12 @@
 package dev.lvstrng.aidsfuscator.context.resource;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.resource.handled.ManifestHandler;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
@@ -12,7 +14,9 @@ public class ResourceHandler {
     private final Context context;
     private final Map<String, byte[]> resources = new HashMap<>();
 
-    private final Map<String, HandledResource> handledResources = Map.of();
+    private final Map<String, Supplier<HandledResource>> handledResources = Map.of(
+            "MANIFEST.MF", ManifestHandler::new
+    );
 
     public ResourceHandler(Context context) {
         this.context = context;
@@ -26,7 +30,7 @@ public class ResourceHandler {
             var handled = false;
             for(var k : handledResources.keySet()) {
                 if(name.endsWith(k)) {
-                    handledResources.get(k).handle(context, jos, name, bytes);
+                    handledResources.get(k).get().handle(context, jos, name, bytes);
 
                     handled = true;
                     break;

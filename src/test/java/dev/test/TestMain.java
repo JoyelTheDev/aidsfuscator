@@ -1,7 +1,9 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.test.transform.CFGTest;
 import dev.test.transform.FrameTest;
+import dev.test.transform.NamingTest;
 
 public class TestMain {
     public static void main(String[] args) {
@@ -11,7 +13,9 @@ public class TestMain {
                 .libs("libs/")
                 .out("out.jar")
                 .initialize()
-                .transform(new FrameTest())
+                .transform(
+                        new NamingTest()
+                )
                 .exportJar();
     }
 }

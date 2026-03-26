@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.tree;
 
+import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleInterpreter;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
@@ -113,6 +114,10 @@ public class JMethod {
         return core.instructions;
     }
 
+    public ControlFlowGraph createFlowGraph(Context context) {
+        return new ControlFlowGraph(context, this).build();
+    }
+
     public Map<AbstractInsnNode, Frame<SimpleValue>> frames(Context context) {
         try {
             var frameArr = new Analyzer<>(new SimpleInterpreter(context)).analyzeAndComputeMaxs(owner.name(), core);
@@ -132,8 +137,12 @@ public class JMethod {
         }
     }
 
+    public String simpleName() {
+        return "%s%s".formatted(name(), desc());
+    }
+
     public String fullName() {
-        return "%s.%s%s".formatted(owner, name(), desc());
+        return "%s.%s".formatted(owner, simpleName());
     }
 
     @Override

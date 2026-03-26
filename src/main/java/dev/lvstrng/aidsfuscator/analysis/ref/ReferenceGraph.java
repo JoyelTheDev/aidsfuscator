@@ -35,14 +35,16 @@ public class ReferenceGraph {
         this.fieldReferencesIn = new ConcurrentHashMap<>();
     }
 
-    public void build() {
+    public ReferenceGraph build() {
         this.clear();
 
-        for(var clazz : context.classes()) {
+        for(var clazz : context.jarClasses()) {
             for(var method : clazz.methods()) {
                 buildInMethod(clazz, method);
             }
         }
+
+        return this;
     }
 
     public Set<MethodCallNode> refs(JMethod method) {

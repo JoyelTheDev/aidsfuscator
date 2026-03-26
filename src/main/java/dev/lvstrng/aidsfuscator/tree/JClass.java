@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.tree;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -29,6 +30,11 @@ public class JClass {
         this.setCore(core);
     }
 
+    public boolean isAnnotatedBy(String annotation) {
+        return MemberUtils.hasAnnotation(core.visibleAnnotations, annotation) ||
+                MemberUtils.hasAnnotation(core.invisibleAnnotations, annotation);
+    }
+
     public void setLibrary() {
         this.library = true;
     }
@@ -45,6 +51,14 @@ public class JClass {
         return Modifier.isInterface(access());
     }
 
+    public boolean isEnum() {
+        return core.superName != null && core.superName.equals("java/lang/Enum");
+    }
+
+    public boolean isRecord() {
+        return core.superName != null && core.superName.equals("java/lang/Record");
+    }
+
     public PropertyContainer properties() {
         return properties;
     }
@@ -53,6 +67,48 @@ public class JClass {
         if(this == clazz)
             return true;
         return clazz.parents.contains(this);
+    }
+
+    public boolean isLibMethod(String name, String desc) {
+        for(var parent : parents()) {
+            if(!parent.isLibrary())
+                continue;
+
+            if(parent.methods.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean isLibField(String name, String desc) {
+        for(var parent : parents()) {
+            if(!parent.isLibrary())
+                continue;
+
+            if(parent.fields.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasFieldInTree(String name, String desc) {
+        for(var member : tree()) {
+            if(member.fields.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasMethodInTree(String name, String desc) {
+        for(var member : tree()) {
+            if(member.methods.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+                return true;
+        }
+
+        return false;
     }
 
     public JMethod findMethodFull(Context context, String name, String desc) {

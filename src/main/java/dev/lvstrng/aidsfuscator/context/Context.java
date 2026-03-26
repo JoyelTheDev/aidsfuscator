@@ -8,6 +8,8 @@ import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.log.Logger;
+import dev.lvstrng.aidsfuscator.naming.dictionary.DefaultDictionary;
+import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
@@ -30,6 +32,7 @@ public class Context {
     private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
     private final IHierarchy hierarchy;
+    private final IDictionary dictionary;
     private final ReferenceGraph referenceGraph;
 
     private final List<Transformer> transformers;
@@ -43,6 +46,7 @@ public class Context {
 
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
+        this.dictionary         = new DefaultDictionary(this, "abcdefghijklmnopqrstuvwxyz");
         this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
 
@@ -137,6 +141,10 @@ public class Context {
     // -----------------
     // ----   MISC  ----
     // -----------------
+
+    public IDictionary dictionary() {
+        return dictionary;
+    }
 
     public ResourceHandler resourceHandler() {
         return resourceHandler;

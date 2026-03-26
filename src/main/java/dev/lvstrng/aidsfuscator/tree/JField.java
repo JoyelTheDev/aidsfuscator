@@ -97,8 +97,12 @@ public class JField {
         core.value = value;
     }
 
+    public String simpleName() {
+        return "%s %s".formatted(name(), desc());
+    }
+
     public String fullName() {
-        return "%s.%s %s".formatted(owner, name(), desc());
+        return "%s.%s".formatted(owner, simpleName());
     }
 
     @Override
