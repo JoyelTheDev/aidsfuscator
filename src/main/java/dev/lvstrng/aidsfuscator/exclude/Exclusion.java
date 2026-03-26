@@ -45,4 +45,9 @@ public class Exclusion {
 
         return e.filter.string().equals(filter.string());
     }
+
+    @Override
+    public String toString() {
+        return filter.string();
+    }
 }

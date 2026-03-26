@@ -42,7 +42,7 @@ public enum Exclusions {
         var match = classExclusions.stream().anyMatch(e -> e.matchesClass(clazz));
 
         if(this == GLOBAL) return match;
-        else return match && GLOBAL.excluded(clazz);
+        else return match || GLOBAL.excluded(clazz);
     }
 
     public boolean excluded(JField field) {

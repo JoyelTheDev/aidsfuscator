@@ -14,6 +14,7 @@ import dev.test.transform.OldNameTest;
 public class TestMain {
     public static void main(String[] args) {
         Exclusions.RENAME_CLASS.addClass("Main");
+        System.out.println(Exclusions.RENAME_CLASS.classExclusions());
 
         Context.newInstance()
                 .computeFrames()
