@@ -6,6 +6,7 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.seed.MethodSalt;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -22,6 +23,7 @@ public class JMethod {
     private MethodNode core;
     private final PropertyContainer properties;
     private boolean library;
+    private MethodSalt salt;
 
     private List<JMethod> parents, children;
 
@@ -29,6 +31,18 @@ public class JMethod {
         this.properties = new PropertyContainer();
         this.library = false;
         this.setCore(core);
+    }
+
+    public void makeSalt(int value, int local) {
+        this.salt = new MethodSalt(value, local);
+    }
+
+    public boolean hasSalt() {
+        return salt != null;
+    }
+
+    public MethodSalt salt() {
+        return salt;
     }
 
     public PropertyContainer properties() {

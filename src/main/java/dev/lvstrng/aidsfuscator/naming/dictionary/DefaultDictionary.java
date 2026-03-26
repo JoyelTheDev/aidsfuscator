@@ -4,6 +4,10 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 
+/**
+ * Dictionary that does aggressive renaming. {@code revert} methods do not have implementations (shouldn't have one either way).
+ * @author lvstrng
+ */
 public class DefaultDictionary implements IDictionary {
     private final Context context;
     private final String dictionary;
