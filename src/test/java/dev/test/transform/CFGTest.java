@@ -6,7 +6,7 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 
 public class CFGTest extends Transformer {
     public CFGTest() {
-        super("CFGTest");
+        super("CFGTest", "cfgTest");
     }
 
     @Override

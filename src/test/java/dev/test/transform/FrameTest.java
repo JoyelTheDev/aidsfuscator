@@ -11,7 +11,7 @@ import java.awt.*;
 
 public class FrameTest extends Transformer {
     public FrameTest() {
-        super("Frame Test");
+        super("Frame Test", "frameTest");
     }
 
     @Override

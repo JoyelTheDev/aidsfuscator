@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 
 public class NamingTest extends Transformer {
     public NamingTest() {
-        super("Naming");
+        super("Naming", "namingTest");
     }
 
     @Override
