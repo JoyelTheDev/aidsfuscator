@@ -4,6 +4,7 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
 
 public class Main {
@@ -19,7 +20,9 @@ public class Main {
 
                         new FieldRenameTransformer(),
                         new MethodRenameTransformer(),
-                        new ClassRenameTransformer()
+                        new ClassRenameTransformer(),
+
+                        new MethodSaltTransformer()
                 )
                 .exportJar();
     }

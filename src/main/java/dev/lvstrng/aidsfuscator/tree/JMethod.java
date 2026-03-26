@@ -7,6 +7,7 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.seed.MethodSalt;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -31,6 +32,58 @@ public class JMethod {
         this.properties = new PropertyContainer();
         this.library = false;
         this.setCore(core);
+    }
+
+    public int allocParameter(Type type) {
+        int argSize = Arrays.stream(args()).mapToInt(Type::getSize).sum();
+        int spot = Modifier.isStatic(access()) ? argSize : argSize + 1;
+
+        if (localVariables() != null) {
+            for (var lv : localVariables()) {
+                if (lv.index >= spot)
+                    lv.index += type.getSize();
+            }
+        }
+
+        for (var insn : insns()) {
+            if (insn instanceof VarInsnNode v) {
+                if (v.var >= spot)
+                    v.var += type.getSize();
+            } else if (insn instanceof IincInsnNode v) {
+                if (v.var >= spot)
+                    v.var += type.getSize();
+            }
+        }
+
+        core.desc = desc().replace(")", type.getDescriptor() + ")");
+        core.maxLocals += type.getSize();
+        return spot;
+    }
+
+    private Type[] args() {
+        return Type.getArgumentTypes(desc());
+    }
+
+    public int allocVar() {
+        return allocVar(Type.getObjectType("java/lang/Object"));
+    }
+
+    public int allocVar(Type type) {
+        var slot = maxLocals();
+        setMaxLocals(maxLocals() + type.getSize());
+        return slot;
+    }
+
+    public int maxLocals() {
+        return core.maxLocals;
+    }
+
+    public void setMaxLocals(int maxLocals) {
+        core.maxLocals = maxLocals;
+    }
+
+    public int maxStack() {
+        return core.maxStack;
     }
 
     public void makeSalt(int value, int local) {

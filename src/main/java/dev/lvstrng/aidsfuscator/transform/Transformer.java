@@ -9,14 +9,17 @@ import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.lang.reflect.Modifier;
+import java.security.SecureRandom;
 import java.util.HashMap;
 
-public abstract class Transformer {
+public abstract class Transformer implements Opcodes {
     private final String name;
+    protected final SecureRandom random;
     private int changes;
 
     public Transformer(String name) {
         this.name = name;
+        this.random = new SecureRandom();
     }
 
     public abstract void transform(Context context);

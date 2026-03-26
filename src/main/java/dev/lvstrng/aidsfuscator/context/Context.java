@@ -142,6 +142,11 @@ public class Context {
     // ----   MISC  ----
     // -----------------
 
+
+    public List<Transformer> transformers() {
+        return transformers;
+    }
+
     public IDictionary dictionary() {
         return dictionary;
     }

@@ -67,6 +67,9 @@ public class ReferenceGraph {
         for(var insn : caller.insns()) {
             switch (insn) {
                 case MethodInsnNode call -> {
+                    if(call.name.equals("clone") && call.desc.startsWith("()"))
+                        break;
+
                     var node = construct(clazz, caller, insn, call.owner, call.name, call.desc);
                     if(node == null)
                         break;
