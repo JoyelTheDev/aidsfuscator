@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -14,6 +15,12 @@ public class MethodRenameTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
+            if(Exclusions.RENAME_METHOD.excluded(clazz))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(Exclusions.RENAME_METHOD::excluded))
+                continue;
+
             mapMethods(context, clazz);
         }
 
@@ -22,6 +29,12 @@ public class MethodRenameTransformer extends Transformer {
 
     private void mapMethods(Context context, JClass clazz) {
         for(var method : clazz.methods()) {
+            if(Exclusions.RENAME_METHOD.excluded(method))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_METHOD.excluded(e, method)))
+                continue;
+
             var selfOld = method.fullName();
             if(Mappings.METHOD.containsOld(selfOld))
                 continue;

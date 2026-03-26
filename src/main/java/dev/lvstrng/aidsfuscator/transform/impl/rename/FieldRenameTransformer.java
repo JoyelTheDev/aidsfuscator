@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -14,6 +15,12 @@ public class FieldRenameTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
+            if(Exclusions.RENAME_FIELD.excluded(clazz))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(Exclusions.RENAME_CLASS::excluded))
+                continue;
+
             mapFields(context, clazz);
         }
 
@@ -22,6 +29,12 @@ public class FieldRenameTransformer extends Transformer {
 
     private void mapFields(Context context, JClass clazz) {
         for(var field : clazz.fields()) {
+            if(Exclusions.RENAME_FIELD.excluded(field))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_FIELD.excluded(e, field)))
+                continue;
+
             var selfOld = field.fullName();
             if(Mappings.FIELD.containsOld(selfOld))
                 continue;

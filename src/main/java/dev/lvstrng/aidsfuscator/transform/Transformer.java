@@ -56,7 +56,7 @@ public abstract class Transformer implements Opcodes {
 
         for(var clazz : context.jarClasses()) {
             var remapped = new ClassNode();
-            clazz.core().accept(new ClassRemapper(remapped, new RemapperImpl()));
+            clazz.accept(new ClassRemapper(remapped, new RemapperImpl()), remapped);
             clazz.setCore(remapped);
 
             if(!clazz.isLibrary()) {

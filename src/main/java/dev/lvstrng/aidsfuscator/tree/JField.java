@@ -14,6 +14,8 @@ public class JField {
     private JClass owner;
     private FieldNode core;
     private final PropertyContainer properties;
+
+    private final String originalName, originalDesc;
     private boolean library;
 
     private List<JField> parents, children;
@@ -21,7 +23,17 @@ public class JField {
     public JField(FieldNode core) {
         this.properties = new PropertyContainer();
         this.library = false;
+        this.originalName = core.name;
+        this.originalDesc = core.desc;
         this.setCore(core);
+    }
+
+    public String originalName() {
+        return originalName;
+    }
+
+    public String originalDesc() {
+        return originalDesc;
     }
 
     public PropertyContainer properties() {
@@ -99,6 +111,14 @@ public class JField {
 
     public String simpleName() {
         return "%s %s".formatted(name(), desc());
+    }
+
+    public String simpleOriginalName() {
+        return "%s%s".formatted(originalName, originalDesc);
+    }
+
+    public String fullOriginalName() {
+        return "%s.%s".formatted(owner.originalName(), simpleOriginalName());
     }
 
     public String fullName() {

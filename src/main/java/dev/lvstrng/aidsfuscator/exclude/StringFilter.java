@@ -3,9 +3,11 @@ package dev.lvstrng.aidsfuscator.exclude;
 import java.util.regex.Pattern;
 
 public class StringFilter {
+    private final String string;
     private final Pattern pattern;
 
     public StringFilter(String pattern) {
+        this.string = pattern;
         this.pattern = Pattern.compile(toRegex(pattern));
     }
 
@@ -38,5 +40,9 @@ public class StringFilter {
 
         out.append("$");
         return out.toString();
+    }
+
+    public String string() {
+        return string;
     }
 }

@@ -23,15 +23,29 @@ public class JMethod {
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
-    private boolean library;
     private MethodSalt salt;
+
+    private boolean library;
+    private final String originalName, originalDesc;
 
     private List<JMethod> parents, children;
 
     public JMethod(MethodNode core) {
         this.properties = new PropertyContainer();
         this.library = false;
+
+        this.originalName = core.name;
+        this.originalDesc = core.desc;
+
         this.setCore(core);
+    }
+
+    public String originalName() {
+        return originalName;
+    }
+
+    public String originalDesc() {
+        return originalDesc;
     }
 
     public int allocParameter(Type type) {
@@ -206,6 +220,14 @@ public class JMethod {
 
     public String simpleName() {
         return "%s%s".formatted(name(), desc());
+    }
+
+    public String simpleOriginalName() {
+        return "%s%s".formatted(originalName, originalDesc);
+    }
+
+    public String fullOriginalName() {
+        return "%s.%s".formatted(owner.originalName(), simpleOriginalName());
     }
 
     public String fullName() {

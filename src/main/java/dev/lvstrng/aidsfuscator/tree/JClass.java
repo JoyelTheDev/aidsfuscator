@@ -3,6 +3,7 @@ package dev.lvstrng.aidsfuscator.tree;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -18,6 +19,8 @@ import java.util.Optional;
 public class JClass {
     private ClassNode core;
     private final PropertyContainer properties;
+
+    private final String originalName;
     private boolean library;
 
     private List<JClass> parents, children;
@@ -27,7 +30,19 @@ public class JClass {
     public JClass(ClassNode core) {
         this.properties = new PropertyContainer();
         this.library = false;
+        this.originalName = core.name;
+
+        this.fields = new ArrayList<>();
+        this.methods = new ArrayList<>();
+
         this.setCore(core);
+
+        core.methods.forEach(this::add);
+        core.fields.forEach(this::add);
+    }
+
+    public String originalName() {
+        return originalName;
     }
 
     public boolean isAnnotatedBy(String annotation) {
@@ -162,12 +177,19 @@ public class JClass {
 
         this.parents = new ArrayList<>();
         this.children = new ArrayList<>();
+    }
 
-        this.fields = new ArrayList<>();
-        this.methods = new ArrayList<>();
+    public void accept(ClassVisitor visitor, ClassNode remapped) {
+        core.accept(visitor);
 
-        core.methods.forEach(this::add);
-        core.fields.forEach(this::add);
+        // ---- refresh member cores ----
+        for(int i = 0; i < methods.size(); i++) {
+            methods.get(i).setCore(remapped.methods.get(i));
+        }
+
+        for(int i = 0; i < fields.size(); i++) {
+            fields.get(i).setCore(remapped.fields.get(i));
+        }
     }
 
     public void remove(JMethod method) {

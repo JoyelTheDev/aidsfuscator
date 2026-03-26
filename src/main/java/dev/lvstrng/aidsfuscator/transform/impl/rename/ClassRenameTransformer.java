@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -13,6 +14,9 @@ public class ClassRenameTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
+            if(Exclusions.RENAME_CLASS.excluded(clazz))
+                continue;
+
             var newClassName = context.dictionary().newClassName();
 
             Mappings.CLASS.register(clazz.name(), new Mapping(newClassName, newClassName));
