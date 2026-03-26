@@ -27,6 +27,27 @@ public class ASMUtils implements Opcodes {
         return new LdcInsnNode(n);
     }
 
+    public static AbstractInsnNode pushLong(long l) {
+        if(l == 0 || l == 1)
+            return new InsnNode((int) (LCONST_0 + l));
+
+        return new LdcInsnNode(l);
+    }
+
+    public static AbstractInsnNode pushDouble(double d) {
+        if(d == 0 || d == 1)
+            return new InsnNode((int) (DCONST_0 + d));
+
+        return new LdcInsnNode(d);
+    }
+
+    public static AbstractInsnNode pushFloat(float f) {
+        if(f == 0 || f == 1 || f == 2)
+            return new InsnNode((int) (FCONST_0 + f));
+
+        return new LdcInsnNode(f);
+    }
+
     public static int getInt(AbstractInsnNode insn) {
         var op = insn.getOpcode();
         if(op >= ICONST_M1 && op <= ICONST_5)
