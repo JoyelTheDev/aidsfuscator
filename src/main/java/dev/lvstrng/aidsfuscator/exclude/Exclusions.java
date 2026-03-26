@@ -86,7 +86,7 @@ public enum Exclusions {
     }
 
     public void addClass(String pattern) {
-        methodExclusions.add(new Exclusion(pattern));
+        classExclusions.add(new Exclusion(pattern));
     }
 
     public Set<Exclusion> classExclusions() {
