@@ -18,6 +18,9 @@
     },
     "methodSalting": {
       "enabled": false
+    },
+    "integerEncrypt": {
+      "enabled": false
     }
   }
 }
