@@ -347,7 +347,7 @@ public class InsnBuilder {
         return this;
     }
 
-    public InsnBuilder iastoer() {
+    public InsnBuilder iastore() {
         list.add(new InsnNode(IASTORE));
         return this;
     }
