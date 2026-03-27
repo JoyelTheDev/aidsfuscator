@@ -25,6 +25,11 @@ public class InsnBuilder {
         return list;
     }
 
+    public InsnBuilder add(AbstractInsnNode node) {
+        list.add(node);
+        return this;
+    }
+
     public InsnBuilder _int(int n) {
         list.add(ASMUtils.pushInt(n));
         return this;

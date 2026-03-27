@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.dictionary.DefaultDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
+import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
@@ -37,6 +38,7 @@ public class Context {
     private final IHierarchy hierarchy;
     private final IDictionary dictionary;
     private final ReferenceGraph referenceGraph;
+    private final GlobalPropertyContainer propertyContainer;
 
     private final List<Transformer> transformers;
 
@@ -49,9 +51,10 @@ public class Context {
 
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.dictionary         = new DefaultDictionary(this, "abcdefghijklmnopqrstuvwxyz");
+        this.dictionary         = new DefaultDictionary(this, "abcdefghijklmnopqrstuvwxyz"); // TODO make user chose dictionary
         this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
+        this.propertyContainer  = new GlobalPropertyContainer();
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -177,6 +180,10 @@ public class Context {
 
     public ReferenceGraph referenceGraph() {
         return referenceGraph;
+    }
+
+    public GlobalPropertyContainer propertyContainer() {
+        return propertyContainer;
     }
 
     public int writerFlags() {

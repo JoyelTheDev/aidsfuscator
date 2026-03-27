@@ -50,7 +50,7 @@ public class ASMUtils implements Opcodes {
 
     public static int getInt(AbstractInsnNode insn) {
         var op = insn.getOpcode();
-        if(op >= ICONST_M1 && op <= ICONST_5)
+        if(isIconst(insn))
             return op - ICONST_0;
 
         if(op == BIPUSH || op == SIPUSH)
@@ -60,5 +60,19 @@ public class ASMUtils implements Opcodes {
             return (int)ldc.cst;
 
         throw new IllegalArgumentException("Not number insn: " + insn.getOpcode());
+    }
+
+    public static boolean isIntPush(AbstractInsnNode insn) {
+        if(insn instanceof IntInsnNode node)
+            return node.getOpcode() != NEWARRAY;
+
+        if(isIconst(insn))
+            return true;
+
+        return insn instanceof LdcInsnNode ldc && ldc.cst instanceof Integer;
+    }
+
+    public static boolean isIconst(AbstractInsnNode insn) {
+        return insn.getOpcode() >= ICONST_M1 && insn.getOpcode() <= ICONST_5;
     }
 }

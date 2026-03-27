@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
@@ -71,7 +72,10 @@ public class MethodSaltTransformer extends Transformer {
 
                 if(num != method.salt().value()) {
                     list.add(method.salt().load());
-                    list.add(ASMUtils.pushInt(method.salt().value() ^ num));
+                    list.add(context.propertyContainer().add(
+                            ASMUtils.pushInt(method.salt().value() ^ num),
+                            Property.IGNORE_INTEGER
+                    ));
                     list.add(new InsnNode(IXOR));
                 } else {
                     list.add(method.salt().load());

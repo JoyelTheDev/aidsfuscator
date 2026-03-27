@@ -3,6 +3,10 @@ package dev.lvstrng.aidsfuscator.property;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A property container used to store a bunch of useful information about objects in the obfuscatable jar.
+ * @author lvstrng
+ */
 public class PropertyContainer {
     private final List<Property> properties;
 

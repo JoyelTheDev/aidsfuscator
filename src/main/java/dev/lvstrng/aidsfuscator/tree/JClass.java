@@ -4,8 +4,10 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.lang.reflect.Modifier;
@@ -126,6 +128,16 @@ public class JClass {
         return false;
     }
 
+    public JMethod findOrCreateClinit() {
+        var opt = findMethod("<clinit>", "()V");
+        if(opt.isPresent())
+            return opt.get();
+
+        var node = new MethodNode(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+        node.instructions.add(new InsnNode(Opcodes.RETURN));
+        return add(node);
+    }
+
     public JMethod findMethodFull(Context context, String name, String desc) {
         var method = findMethod(name, desc).orElse(null);
         if(method != null)
@@ -202,28 +214,30 @@ public class JClass {
         core.fields.remove(field.core());
     }
 
-    public void add(MethodNode method) {
-        add(new JMethod(method));
+    public JMethod add(MethodNode method) {
+        return add(new JMethod(method));
     }
 
-    public void add(FieldNode field) {
-        add(new JField(field));
+    public JField add(FieldNode field) {
+        return add(new JField(field));
     }
 
-    public void add(JMethod method) {
+    public JMethod add(JMethod method) {
         methods.add(method);
         if(!core.methods.contains(method.core()))
             core.methods.add(method.core());
 
         method.setOwner(this);
+        return method;
     }
 
-    public void add(JField field) {
+    public JField add(JField field) {
         fields.add(field);
         if(!core.fields.contains(field.core()))
             core.fields.add(field.core());
 
         field.setOwner(this);
+        return field;
     }
 
     public List<JClass> parents() {
