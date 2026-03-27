@@ -16,6 +16,8 @@ public enum Exclusions {
     LOCAL_NAMES("localNames", true, false, true),
     METHOD_SALTING("methodSalting", true, false, true),
 
+    INTEGER_ENCRYPTION("integerEncrypt", true, false, true),
+
     ;
 
     private final boolean excludesClass, excludesField, excludesMethod;

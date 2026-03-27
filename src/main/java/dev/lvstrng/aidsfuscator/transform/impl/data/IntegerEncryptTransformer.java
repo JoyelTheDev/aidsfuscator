@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
@@ -27,12 +28,18 @@ public class IntegerEncryptTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
+            if(Exclusions.INTEGER_ENCRYPTION.excluded(clazz))
+                continue;
+
             var numbers = new ArrayList<Integer>();
             var decryptorName = context.dictionary().newMethodName(clazz, "(II)I");
             var fieldName = context.dictionary().newFieldName(clazz, "[I");
             int idxXor = random.nextInt();
 
             for(var method : clazz.methods()) {
+                if(Exclusions.INTEGER_ENCRYPTION.excluded(method))
+                    continue;
+
                 for(var insn : method.insns()) {
                     if(!ASMUtils.isIntPush(insn))
                         continue;
