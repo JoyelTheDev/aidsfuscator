@@ -43,6 +43,10 @@ public class JClass {
         core.fields.forEach(this::add);
     }
 
+    public int version() {
+        return core.version;
+    }
+
     public String originalName() {
         return originalName;
     }

@@ -28,6 +28,9 @@ public class IntegerEncryptTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
+            if(clazz.isInterface() && clazz.version() < V1_8)
+                continue;
+
             if(Exclusions.INTEGER_ENCRYPTION.excluded(clazz))
                 continue;
 
@@ -73,15 +76,21 @@ public class IntegerEncryptTransformer extends Transformer {
             if(numbers.isEmpty())
                 continue;
 
-            clazz.add(new FieldNode(ACC_PRIVATE | ACC_STATIC | ACC_FINAL, fieldName, "[I", null, null));
+            int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
+            clazz.add(new FieldNode(access, fieldName, "[I", null, null));
             generateDecryptor(clazz, fieldName, decryptorName, idxXor);
             generateClinit(context, clazz, fieldName, numbers);
         }
     }
 
     private void generateDecryptor(JClass clazz, String fieldName, String decryptorName, int idxXor) {
-        var method = clazz.add(new MethodNode(ACC_PRIVATE | ACC_STATIC, decryptorName, "(II)I", null, null));
+        int access = (clazz.isInterface())
+                ? ACC_PUBLIC | ACC_STATIC
+                : ACC_PRIVATE | ACC_STATIC;
+        var method = clazz.add(new MethodNode(access, decryptorName, "(II)I", null, null));
         // ---- LOCALS ----
+        if(clazz.isInterface()) method.allocVar();
+
         var idxVal = method.allocVar(Type.INT_TYPE);
         var key = method.allocVar(Type.INT_TYPE);
 
