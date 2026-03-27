@@ -454,4 +454,79 @@ public class InsnBuilder {
         list.add(new InsnNode(ACONST_NULL));
         return this;
     }
+
+    public InsnBuilder i2s() {
+        list.add(new InsnNode(I2S));
+        return this;
+    }
+
+    public InsnBuilder i2b() {
+        list.add(new InsnNode(I2B));
+        return this;
+    }
+
+    public InsnBuilder i2C() {
+        list.add(new InsnNode(I2C));
+        return this;
+    }
+
+    public InsnBuilder i2d() {
+        list.add(new InsnNode(I2D));
+        return this;
+    }
+
+    public InsnBuilder i2f() {
+        list.add(new InsnNode(I2F));
+        return this;
+    }
+
+    public InsnBuilder i2l() {
+        list.add(new InsnNode(I2L));
+        return this;
+    }
+
+    public InsnBuilder l2i() {
+        list.add(new InsnNode(L2I));
+        return this;
+    }
+
+    public InsnBuilder l2d() {
+        list.add(new InsnNode(L2D));
+        return this;
+    }
+
+    public InsnBuilder l2f() {
+        list.add(new InsnNode(L2F));
+        return this;
+    }
+
+    public InsnBuilder d2l() {
+        list.add(new InsnNode(D2L));
+        return this;
+    }
+
+    public InsnBuilder d2f() {
+        list.add(new InsnNode(D2F));
+        return this;
+    }
+
+    public InsnBuilder d2i() {
+        list.add(new InsnNode(D2I));
+        return this;
+    }
+
+    public InsnBuilder f2l() {
+        list.add(new InsnNode(F2L));
+        return this;
+    }
+
+    public InsnBuilder f2i() {
+        list.add(new InsnNode(F2I));
+        return this;
+    }
+
+    public InsnBuilder f2d() {
+        list.add(new InsnNode(F2D));
+        return this;
+    }
 }
