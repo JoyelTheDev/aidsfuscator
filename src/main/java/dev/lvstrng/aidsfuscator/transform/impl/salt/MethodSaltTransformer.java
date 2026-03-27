@@ -4,6 +4,7 @@ import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 public class MethodSaltTransformer extends Transformer {
     private final Map<JMethod, List<AbstractInsnNode>> seedInsns;
+    private final Setting<Boolean> seedUselessMethods = setting("seedUselessMethods", true);
 
     public MethodSaltTransformer() {
         super("Method Salting", "methodSalting");
@@ -36,7 +38,17 @@ public class MethodSaltTransformer extends Transformer {
 
         for(var clazz : context.classes()) {
             for(var method : clazz.methods()) {
-                if(graph.refs(method).stream().anyMatch(e -> !e.canEdit()))
+                var refs = graph.refs(method);
+                if(!seedUselessMethods.value()) {
+                    var methodsIn = graph.methodRefsIn(method);
+                    var fieldsIn = graph.fieldRefsIn(method);
+                    if(refs.isEmpty()) {
+                        if(methodsIn.stream().allMatch(e -> e.method().owner().isLibrary()) && fieldsIn.stream().allMatch(e -> e.field().owner().isLibrary()))
+                            continue;
+                    }
+                }
+
+                if(refs.stream().anyMatch(e -> !e.canEdit()))
                     continue;
 
                 registerTree(graph, clazz, method, salts, methods);

@@ -50,6 +50,23 @@ public abstract class Transformer implements Opcodes {
         return settings;
     }
 
+    public <T> Setting<T> add(Setting<T> setting) {
+        settings.add(setting);
+        return setting;
+    }
+
+    public Setting<Boolean> setting(String name, boolean value) {
+        return add(Setting.ofBoolean(name, value));
+    }
+
+    public Setting<Integer> setting(String name, int value) {
+        return add(Setting.ofInt(name, value));
+    }
+
+    public Setting<String> setting(String name, String value) {
+        return add(Setting.ofString(name, value));
+    }
+
     public void remap(Context context) {
         var newClasses = new HashMap<String, JClass>();
         var newExcludedClasses = new HashMap<String, JClass>();

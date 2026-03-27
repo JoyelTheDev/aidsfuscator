@@ -17,10 +17,11 @@
       "enabled": true
     },
     "methodSalting": {
-      "enabled": false
+      "enabled": true,
+      "seedUselessMethods": false
     },
     "integerEncrypt": {
-      "enabled": false
+      "enabled": true
     }
   }
 }
