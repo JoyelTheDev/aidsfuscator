@@ -1,8 +1,10 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.CryptUtils;
@@ -14,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringEncryptTransformer extends Transformer {
+    private final Setting<Integer> minLength = setting("minLength", 1);
+
     public StringEncryptTransformer() {
         super("Encrypt String Constants", "encryptStrings");
     }
@@ -38,8 +42,13 @@ public class StringEncryptTransformer extends Transformer {
                     if(context.propertyContainer().get(insn).has(Property.IGNORE_STRING))
                         continue;
 
-                    if(str.length() > Character.MAX_VALUE || str.isEmpty())
+                    if(str.length() < minLength.value())
                         continue;
+
+                    if(str.length() > Character.MAX_VALUE) {
+                        Logger.warn("String constant in '%s' too big for string encryption.", method.fullOriginalName());
+                        continue;
+                    }
 
                     var key = method.hasSalt() ? method.salt().value() >> 16 : random.nextInt() >> 16;
                     var encryptedString = CryptUtils.xor(str, key, keys, keys[0]);

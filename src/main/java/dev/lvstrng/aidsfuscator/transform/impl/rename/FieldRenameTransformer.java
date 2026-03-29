@@ -5,9 +5,14 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 
+import java.util.Collections;
+
 public class FieldRenameTransformer extends Transformer {
+    private final Setting<Boolean> shuffle = setting("shuffle", false);
+
     public FieldRenameTransformer() {
         super("Rename Fields", "renameFields");
     }
@@ -28,7 +33,15 @@ public class FieldRenameTransformer extends Transformer {
     }
 
     private void mapFields(Context context, JClass clazz) {
-        for(var field : clazz.fields()) {
+        // ---- SHUFFLING ----
+        var fields = clazz.fields();
+        if(shuffle.value()) {
+            Collections.shuffle(fields);
+            Collections.shuffle(clazz.core().fields);
+        }
+
+        // ---- REMAPPING ENTIRE TREE ----
+        for(var field : fields) {
             if(Exclusions.RENAME_FIELD.excluded(field))
                 continue;
 

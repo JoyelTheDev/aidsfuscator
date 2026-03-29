@@ -5,9 +5,14 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 
+import java.util.Collections;
+
 public class MethodRenameTransformer extends Transformer {
+    private final Setting<Boolean> shuffle = setting("shuffle", false);
+
     public MethodRenameTransformer() {
         super("Rename Methods", "renameMethods");
     }
@@ -28,7 +33,15 @@ public class MethodRenameTransformer extends Transformer {
     }
 
     private void mapMethods(Context context, JClass clazz) {
-        for(var method : clazz.methods()) {
+        // ---- SHUFFLING ----
+        var methods = clazz.methods();
+        if(shuffle.value()) {
+            Collections.shuffle(methods);
+            Collections.shuffle(clazz.core().methods);
+        }
+
+        // ---- REMAPPING ENTIRE TREE ----
+        for(var method : methods) {
             if(Exclusions.RENAME_METHOD.excluded(method))
                 continue;
 

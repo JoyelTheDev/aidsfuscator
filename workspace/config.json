@@ -6,13 +6,16 @@
   "computeFrames": true,
   "transformers": {
     "renameFields": {
-      "enabled": true
+      "enabled": true,
+      "shuffle": true
     },
     "renameMethods": {
-      "enabled": true
+      "enabled": true,
+      "shuffle": true
     },
     "renameClasses": {
-      "enabled": true
+      "enabled": true,
+      "randomize": true
     },
     "localNames": {
       "enabled": true
@@ -25,7 +28,8 @@
       "enabled": true
     },
     "encryptStrings": {
-      "enabled": true
+      "enabled": true,
+      "minLength": 2
     }
   }
 }
