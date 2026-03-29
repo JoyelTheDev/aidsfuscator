@@ -31,6 +31,7 @@ public class ConfigWriter {
         configObject.add("in", new JsonPrimitive(context.in()));
         configObject.add("out", new JsonPrimitive(context.out()));
         configObject.add("libs", new JsonPrimitive(context.libs()));
+        configObject.add("dictionary", new JsonPrimitive(context.dictionaryString()));
         configObject.add("computeFrames", new JsonPrimitive(context.doesComputeFrames()));
 
         for(var transformer : TransformerOrder.transformers()) {

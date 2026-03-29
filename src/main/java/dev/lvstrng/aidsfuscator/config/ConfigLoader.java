@@ -29,7 +29,8 @@ public class ConfigLoader {
         var configObject = new Gson().fromJson(Context.readWorkspaceString(configPath), JsonObject.class);
         context.in(configObject.get("in").getAsString())
                 .out(configObject.get("out").getAsString())
-                .libs(configObject.get("libs").getAsString());
+                .libs(configObject.get("libs").getAsString())
+                .setDictionary(configObject.get("dictionary").getAsString());
 
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();

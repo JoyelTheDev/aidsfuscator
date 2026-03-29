@@ -55,8 +55,8 @@ public class IntegerEncryptTransformer extends Transformer {
 
                     // ---- PREPARE KEYS -----
                     var key = method.hasSalt() ? method.salt().value() : random.nextInt();
-                    var num = ASMUtils.getInt(insn) ^ key;
                     int idxValue = numbers.size() ^ idxXor;
+                    var num = ASMUtils.getInt(insn) ^ key ^ idxValue;
                     numbers.add(num);
 
                     // ---- INSTRUCTIONS ----
@@ -96,16 +96,16 @@ public class IntegerEncryptTransformer extends Transformer {
 
         new InsnBuilder(method.insns())
                 .label(new LabelNode())
-                ._var(ILOAD, idxVal)
-                ._int(idxXor)
-                .ixor()
-                ._var(ISTORE, idxVal)
 
                 .label(new LabelNode())
                 .field(GETSTATIC, clazz.name(), fieldName, "[I")
                 ._var(ILOAD, idxVal)
+                ._int(idxXor)
+                .ixor()
                 .iaload()
                 ._var(ILOAD, key)
+                .ixor()
+                ._var(ILOAD, idxVal)
                 .ixor()
                 ._ireturn()
         ;

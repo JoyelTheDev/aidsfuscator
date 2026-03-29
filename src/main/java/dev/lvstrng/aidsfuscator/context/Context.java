@@ -32,6 +32,7 @@ public class Context {
     private final Map<String, JClass> classes, artificials, libraries, excluded;
     private int writerFlags;
     private boolean computeFrames;
+    private String dictionaryString;
 
     private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
@@ -43,6 +44,7 @@ public class Context {
     private final List<Transformer> transformers;
 
     private Context() {
+        this.dictionaryString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         this.classes = new HashMap<>();
         this.artificials = new HashMap<>();
         this.libraries = new HashMap<>();
@@ -51,7 +53,7 @@ public class Context {
 
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.dictionary         = new DefaultDictionary(this, "abcdefghijklmnopqrstuvwxyz"); // TODO make user chose dictionary
+        this.dictionary         = new DefaultDictionary(this, dictionaryString); // TODO make user chose dictionary
         this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
@@ -274,6 +276,10 @@ public class Context {
         return computeFrames;
     }
 
+    public String dictionaryString() {
+        return dictionaryString;
+    }
+
     // -----------------
     // ---- BUILDER ----
     // -----------------
@@ -300,6 +306,11 @@ public class Context {
     public Context computeFrames() {
         this.computeFrames = true;
         this.writerFlags |= ClassWriter.COMPUTE_FRAMES;
+        return this;
+    }
+
+    public Context setDictionary(String str) {
+        this.dictionaryString = str;
         return this;
     }
 }
