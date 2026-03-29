@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -28,6 +29,9 @@ public class StringEncryptTransformer extends Transformer {
             if(clazz.isInterface() && clazz.version() < V1_8)
                 continue;
 
+            if(Exclusions.STRING_ENCRYPTION.excluded(clazz))
+                continue;
+
             var strings = new ArrayList<String>();
             var fieldName = context.dictionary().newFieldName(clazz, "[Ljava/lang/String;");
             var decryptorName = context.dictionary().newMethodName(clazz, "(II)Ljava/lang/String;");
@@ -35,6 +39,9 @@ public class StringEncryptTransformer extends Transformer {
             var idxXor = random.nextInt();
 
             for(var method : clazz.methods()) {
+                if(Exclusions.STRING_ENCRYPTION.excluded(method))
+                    continue;
+
                 for(var insn : method.insns()) {
                     if(!(insn instanceof LdcInsnNode ldc && ldc.cst instanceof String str))
                         continue;
