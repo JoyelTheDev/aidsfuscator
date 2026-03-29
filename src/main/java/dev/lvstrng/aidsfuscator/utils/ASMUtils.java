@@ -1,10 +1,11 @@
 package dev.lvstrng.aidsfuscator.utils;
 
+import dev.lvstrng.aidsfuscator.tree.JMethod;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.*;
+
+import java.util.Arrays;
 
 public class ASMUtils implements Opcodes {
     public static boolean isReturn(int opcode) {
@@ -74,5 +75,116 @@ public class ASMUtils implements Opcodes {
 
     public static boolean isIconst(AbstractInsnNode insn) {
         return insn.getOpcode() >= ICONST_M1 && insn.getOpcode() <= ICONST_5;
+    }
+
+    /**
+     * Translates invokedynamic string concat calls into string builder
+     * @author reowya
+     * @param method the method to translate the concats in
+     */
+    public static void translateConcatenation(JMethod method) {
+        var STACK_ARG_CONSTANT = '\u0001';
+        var BSM_ARG_CONSTANT = '\u0002';
+
+        for(var insn : method.insns()) {
+            if(!(insn instanceof InvokeDynamicInsnNode indy))
+                continue;
+
+            if(!indy.bsm.getOwner().equals("java/lang/invoke/StringConcatFactory"))
+                continue;
+
+            if(!indy.bsm.getName().equals("makeConcatWithConstants"))
+                continue;
+
+            var pattern = (String) indy.bsmArgs[0];
+
+            var stackArgs = Type.getArgumentTypes(indy.desc);
+            var bsmArgs = Arrays.copyOfRange(indy.bsmArgs, 1, indy.bsmArgs.length);
+
+            int stackArgsCount = 0;
+            for(var c : pattern.toCharArray()) {
+                if(c == STACK_ARG_CONSTANT)
+                    stackArgsCount++;
+            }
+
+            int bsmArgsCount = 0;
+            for (char c : pattern.toCharArray()) {
+                if (c == BSM_ARG_CONSTANT)
+                    bsmArgsCount++;
+            }
+
+            if(stackArgsCount != stackArgs.length)
+                continue;
+
+            if(bsmArgsCount != bsmArgs.length)
+                continue;
+
+            var v = method.allocVar(stackArgs[0]);
+            var indices = new int[stackArgsCount];
+
+            for(int i = 0; i < stackArgs.length; i++) {
+                indices[i] = v;
+                v += stackArgs[i].getSize();
+            }
+
+            for (int i = indices.length - 1; i >= 0; i--) {
+                method.insns().insertBefore(indy, new VarInsnNode(stackArgs[i].getOpcode(ISTORE), indices[i]));
+            }
+
+            var list = new InsnList();
+            var arr = pattern.toCharArray();
+
+            int stackArgsIndex = 0;
+            int bsmArgsIndex = 0;
+
+            var builder = new StringBuilder();
+            list.add(new TypeInsnNode(NEW, "java/lang/StringBuilder"));
+            list.add(new InsnNode(DUP));
+            list.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V"));
+
+            for (char c : arr) {
+                if (c == STACK_ARG_CONSTANT) {
+                    if (!builder.isEmpty()) {
+                        list.add(new LdcInsnNode(builder.toString()));
+                        list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+                        builder = new StringBuilder();
+                    }
+
+                    var stackArg = stackArgs[stackArgsIndex++];
+                    var stackIndex = indices[stackArgsIndex - 1];
+
+                    if (stackArg.getSort() == Type.OBJECT) {
+                        list.add(new VarInsnNode(ALOAD, stackIndex));
+                        list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;"));
+                    } else if (stackArg.getSort() == Type.ARRAY) {
+                        list.add(new VarInsnNode(ALOAD, stackIndex));
+                        list.add(new MethodInsnNode(INVOKESTATIC, "java/util/Arrays", "toString", "([Ljava/lang/Object;)Ljava/lang/String;"));
+                        list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+                    } else {
+                        list.add(new VarInsnNode(stackArg.getOpcode(ILOAD), stackIndex));
+                        var adaptedDescriptor = stackArg.getDescriptor();
+                        if (adaptedDescriptor.equals("B") || adaptedDescriptor.equals("S"))
+                            adaptedDescriptor = "I";
+
+                        list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(" + adaptedDescriptor + ")Ljava/lang/StringBuilder;"));
+                    }
+                } else if (c == BSM_ARG_CONSTANT) {
+                    list.add(new LdcInsnNode(bsmArgs[bsmArgsIndex++]));
+                    list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;"));
+                } else {
+                    builder.append(c);
+                }
+            }
+
+            if (!builder.isEmpty()) {
+                list.add(new LdcInsnNode(builder.toString()));
+                list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+            }
+
+            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;"));
+
+            method.insns().insertBefore(indy, list);
+            method.insns().remove(indy);
+        }
     }
 }

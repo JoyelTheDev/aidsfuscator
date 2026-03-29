@@ -29,6 +29,7 @@
     },
     "encryptStrings": {
       "enabled": true,
+      "translateConcat": true,
       "minLength": 2
     }
   }

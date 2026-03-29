@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringEncryptTransformer extends Transformer {
+    private final Setting<Boolean> translateConcat = setting("translateConcat", true);
     private final Setting<Integer> minLength = setting("minLength", 1);
 
     public StringEncryptTransformer() {
@@ -42,6 +43,9 @@ public class StringEncryptTransformer extends Transformer {
                 if(Exclusions.STRING_ENCRYPTION.excluded(method))
                     continue;
 
+                if(translateConcat.value())
+                    ASMUtils.translateConcatenation(method);
+
                 for(var insn : method.insns()) {
                     if(!(insn instanceof LdcInsnNode ldc && ldc.cst instanceof String str))
                         continue;
@@ -66,7 +70,8 @@ public class StringEncryptTransformer extends Transformer {
                     if(method.hasSalt()) {
                         builder.add(method.salt().load());
                     } else {
-                        builder.add(context.propertyContainer().add(ASMUtils.pushInt(key << 16), Property.IGNORE_INTEGER));
+                        //                                                                            add useless bits on purpose
+                        builder.add(context.propertyContainer().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
                     }
                     builder.method(INVOKESTATIC, clazz.name(), decryptorName, "(II)Ljava/lang/String;");
 
