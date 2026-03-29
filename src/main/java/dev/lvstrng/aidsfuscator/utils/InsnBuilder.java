@@ -30,6 +30,15 @@ public class InsnBuilder {
         return this;
     }
 
+    public InsnBuilder add(InsnList list) {
+        this.list.add(list);
+        return this;
+    }
+
+    public InsnBuilder add(InsnBuilder builder) {
+        return add(builder.result());
+    }
+
     public InsnBuilder _int(int n) {
         list.add(ASMUtils.pushInt(n));
         return this;
@@ -470,7 +479,7 @@ public class InsnBuilder {
         return this;
     }
 
-    public InsnBuilder i2C() {
+    public InsnBuilder i2c() {
         list.add(new InsnNode(I2C));
         return this;
     }

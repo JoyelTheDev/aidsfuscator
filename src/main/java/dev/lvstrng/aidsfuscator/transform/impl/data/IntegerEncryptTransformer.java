@@ -8,10 +8,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -133,12 +130,12 @@ public class IntegerEncryptTransformer extends Transformer {
 
         var builder = new InsnBuilder();
         builder.label(new LabelNode())
-                .add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT))
+                .add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
                 ._var(ISTORE, keyVar)
 
                 .label(new LabelNode())
-                ._const(theStr.toString())
-                ._const("ISO-8859-1")
+                .add(context.propertyContainer().add(new LdcInsnNode(theStr.toString()), Property.IGNORE_STRING))
+                .add(context.propertyContainer().add(new LdcInsnNode("ISO-8859-1"), Property.IGNORE_STRING))
                 .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
                 ._var(ASTORE, bytesVar)
 
