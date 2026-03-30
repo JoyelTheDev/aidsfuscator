@@ -1,20 +1,21 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.test.transform.CFGTest;
+import dev.test.transform.ControlFlowFlatteningTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
                 .libs("libs/")
-                .out("out.jar")
+                .out("out-out.jar")
                 .initialize()
                 .transform(
-                        new IntegerEncryptTransformer(),
-                        new StringEncryptTransformer()
+                        new ControlFlowFlatteningTransformer(),
+                        new LocalVariableNameTransformer()
                 )
                 .exportJar();
     }

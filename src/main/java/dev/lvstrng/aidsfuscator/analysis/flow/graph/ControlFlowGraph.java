@@ -58,7 +58,7 @@ public class ControlFlowGraph {
                 continue;
 
             var frame = frameAt(insn);
-            if(frame == null) {
+            if(frame != null) {
                 if(currentBlock.start() == null)
                     currentBlock.setStart(frame);
                 currentBlock.setEnd(frame);
@@ -218,5 +218,9 @@ public class ControlFlowGraph {
 
     public Block get(LabelNode label) {
         return labelBlocks.get(label);
+    }
+
+    public Block blockContaining(AbstractInsnNode insn) {
+        return blocks.stream().filter(e -> e.insns().contains(insn)).findFirst().orElseThrow(RuntimeException::new);
     }
 }

@@ -1,0 +1,17 @@
+package dev.lvstrng.aidsfuscator.analysis.interpreter;
+
+import org.objectweb.asm.tree.analysis.Frame;
+
+import java.awt.*;
+
+public class FrameString {
+    public static String generate(Frame<SimpleValue> frame) {
+        var sb = new StringBuilder("{");
+        for(int i = 0; i < frame.getLocals(); i++) {
+            sb.append(i).append(": ").append(frame.getLocal(i)).append("; ");
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+}
