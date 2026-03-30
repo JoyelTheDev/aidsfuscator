@@ -6,6 +6,7 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.SwitchUtils;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -25,8 +26,19 @@ public class ControlFlowFlatteningTransformer extends Transformer {
     public void transform(Context context) {
         for(var clazz : context.classes()) {
             for(var method : clazz.methods()) {
+                int maxUsed = 0;
+                for(var insn : method.insns()) {
+                    if(insn instanceof VarInsnNode v)
+                        maxUsed = Math.max(maxUsed, v.var + 1);
+                    else if(insn instanceof IincInsnNode v)
+                        maxUsed = Math.max(maxUsed, v.var + 1);
+                }
+                if(maxUsed > method.maxLocals()) {
+                    method.setMaxLocals(maxUsed);
+                }
+
                 var graph = method.createFlowGraph(context);
-                if (graph.isEmpty())
+                if(graph.isEmpty())
                     continue;
 
                 var groups = new HashMap<String, List<LabelNode>>();
@@ -48,20 +60,28 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                     var lbl = new LabelNode();
                     method.insns().insertBefore(insn, lbl);
                     groups.computeIfAbsent(
-                            frame.toString(),
-                            _ -> new ArrayList<>()
-                    ).add(lbl);
+                            FrameString.generate(frame),
+                            _ -> new ArrayList<>()).add(lbl);
                 }
 
                 var entries = new ArrayList<>(groups.entrySet());
                 Collections.shuffle(entries);
 
+                int flattenerLocal = -1;
                 for(var group : entries) {
                     var labels = group.getValue();
                     if(labels.size() < 3)
                         continue;
 
-                    var local = method.allocVar(Type.INT_TYPE);
+                    if(flattenerLocal == -1) {
+                        flattenerLocal = method.allocVar(Type.INT_TYPE);
+                        var initList = new InsnList();
+                        initList.add(ASMUtils.pushInt(0));
+                        initList.add(new VarInsnNode(ISTORE, flattenerLocal));
+                        method.insns().insert(initList);
+                    }
+
+                    var local = flattenerLocal;
                     var dispatcher = new LabelNode();
                     var cases = new HashMap<LabelNode, Integer>();
 
