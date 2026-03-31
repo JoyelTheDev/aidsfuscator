@@ -3,6 +3,7 @@ package dev.lvstrng.aidsfuscator.analysis.interpreter;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.utils.TypeUtils;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.Value;
 
 public class SimpleValue implements Value {
@@ -14,9 +15,16 @@ public class SimpleValue implements Value {
     public static final SimpleValue RETURNADDRESS_VALUE = new SimpleValue(Type.VOID_TYPE);
 
     private final Type type;
+    private final AbstractInsnNode uninitializedInsn;
 
     public SimpleValue(Type type) {
         this.type = type;
+        this.uninitializedInsn = null;
+    }
+
+    public SimpleValue(Type type, AbstractInsnNode uninitializedInsn) {
+        this.type = type;
+        this.uninitializedInsn = uninitializedInsn;
     }
 
     @Override
@@ -61,6 +69,9 @@ public class SimpleValue implements Value {
         if (value == this) {
             return true;
         } else if (value instanceof SimpleValue other) {
+            if (uninitializedInsn != other.uninitializedInsn) {
+                return false;
+            }
             if (type == null) {
                 return other.type == null;
             } else {
@@ -76,6 +87,9 @@ public class SimpleValue implements Value {
         if(type == null)
             return "top";
 
-        return type.getInternalName();
+        if (uninitializedInsn != null)
+            return type.getDescriptor() + "@" + System.identityHashCode(uninitializedInsn);
+
+        return type.getDescriptor();
     }
 }

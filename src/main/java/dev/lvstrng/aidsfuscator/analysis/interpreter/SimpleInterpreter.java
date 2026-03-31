@@ -104,7 +104,7 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
             case GETSTATIC:
                 return newValue(Type.getType(((FieldInsnNode) insn).desc));
             case NEW:
-                return newValue(Type.getObjectType(((TypeInsnNode) insn).desc));
+                return new SimpleValue(Type.getObjectType(((TypeInsnNode) insn).desc), insn);
             default:
                 throw new AssertionError();
         }
@@ -236,10 +236,10 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
 
     @Override
     public SimpleValue merge(SimpleValue v1, SimpleValue v2) {
-        if(v2 == SimpleValue.UNINITIALIZED_VALUE)
-            return v1;
         if(v1.equals(v2))
             return v1;
+        if (v1 == SimpleValue.UNINITIALIZED_VALUE || v2 == SimpleValue.UNINITIALIZED_VALUE)
+            return SimpleValue.UNINITIALIZED_VALUE;
 
         if(v1.type() == NULL_TYPE && v2.isReference())
             return v2;
