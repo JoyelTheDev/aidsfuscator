@@ -37,9 +37,9 @@ public class Context {
     private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
     private final IHierarchy hierarchy;
-    private final IDictionary dictionary;
     private final ReferenceGraph referenceGraph;
     private final GlobalPropertyContainer propertyContainer;
+    private IDictionary dictionary;
 
     private final List<Transformer> transformers;
 
@@ -53,7 +53,6 @@ public class Context {
 
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.dictionary         = new DefaultDictionary(this, dictionaryString); // TODO make user chose dictionary
         this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
@@ -63,6 +62,8 @@ public class Context {
 
     // ---- INITIALIZE OBFUSCATOR ----
     public Context initialize() {
+        this.dictionary         = new DefaultDictionary(this, dictionaryString); // TODO make user chose dictionary
+
         Logger.info("Loading libraries...");
         this.libraryLoader().loadLibraries(libPath);
 
