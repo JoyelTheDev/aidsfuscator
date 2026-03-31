@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        Logger.info("Current version: %s", AidsfuscatorInfo.versionText());
+        UpdateChecker.checkAndPrintUpdates();
         if(args.length < 2) {
             Logger.error("Specify a config and exclusion file in the 'workspace' directory. Usage: java -jar aidsfuscator.jar <config.json> <exclusions.json>");
             return;
