@@ -62,7 +62,7 @@ public class Context {
 
     // ---- INITIALIZE OBFUSCATOR ----
     public Context initialize() {
-        this.dictionary         = new DefaultDictionary(this, dictionaryString); // TODO make user chose dictionary
+        this.dictionary         = new DefaultDictionary(this, dictionaryString);
 
         Logger.info("Loading libraries...");
         this.libraryLoader().loadLibraries(libPath);
