@@ -34,13 +34,13 @@ public class UpdateChecker {
             var latest = getLatestReleaseTag();
             var current = AidsfuscatorInfo.build();
             if (!latest.equals(current)) {
-                Logger.warn("You're using an outdated version of Aidsfuscator, current version: %s, latest version: %s", current, latest);
+                Logger.warn("Running %s (Outdated). Please update to the latest version (%s)", AidsfuscatorInfo.versionText(), latest);
                 return;
             }
 
-            Logger.info("Everything is up to date. Current version: %s", AidsfuscatorInfo.versionText());
+            Logger.info("Running %s (Up to date)", AidsfuscatorInfo.versionText());
         } catch (IOException e) {
-            Logger.error("There was an error checking for the latest version of Aidsfuscator", e);
+            Logger.error("There was an error checking for the latest version of Aidsfuscator, running anyway", e);
         }
     }
 }
