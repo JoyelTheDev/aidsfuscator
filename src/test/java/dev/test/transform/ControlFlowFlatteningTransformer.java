@@ -28,10 +28,15 @@ public class ControlFlowFlatteningTransformer extends Transformer {
             for(var method : clazz.methods()) {
                 int maxUsed = 0;
                 for(var insn : method.insns()) {
-                    if(insn instanceof VarInsnNode v)
+                    if(insn instanceof VarInsnNode v) {
+                        var isCategoryTwo = v.getOpcode() == LLOAD || v.getOpcode() == LSTORE
+                                || v.getOpcode() == DLOAD || v.getOpcode() == DSTORE;
+
+                        var slots = isCategoryTwo ? 2 : 1;
+                        maxUsed = Math.max(maxUsed, v.var + slots);
+                    } else if(insn instanceof IincInsnNode v) {
                         maxUsed = Math.max(maxUsed, v.var + 1);
-                    else if(insn instanceof IincInsnNode v)
-                        maxUsed = Math.max(maxUsed, v.var + 1);
+                    }
                 }
                 if(maxUsed > method.maxLocals()) {
                     method.setMaxLocals(maxUsed);

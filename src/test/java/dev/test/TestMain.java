@@ -1,6 +1,12 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
 import dev.test.transform.CFGTest;
 import dev.test.transform.ControlFlowFlatteningTransformer;
