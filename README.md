@@ -11,3 +11,21 @@ Over these 2 years of me working with java bytecode, I noticed There's not many 
 
 ## Why v2?
 I make a poll on [Aidsfuscators/Cryptics discord server](https://discord.gg/4JGANqEZsK), asking if anyone wanted me to rewrite the v1 aidsfuscator. The majority said yes, so that's what makes me want to do this project.
+
+## How to use?
+- Download the zip file from [the releases page](https://github.com/LvStrnggg/aidsfuscator/releases).
+- Extract the ZIP file
+- Your config.json and exclusions.json files should stay in your workspace folder, everything else can stay outside.
+- Run the obfuscator with Java 25: `java -jar aidsfuscator.jar config.json exclusions.json`
+
+### Default structure
+
+```
+aidsfuscator.jar
+workspace
+|- config.json
+\- exclusions.json
+```
+
+### What not to do
+- Do not run it with `java -jar aidsfuscator workspace/config.json workspace/exclusions.json`. Aidsfuscator automatically prefixes `workspace/` before any workspace item, that isn't the libs folder or input file.
