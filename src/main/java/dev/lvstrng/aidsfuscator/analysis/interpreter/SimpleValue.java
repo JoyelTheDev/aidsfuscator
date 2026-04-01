@@ -75,7 +75,7 @@ public class SimpleValue implements Value {
             if (type == null) {
                 return other.type == null;
             } else {
-                return type.equals(other.type) || (TypeUtils.isPrimitive(type) && TypeUtils.isPrimitive(other.type) && TypeUtils.isPromotion(type, other.type));
+                return type.equals(other.type);
             }
         }
 

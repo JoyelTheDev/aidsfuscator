@@ -38,6 +38,7 @@ build/
 ### Mac OS ###
 .DS_Store
 
-### Build ###
+### Aidsfuscator ###
+*.jar
 *.MF
 out/

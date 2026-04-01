@@ -17,7 +17,9 @@ public enum Exclusions {
     METHOD_SALTING("methodSalting", true, false, true),
 
     INTEGER_ENCRYPTION("integerEncrypt", true, false, true),
-    STRING_ENCRYPTION("stringEncrypt", true, false, true)
+    STRING_ENCRYPTION("stringEncrypt", true, false, true),
+
+    FLOW_FLATTEN("controlFlowFlatten", true, false, true)
 
     ;
 
