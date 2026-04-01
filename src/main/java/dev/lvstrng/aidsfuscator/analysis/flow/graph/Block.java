@@ -1,6 +1,8 @@
 package dev.lvstrng.aidsfuscator.analysis.flow.graph;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
+import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
@@ -37,6 +39,18 @@ public class Block {
         this.traps = new ArrayList<>();
         this.trapEnds = new ArrayList<>();
         this.trapHandlers = new ArrayList<>();
+    }
+
+    public boolean deadEnd() {
+        return defaultBlock == null;
+    }
+
+    public boolean ends() {
+        var insn = insns.getLast();
+        return insn.getOpcode() == Opcodes.GOTO
+                || insn.getOpcode() == Opcodes.LOOKUPSWITCH
+                || insn.getOpcode() == Opcodes.TABLESWITCH
+                || ASMUtils.isReturn(insn) || insn.getOpcode() == Opcodes.ATHROW;
     }
 
     public void setExpectsValue() {

@@ -39,7 +39,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
         if(block.inTrapEnd())       return false;
         if(block.expectsValue())    return false;
 
-        return graph.blocks().getFirst() != block;
+        return graph.firstBlock() != block;
     };
 
     public ControlFlowFlatteningTransformer() {
@@ -136,7 +136,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 continue;
 
             var block = graph.blockContaining(insn);
-            if(block == graph.blocks().getFirst())
+            if(block == graph.firstBlock())
                 continue;
 
             if(block == null || block.inTrapHandler() || block.inTrapEnd())

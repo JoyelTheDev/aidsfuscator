@@ -36,6 +36,9 @@
       "enabled": true,
       "mode": "NORMAL",
       "useSalt": true
+    },
+    "controlFlowShuffle": {
+      "enabled": false
     }
   }
 }

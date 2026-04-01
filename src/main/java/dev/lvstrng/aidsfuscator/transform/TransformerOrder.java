@@ -3,6 +3,7 @@ package dev.lvstrng.aidsfuscator.transform;
 import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
@@ -27,7 +28,8 @@ public final class TransformerOrder {
             new IntegerEncryptTransformer(),
             new StringEncryptTransformer(),
 
-            new ControlFlowFlatteningTransformer()
+            new ControlFlowFlatteningTransformer(),
+            new ControlFlowShufflingTransformer()
     );
 
     @SuppressWarnings("unchecked")

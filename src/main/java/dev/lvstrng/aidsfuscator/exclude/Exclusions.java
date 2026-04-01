@@ -19,7 +19,8 @@ public enum Exclusions {
     INTEGER_ENCRYPTION("integerEncrypt", true, false, true),
     STRING_ENCRYPTION("stringEncrypt", true, false, true),
 
-    FLOW_FLATTEN("controlFlowFlatten", true, false, true)
+    FLOW_FLATTEN("controlFlowFlatten", true, false, true),
+    FLOW_SHUFFLE("controlFlowShuffle", true, false, true)
 
     ;
 

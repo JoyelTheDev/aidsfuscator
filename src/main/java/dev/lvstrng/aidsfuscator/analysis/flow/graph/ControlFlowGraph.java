@@ -199,6 +199,10 @@ public class ControlFlowGraph {
         }
     }
 
+    public Block firstBlock() {
+        return blocks.getFirst();
+    }
+
     public boolean isEmpty() {
         return blocks.isEmpty();
     }
