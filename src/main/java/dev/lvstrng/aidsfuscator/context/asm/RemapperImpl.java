@@ -16,13 +16,6 @@ public class RemapperImpl extends Remapper {
     @Override
     public String mapMethodName(String owner, String name, String descriptor) {
         var id = MemberUtils.fullMethod(owner, name, descriptor);
-        if(name.equals("emit")) {
-            System.out.println(id);
-
-            if(Mappings.METHOD.containsOld(id)) {
-                System.out.println(Mappings.METHOD.retrieve(id).value());
-            }
-        }
         if(Mappings.METHOD.containsOld(id)) {
             return super.mapMethodName(owner, Mappings.METHOD.retrieve(id).value(), descriptor);
         }

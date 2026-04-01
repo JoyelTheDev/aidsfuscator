@@ -5,17 +5,14 @@ import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.FrameString;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.SwitchUtils;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,19 +20,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiPredicate;
 
+/**
+ * Flattens a methods Control Flow Graph (CFG), making analysis by control flow graph a little bit harder. (much harder when shuffling is applied).
+ * This has two modes: NORMAL and AGGRESSIVE.
+ *
+ * <li> NORMAL is more simple and costs less performance. </li>
+ * <li> AGGRESSIVE adds more cases to the dispatcher switch that go back and forth. </li>
+ *
+ * It can also use a methods salt (if present) to lightly obfuscate the switch values a little.
+ */
 public class ControlFlowFlatteningTransformer extends Transformer {
     // NORMAL and AGGRESSIVE
     private final Setting<String> mode = setting("mode", "NORMAL");
+    private final Setting<Boolean> useSalt = setting("useSalt", true);
 
     private static final BiPredicate<ControlFlowGraph, Block> goodBlock = (graph, block) -> {
-        if(block.inTrapHandler())
-            return false;
-
-        if(block.inTrapEnd())
-            return false;
-
-        if(block.expectsValue())
-            return false;
+        if(block.inTrapHandler())   return false;
+        if(block.inTrapEnd())       return false;
+        if(block.expectsValue())    return false;
 
         return graph.blocks().getFirst() != block;
     };
@@ -51,6 +53,9 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 continue;
 
             for(var method : clazz.methods()) {
+                if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
+                    continue;
+
                 if(Exclusions.FLOW_FLATTEN.excluded(method))
                     continue;
 
@@ -60,15 +65,15 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                 fixLocals(method);
                 if(mode.value().equals("NORMAL"))
-                    flattenNormal(method, graph);
-                else flattenAggressive(method, graph);
+                    flattenNormal(context, method, graph);
+                else flattenAggressive(context, method, graph);
 
                 markChange();
             }
         }
     }
 
-    private void flattenNormal(JMethod method, ControlFlowGraph graph) {
+    private void flattenNormal(Context context, JMethod method, ControlFlowGraph graph) {
         var grouped = grouped(graph);
         int flattenerLocal = -1;
 
@@ -95,7 +100,14 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 var lbl = new LabelNode();
                 var key = random.nextInt();
 
-                list.add(ASMUtils.pushInt(key));
+                if(method.hasSalt() && useSalt.value()) {
+                    list.add(method.salt().load());
+                    list.add(context.propertyContainer().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
+                    list.add(new InsnNode(IXOR));
+                } else {
+                    list.add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                }
+
                 list.add(new VarInsnNode(ISTORE, flattenerLocal));
                 list.add(new JumpInsnNode(GOTO, dispatcher));
                 list.add(lbl);
@@ -113,7 +125,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
         }
     }
 
-    private void flattenAggressive(JMethod method, ControlFlowGraph graph) {
+    private void flattenAggressive(Context context, JMethod method, ControlFlowGraph graph) {
         var groups = new HashMap<String, List<LabelNode>>();
         for(var insn : method.insns()) {
             var frame = graph.frameAt(insn);
@@ -165,7 +177,13 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 var list = new InsnList();
                 cases.put(e, key);
 
-                list.add(ASMUtils.pushInt(cases.get(e)));
+                if(method.hasSalt() && useSalt.value()) {
+                    list.add(method.salt().load());
+                    list.add(context.propertyContainer().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
+                    list.add(new InsnNode(IXOR));
+                } else {
+                    list.add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                }
                 list.add(new VarInsnNode(ISTORE, local));
                 list.add(new JumpInsnNode(GOTO, dispatcher));
 
