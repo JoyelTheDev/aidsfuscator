@@ -26,7 +26,6 @@ public class MethodRenameTransformer extends Transformer {
             if(clazz.tree().stream().anyMatch(Exclusions.RENAME_METHOD::excluded))
                 continue;
 
-            System.out.println(clazz);
             mapMethods(context, clazz);
         }
 
