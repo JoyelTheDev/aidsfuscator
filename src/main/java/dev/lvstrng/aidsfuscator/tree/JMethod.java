@@ -29,6 +29,7 @@ public class JMethod {
     private final String originalName, originalDesc;
 
     private List<JMethod> parents, children;
+    private AbstractInsnNode safeInsn;
 
     public JMethod(MethodNode core) {
         this.properties = new PropertyContainer();
@@ -38,6 +39,15 @@ public class JMethod {
         this.originalDesc = core.desc;
 
         this.setCore(core);
+    }
+
+    public AbstractInsnNode safeInsn() {
+        return safeInsn;
+    }
+
+    public AbstractInsnNode setSafeInsn(AbstractInsnNode insn) {
+        this.safeInsn = insn;
+        return safeInsn;
     }
 
     public String originalName() {
@@ -74,7 +84,11 @@ public class JMethod {
         return spot;
     }
 
-    private Type[] args() {
+    public Type returnType() {
+        return Type.getReturnType(desc());
+    }
+
+    public Type[] args() {
         return Type.getArgumentTypes(desc());
     }
 
@@ -155,6 +169,10 @@ public class JMethod {
 
     public boolean isVirtual() {
         return !Modifier.isStatic(access());
+    }
+
+    public boolean isAbstract() {
+        return Modifier.isAbstract(access());
     }
 
     public MethodNode core() {

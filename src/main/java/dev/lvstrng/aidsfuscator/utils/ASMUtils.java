@@ -187,4 +187,58 @@ public class ASMUtils implements Opcodes {
             method.insns().remove(indy);
         }
     }
+
+    public static void box(InsnList list, Type type) {
+        switch (type.getSort()) {
+            case Type.CHAR -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;"));
+            case Type.INT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false));
+            case Type.SHORT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false));
+            case Type.FLOAT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false));
+            case Type.DOUBLE -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false));
+            case Type.LONG -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false));
+            case Type.BOOLEAN -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false));
+        }
+    }
+
+    public static MethodInsnNode unbox(InsnList list, Type type) {
+        MethodInsnNode m = null;
+
+        switch (type.getSort()) {
+            case Type.CHAR -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Character"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C"));
+            }
+            case Type.INT -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Integer"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I"));
+            }
+            case Type.SHORT -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Short"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Short", "shortValue", "()S"));
+            }
+            case Type.BYTE -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Byte"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Byte", "byteValue", "()B"));
+            }
+            case Type.BOOLEAN -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Boolean"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z"));
+            }
+            case Type.FLOAT -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Float"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F"));
+            }
+            case Type.DOUBLE -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Double"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D"));
+            }
+            case Type.LONG -> {
+                list.add(new TypeInsnNode(CHECKCAST, "java/lang/Long"));
+                list.add(m = new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J"));
+            }
+            case Type.OBJECT, Type.ARRAY -> list.add(new TypeInsnNode(CHECKCAST, type.getInternalName()));
+        }
+
+        return m;
+    }
 }

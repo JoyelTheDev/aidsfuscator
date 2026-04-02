@@ -137,7 +137,12 @@ public class Context {
         try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
             for(var clazz : jarClasses()) {
                 var writer = new HierarchyClassWriter(this);
-                clazz.core().accept(writer);
+                try {
+                    clazz.core().accept(writer);
+                } catch (Exception e) {
+                    Logger.error("Error writing class %s", clazz.name());
+                    e.printStackTrace();
+                }
 
                 jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
                 jos.write(writer.toByteArray());

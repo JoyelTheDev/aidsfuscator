@@ -213,7 +213,7 @@ public class InsnBuilder {
     }
 
     public InsnBuilder dup_x2() {
-        list.add(new InsnNode(IXOR));
+        list.add(new InsnNode(DUP_X2));
         return this;
     }
 
