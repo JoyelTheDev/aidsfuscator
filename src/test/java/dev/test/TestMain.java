@@ -1,19 +1,21 @@
 package dev.test;
 
+import dev.lvstrng.aidsfuscator.config.initOrder.ClassInitOrderLoader;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.test.transform.MethodParameterObfuscationTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
-        Context.newInstance()
+        var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("in.jar")
                 .libs("libs/")
                 .out("out-out.jar")
-                .initialize()
-                .transform(
-                        new MethodParameterObfuscationTransformer()
-                )
-                .exportJar();
+                .initialize();
+
+        new ClassInitOrderLoader(context, "initOrder.json").load();
+
+        context.transform(
+                new ClassSaltTransformer()
+        ).exportJar();
     }
 }

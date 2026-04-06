@@ -66,7 +66,7 @@ public class MethodSaltTransformer extends Transformer {
                 insn.desc = insn.desc.replace(")", "I)");
                 node.caller().insns().insertBefore(
                         insn,
-                        add(node.caller(), ASMUtils.pushInt(seed))
+                        add(context, node.caller(), ASMUtils.pushInt(seed))
                 );
             }
 
@@ -99,8 +99,10 @@ public class MethodSaltTransformer extends Transformer {
         }
     }
 
-    private AbstractInsnNode add(JMethod caller, AbstractInsnNode insn) {
-        seedInsns.computeIfAbsent(caller, _ -> new ArrayList<>()).add(insn);
+    private AbstractInsnNode add(Context context, JMethod caller, AbstractInsnNode insn) {
+        seedInsns.computeIfAbsent(caller, _ -> new ArrayList<>()).add(
+                context.propertyContainer().add(insn, Property.UNPROTECTED_SALT)
+        );
         return insn;
     }
 

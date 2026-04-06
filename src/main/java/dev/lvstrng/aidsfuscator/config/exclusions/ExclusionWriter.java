@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.config;
+package dev.lvstrng.aidsfuscator.config.exclusions;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;

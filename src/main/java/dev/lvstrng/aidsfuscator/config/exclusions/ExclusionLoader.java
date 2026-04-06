@@ -1,12 +1,10 @@
-package dev.lvstrng.aidsfuscator.config;
+package dev.lvstrng.aidsfuscator.config.exclusions;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
-
-import java.io.File;
 
 public class ExclusionLoader {
     private final String exclusionPath;

@@ -177,6 +177,7 @@ public class StringEncryptTransformer extends Transformer {
                 ._areturn();
 
         method.insns().add(builder.result());
+        method.properties().add(Property.STRING_DECRYPTOR);
     }
 
     private void generateClinit(Context context, JClass clazz, String fieldName, List<String> strings) {

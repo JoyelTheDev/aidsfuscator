@@ -2,9 +2,11 @@ package dev.lvstrng.aidsfuscator.tree;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.salt.ClassSalt;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnNode;
@@ -26,8 +28,9 @@ public class JClass {
     private boolean library;
 
     private List<JClass> parents, children;
-    private List<JField> fields;
-    private List<JMethod> methods;
+    private final List<JField> fields;
+    private final List<JMethod> methods;
+    private ClassSalt salt;
 
     public JClass(ClassNode core) {
         this.properties = new PropertyContainer();
@@ -41,6 +44,18 @@ public class JClass {
 
         core.methods.forEach(this::add);
         core.fields.forEach(this::add);
+    }
+
+    public boolean hasSalt() {
+        return salt != null;
+    }
+
+    public ClassSalt salt() {
+        return salt;
+    }
+
+    public void setSalt(ClassSalt salt) {
+        this.salt = salt;
     }
 
     public int version() {
@@ -264,6 +279,10 @@ public class JClass {
 
     public List<JField> fields() {
         return fields;
+    }
+
+    public Type type() {
+        return Type.getObjectType(name());
     }
 
     public ClassNode core() {

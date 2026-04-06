@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.context;
 
+import dev.lvstrng.aidsfuscator.analysis.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
@@ -39,6 +40,7 @@ public class Context {
     private final IHierarchy hierarchy;
     private final ReferenceGraph referenceGraph;
     private final GlobalPropertyContainer propertyContainer;
+    private final ClassInitOrderHandler initOrder;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
@@ -56,6 +58,7 @@ public class Context {
         this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
+        this.initOrder          = new ClassInitOrderHandler(this);
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -135,7 +138,10 @@ public class Context {
 
         var outputFile = new File(output);
         try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
-            for(var clazz : jarClasses()) {
+            var classes = new ArrayList<>(jarClasses());
+            classes.addAll(artificials().values());
+
+            for(var clazz : classes) {
                 var writer = new HierarchyClassWriter(this);
                 try {
                     clazz.core().accept(writer);
@@ -194,6 +200,10 @@ public class Context {
         return propertyContainer;
     }
 
+    public ClassInitOrderHandler initOrder() {
+        return initOrder;
+    }
+
     public int writerFlags() {
         return writerFlags;
     }
@@ -249,7 +259,7 @@ public class Context {
     }
 
     public void addLibrary(JClass clazz) {
-        artificials.put(clazz.name(), clazz);
+        libraries.put(clazz.name(), clazz);
     }
 
     public List<JClass> jarClasses() {

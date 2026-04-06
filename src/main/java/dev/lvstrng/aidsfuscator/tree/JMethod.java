@@ -6,7 +6,7 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
-import dev.lvstrng.aidsfuscator.seed.MethodSalt;
+import dev.lvstrng.aidsfuscator.salt.MethodSalt;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -39,6 +39,14 @@ public class JMethod {
         this.originalDesc = core.desc;
 
         this.setCore(core);
+    }
+
+    public void insertSafe(InsnList list) {
+        if(safeInsn == null) {
+            insns().insert(list);
+        } else {
+            insns().insert(safeInsn, list);
+        }
     }
 
     public AbstractInsnNode safeInsn() {

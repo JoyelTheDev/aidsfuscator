@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -119,8 +120,14 @@ public class MethodParameterObfuscationTransformer extends Transformer {
         if(cantEditMethod(clazz, method))
             return;
 
+        if((method.access() & ACC_SYNTHETIC) != 0)
+            return;
+
         for(var member : method.tree()) {
             if(cantEditMethod(member.owner(), member))
+                return;
+
+            if((member.access() & ACC_SYNTHETIC) != 0)
                 return;
         }
 

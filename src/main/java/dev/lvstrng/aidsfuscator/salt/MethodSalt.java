@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.seed;
+package dev.lvstrng.aidsfuscator.salt;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
