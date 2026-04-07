@@ -38,7 +38,7 @@
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": false
+      "enabled": true
     }
   }
 }

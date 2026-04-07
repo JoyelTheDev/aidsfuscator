@@ -84,7 +84,7 @@ public class MethodSaltTransformer extends Transformer {
 
                 if(num != method.salt().value()) {
                     list.add(method.salt().load());
-                    list.add(context.propertyContainer().add(
+                    list.add(context.properties().add(
                             ASMUtils.pushInt(method.salt().value() ^ num),
                             Property.IGNORE_INTEGER
                     ));
@@ -101,7 +101,7 @@ public class MethodSaltTransformer extends Transformer {
 
     private AbstractInsnNode add(Context context, JMethod caller, AbstractInsnNode insn) {
         seedInsns.computeIfAbsent(caller, _ -> new ArrayList<>()).add(
-                context.propertyContainer().add(insn, Property.UNPROTECTED_SALT)
+                context.properties().add(insn, Property.UNPROTECTED_SALT)
         );
         return insn;
     }

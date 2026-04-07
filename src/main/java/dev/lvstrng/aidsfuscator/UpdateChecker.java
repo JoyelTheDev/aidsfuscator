@@ -15,7 +15,7 @@ public class UpdateChecker {
         connection.setRequestMethod("GET");
 
         if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            throw new IllegalArgumentException("Invalid status code");
+            Logger.error("Invalid status code");
         }
 
         var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

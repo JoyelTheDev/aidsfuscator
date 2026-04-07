@@ -196,7 +196,7 @@ public class Context {
         return referenceGraph;
     }
 
-    public GlobalPropertyContainer propertyContainer() {
+    public GlobalPropertyContainer properties() {
         return propertyContainer;
     }
 

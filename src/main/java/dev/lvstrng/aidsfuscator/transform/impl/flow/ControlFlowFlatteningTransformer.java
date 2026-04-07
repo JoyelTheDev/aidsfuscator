@@ -102,10 +102,10 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                 if(method.hasSalt() && useSalt.value()) {
                     list.add(method.salt().load());
-                    list.add(context.propertyContainer().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
+                    list.add(context.properties().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
                     list.add(new InsnNode(IXOR));
                 } else {
-                    list.add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                    list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                 }
 
                 list.add(new VarInsnNode(ISTORE, flattenerLocal));
@@ -179,10 +179,10 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                 if(method.hasSalt() && useSalt.value()) {
                     list.add(method.salt().load());
-                    list.add(context.propertyContainer().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
+                    list.add(context.properties().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
                     list.add(new InsnNode(IXOR));
                 } else {
-                    list.add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                    list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                 }
                 list.add(new VarInsnNode(ISTORE, local));
                 list.add(new JumpInsnNode(GOTO, dispatcher));

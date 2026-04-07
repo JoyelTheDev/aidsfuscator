@@ -11,7 +11,6 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
                     continue;
 
                 var list = new InsnBuilder()
-                        .add(context.propertyContainer().add(ASMUtils.pushInt(args.length), Property.IGNORE_INTEGER))
+                        .add(context.properties().add(ASMUtils.pushInt(args.length), Property.IGNORE_INTEGER))
                         .anewarray("java/lang/Object");
 
                 for(int i = args.length - 1; i >= 0; i--) {
@@ -63,7 +62,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
 
                     ASMUtils.box(list.result(), arg);
                     list
-                            .add(context.propertyContainer().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
+                            .add(context.properties().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
                             .swap()
                             .aastore();
                 }
@@ -88,7 +87,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
 
                 builder
                         .dup()
-                        .add(context.propertyContainer().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
+                        .add(context.properties().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
                         .aaload();
                 ASMUtils.unbox(builder.result(), arg);
                 builder._var(arg.getOpcode(ISTORE), current);

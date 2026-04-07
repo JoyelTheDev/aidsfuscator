@@ -54,7 +54,7 @@ public class ClassInitOrderClassGen implements Opcodes {
         new InsnBuilder(get.insns())
                 .field(GETSTATIC, clazz.name(), field.name(), field.desc())
                 ._var(ALOAD, 0)
-                .method(INVOKEVIRTUAL, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true)
+                .method(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true)
                 .type(CHECKCAST, "java/lang/Integer")
                 .method(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
                 ._ireturn();
@@ -71,7 +71,7 @@ public class ClassInitOrderClassGen implements Opcodes {
                 ._var(ALOAD, 0)
                 ._var(ILOAD, 1)
                 .method(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
-                .method(INVOKEVIRTUAL, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
+                .method(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
                 .pop()
                 ._return();
 

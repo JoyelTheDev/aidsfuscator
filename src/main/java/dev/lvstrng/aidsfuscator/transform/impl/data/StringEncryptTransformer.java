@@ -50,7 +50,7 @@ public class StringEncryptTransformer extends Transformer {
                     if(!(insn instanceof LdcInsnNode ldc && ldc.cst instanceof String str))
                         continue;
 
-                    if(context.propertyContainer().get(insn).has(Property.IGNORE_STRING))
+                    if(context.properties().get(insn).has(Property.IGNORE_STRING))
                         continue;
 
                     if(str.length() < minLength.value())
@@ -66,12 +66,12 @@ public class StringEncryptTransformer extends Transformer {
                     var idx = strings.size();
                     var idxVal = idx ^ idxXor;
 
-                    var builder = new InsnBuilder().add(context.propertyContainer().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
+                    var builder = new InsnBuilder().add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
                     if(method.hasSalt()) {
                         builder.add(method.salt().load());
                     } else {
                         //                                                                            add useless bits on purpose
-                        builder.add(context.propertyContainer().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
+                        builder.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
                     }
                     builder.method(INVOKESTATIC, clazz.name(), decryptorName, "(II)Ljava/lang/String;");
 
@@ -111,7 +111,7 @@ public class StringEncryptTransformer extends Transformer {
                 .label(new LabelNode())
                 .field(GETSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
                 ._var(ILOAD, idxValVar)
-                .add(context.propertyContainer().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER))
+                .add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER))
                 .ixor()
                 .aaload()
                 .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
@@ -123,7 +123,7 @@ public class StringEncryptTransformer extends Transformer {
 
                 .label(loop)
                 ._var(ILOAD, iVar)
-                .add(context.propertyContainer().add(ASMUtils.pushInt(keys.length), Property.IGNORE_INTEGER))
+                .add(context.properties().add(ASMUtils.pushInt(keys.length), Property.IGNORE_INTEGER))
                 .irem();
 
         var end = new LabelNode();
@@ -136,7 +136,7 @@ public class StringEncryptTransformer extends Transformer {
 
             routeBuilder
                     .label(route)
-                    .add(context.propertyContainer().add(ASMUtils.pushInt(keys[i]), Property.IGNORE_INTEGER))
+                    .add(context.properties().add(ASMUtils.pushInt(keys[i]), Property.IGNORE_INTEGER))
                     ._var(ISTORE, xorKey)
                     ._goto(end);
         }
@@ -154,7 +154,7 @@ public class StringEncryptTransformer extends Transformer {
                 ._var(ILOAD, xorKey)
                 .ixor()
                 ._var(ILOAD, xorValueVar)
-                .add(context.propertyContainer().add(ASMUtils.pushInt(16), Property.IGNORE_INTEGER))
+                .add(context.properties().add(ASMUtils.pushInt(16), Property.IGNORE_INTEGER))
                 .ishr()
                 .ixor()
                 .castore()
@@ -182,13 +182,13 @@ public class StringEncryptTransformer extends Transformer {
 
     private void generateClinit(Context context, JClass clazz, String fieldName, List<String> strings) {
         // ---- INIT ----
-        int key = random.nextInt(Short.MIN_VALUE, Short.MAX_VALUE);
+        int key = random.nextInt(Short.MAX_VALUE);
         var strBuilder = new StringBuilder();
         var lengthStr = new StringBuilder();
 
         for(var str : strings) {
             strBuilder.append(str);
-            lengthStr.append((char) str.length());
+            lengthStr.append((char) (str.length() ^ key));
         }
 
         var theStr = strBuilder.toString();
@@ -211,9 +211,16 @@ public class StringEncryptTransformer extends Transformer {
         var varLbl = new LabelNode();
 
         var builder = new InsnBuilder()
-                .label(new LabelNode())
-                ._int(key)
-                ._var(ISTORE, keyVar)
+                .label(new LabelNode());
+        if(clazz.hasSalt()) {
+            builder.add(context.properties().add(ASMUtils.pushInt(key ^ clazz.salt().value()), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
+                    .add(clazz.salt().load())
+                    .ixor();
+        } else {
+            builder.add(context.properties().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER));
+        }
+
+        builder._var(ISTORE, keyVar)
 
                 .label(new LabelNode())
                 ._const(theStr)
@@ -240,6 +247,8 @@ public class StringEncryptTransformer extends Transformer {
                 ._var(ALOAD, lenArrVar)
                 ._var(ILOAD, iVar)
                 .caload()
+                ._var(ILOAD, keyVar)
+                .ixor()
                 ._var(ISTORE, lenVar)
 
                 .label(new LabelNode())
@@ -294,6 +303,6 @@ public class StringEncryptTransformer extends Transformer {
                 ._var(ALOAD, strArrVar)
                 .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;");
 
-        method.insns().insert(builder.result());
+        method.insertSafe(builder.result());
     }
 }

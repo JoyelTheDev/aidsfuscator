@@ -17,6 +17,9 @@ public class ClassInitOrderHandler {
     }
 
     public void add(String before, String after) {
+        before = before.replace('.', '/');
+        after = after.replace('.', '/');
+
         var firstClass = context.forName(before);
         var secondClass = context.forName(after);
 

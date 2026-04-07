@@ -47,7 +47,7 @@ public class IntegerEncryptTransformer extends Transformer {
                     if(ASMUtils.isIconst(insn))
                         continue;
 
-                    if(context.propertyContainer().get(insn).has(Property.IGNORE_INTEGER))
+                    if(context.properties().get(insn).has(Property.IGNORE_INTEGER))
                         continue;
 
                     // ---- PREPARE KEYS -----
@@ -128,14 +128,20 @@ public class IntegerEncryptTransformer extends Transformer {
         // ---- INSNS ----
         var loop = new LabelNode();
 
-        var builder = new InsnBuilder();
-        builder.label(new LabelNode())
-                .add(context.propertyContainer().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
-                ._var(ISTORE, keyVar)
+        var builder = new InsnBuilder()
+                .label(new LabelNode());
+        if(!clazz.hasSalt()) {
+            builder.add(context.properties().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER));
+        } else {
+            builder.add(context.properties().add(ASMUtils.pushInt(key ^ clazz.salt().value()), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
+                    .add(clazz.salt().load())
+                    .ixor();
+        }
+        builder._var(ISTORE, keyVar)
 
                 .label(new LabelNode())
-                .add(context.propertyContainer().add(new LdcInsnNode(theStr.toString()), Property.IGNORE_STRING))
-                .add(context.propertyContainer().add(new LdcInsnNode("ISO-8859-1"), Property.IGNORE_STRING))
+                .add(context.properties().add(new LdcInsnNode(theStr.toString()), Property.IGNORE_STRING))
+                .add(context.properties().add(new LdcInsnNode("ISO-8859-1"), Property.IGNORE_STRING))
                 .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
                 ._var(ASTORE, bytesVar)
 
@@ -219,7 +225,7 @@ public class IntegerEncryptTransformer extends Transformer {
                 ._var(ILOAD, lenVar)
                 .jump(IF_ICMPLT, loop);
 
-        clinit.insns().insert(builder.result());
+        clinit.insertSafe(builder.result());
     }
 
     private static byte[] intToBytes(int i) {
