@@ -9,6 +9,7 @@ import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
 import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.dictionary.DefaultDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
@@ -32,6 +33,7 @@ public class Context {
     private String input, output, libPath;
     private final Map<String, JClass> classes, artificials, libraries, excluded;
     private int writerFlags;
+    private int version;
     private boolean computeFrames;
     private String dictionaryString;
 
@@ -92,8 +94,17 @@ public class Context {
 
                 // if class, add new class
                 if(name.endsWith(".class")) {
-                    var node = ClassUtils.readClass(bytes);
-                    add(new JClass(node));
+                    var clazz = new JClass(ClassUtils.readClass(bytes));
+                    version = Math.max(clazz.version(), version);
+
+                    // if excluded, add to excluded class list
+                    if(Exclusions.GLOBAL.excluded(clazz)) {
+                        clazz.setLibrary();
+                        addExcluded(clazz);
+                        continue;
+                    }
+
+                    add(clazz);
                     continue;
                 }
 
@@ -254,6 +265,10 @@ public class Context {
         classes.put(clazz.name(), clazz);
     }
 
+    public void addExcluded(JClass clazz) {
+        excluded.put(clazz.name(), clazz);
+    }
+
     public void addArtificial(JClass clazz) {
         artificials.put(clazz.name(), clazz);
     }
@@ -290,6 +305,10 @@ public class Context {
 
     public boolean doesComputeFrames() {
         return computeFrames;
+    }
+
+    public int version() {
+        return version;
     }
 
     public String dictionaryString() {

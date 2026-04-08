@@ -78,7 +78,11 @@ public class MethodSaltTransformer extends Transformer {
             if(!method.hasSalt())
                 continue;
 
+            var frames = method.frames(context);
             for(var insn : seedInsns.get(method)) {
+                if(frames.get(insn).getLocal(method.salt().local()).isUninitialized())
+                    continue;
+
                 var num = ASMUtils.getInt(insn);
                 var list = new InsnList();
 

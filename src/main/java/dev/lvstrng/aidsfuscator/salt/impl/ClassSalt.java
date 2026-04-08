@@ -1,13 +1,13 @@
-package dev.lvstrng.aidsfuscator.salt;
+package dev.lvstrng.aidsfuscator.salt.impl;
 
+import dev.lvstrng.aidsfuscator.salt.ISalt;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
-public class ClassSalt {
+public class ClassSalt implements ISalt {
     private final JClass clazz;
     private final JField field;
     private final int value;
@@ -18,14 +18,17 @@ public class ClassSalt {
         this.value = value;
     }
 
+    @Override
     public int value() {
         return value;
     }
 
+    @Override
     public AbstractInsnNode load() {
         return new FieldInsnNode(Opcodes.GETSTATIC, clazz.name(), field.name(), "I");
     }
 
+    @Override
     public AbstractInsnNode store() {
         return new FieldInsnNode(Opcodes.PUTSTATIC, clazz.name(), field.name(), "I");
     }

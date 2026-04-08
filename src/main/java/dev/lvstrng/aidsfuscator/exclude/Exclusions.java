@@ -15,6 +15,7 @@ public enum Exclusions {
 
     LOCAL_NAMES("localNames", true, false, true),
     METHOD_SALTING("methodSalting", true, false, true),
+    CLASS_SALTING("classSalting", true, false, true),
     PARAMETER_OBFUSCATE("methodParameterObfuscate", true, false, true),
 
     INTEGER_ENCRYPTION("integerEncrypt", true, false, true),

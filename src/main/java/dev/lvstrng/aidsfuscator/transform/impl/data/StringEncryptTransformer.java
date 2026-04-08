@@ -46,6 +46,7 @@ public class StringEncryptTransformer extends Transformer {
                 if(translateConcat.value())
                     ASMUtils.translateConcatenation(method);
 
+                var frames = method.frames(context);
                 for(var insn : method.insns()) {
                     if(!(insn instanceof LdcInsnNode ldc && ldc.cst instanceof String str))
                         continue;
@@ -67,7 +68,7 @@ public class StringEncryptTransformer extends Transformer {
                     var idxVal = idx ^ idxXor;
 
                     var builder = new InsnBuilder().add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
-                    if(method.hasSalt()) {
+                    if(method.canSalt(frames.get(ldc))) {
                         builder.add(method.salt().load());
                     } else {
                         //                                                                            add useless bits on purpose

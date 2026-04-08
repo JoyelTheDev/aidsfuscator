@@ -1,0 +1,105 @@
+package dev.lvstrng.aidsfuscator.transform.impl.salt.classSalting;
+
+import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.property.Property;
+import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.JField;
+import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.*;
+
+import java.util.Random;
+
+import static org.objectweb.asm.Opcodes.*;
+
+public class SimpleClassSaltClassGenerator {
+    public JMethod retrieverMethod;
+
+    public JClass create(Context context) {
+        var _node = new ClassNode();
+        _node.name = context.dictionary().newClassName();
+        _node.superName = "java/lang/Object";
+        _node.version = context.version();
+        _node.access = ACC_PUBLIC;
+
+        var clazz = new JClass(_node);
+        var fieldName = context.dictionary().newFieldName(clazz, "Ljava/util/Map;");
+        var field = clazz.add(new FieldNode(ACC_STATIC, fieldName, "Ljava/util/Map;", null, null));
+
+        generateRetrieverMethod(context, field, clazz);
+        generateInitializersAndClinit(context, field, clazz);
+
+        return clazz;
+    }
+
+    private void generateInitializersAndClinit(Context context, JField mapField, JClass clazz) {
+        var saltyClasses = context.classes().stream().filter(JClass::hasSalt).toList();
+        var count = (int) Math.ceil((double) saltyClasses.size() / 1000);
+
+        var clinit = clazz.findOrCreateClinit();
+        var clinitBuilder = new InsnBuilder()
+                .type(NEW, "java/util/HashMap")
+                .dup()
+                .method(INVOKESPECIAL, "java/util/HashMap", "<init>", "()V")
+                .field(PUTSTATIC, clazz.name(), mapField.name(), mapField.desc());
+
+        int j = 0;
+        for(int i = 0; i < count; i++) {
+             var name = context.dictionary().newMethodName(clazz, "()V");
+             var method = clazz.add(new MethodNode(ACC_STATIC, name, "()V", null, null));
+
+             var builder = new InsnBuilder(method.insns())
+                     .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc());
+
+             for(int n = Math.min(j + 1000, saltyClasses.size()); j < n; j++) {
+                 var saltClass = saltyClasses.get(j);
+                 var key = new Random().nextInt();
+
+                 builder.dup()
+                         ._const(saltClass.type())
+                         ._int(key ^ saltClass.salt().value())
+                         .method(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
+                         .method(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+                         .pop();
+
+                 var classClinit = saltClass.findOrCreateClinit();
+                 var list = new InsnList();
+                 list.add(new LdcInsnNode(saltClass.type()));
+                 list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                 list.add(new MethodInsnNode(INVOKESTATIC, clazz.name(), retrieverMethod.name(), retrieverMethod.desc()));
+                 list.add(saltClass.salt().store());
+
+                 classClinit.setSafeInsn(list.getLast());
+                 classClinit.insns().insert(list);
+             }
+
+             builder._return();
+             clinitBuilder.method(INVOKESTATIC, clazz.name(), name, "()V");
+        }
+
+        clinit.insns().insert(clinitBuilder.result());
+    }
+
+    private void generateRetrieverMethod(Context context, JField mapField, JClass clazz) {
+        var desc = "(Ljava/lang/Object;I)I";
+        var name = context.dictionary().newMethodName(clazz, desc);
+        retrieverMethod = clazz.add(new MethodNode(ACC_PUBLIC | ACC_STATIC, name, desc, null, null));
+
+        // ---- LOCALS ----
+        var objVar = retrieverMethod.allocVar();
+        var keyVar = retrieverMethod.allocVar(Type.INT_TYPE);
+
+        // ---- CODE ----
+        var builder = new InsnBuilder(retrieverMethod.insns())
+                .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc())
+                ._var(ALOAD, objVar)
+                .method(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;")
+                .type(CHECKCAST, "java/lang/Integer")
+                .method(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
+                ._var(ILOAD, keyVar)
+                .ixor()
+                ._ireturn();
+    }
+}

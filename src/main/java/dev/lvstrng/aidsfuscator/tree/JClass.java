@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.tree;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
-import dev.lvstrng.aidsfuscator.salt.ClassSalt;
+import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;

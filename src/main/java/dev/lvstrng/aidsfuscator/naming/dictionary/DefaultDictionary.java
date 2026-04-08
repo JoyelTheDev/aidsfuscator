@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 public class DefaultDictionary implements IDictionary {
     private final Context context;
     private final String dictionary;
+    private int classCounter = 0;
 
     public DefaultDictionary(Context context, String dictionary) {
         this.context = context;
@@ -19,11 +20,10 @@ public class DefaultDictionary implements IDictionary {
 
     @Override
     public String newClassName() {
-        int counter = 0;
         var result = "";
 
         do {
-            result = newName(counter++);
+            result = newName(classCounter++);
         } while (isClassMapped(result));
 
         return result;

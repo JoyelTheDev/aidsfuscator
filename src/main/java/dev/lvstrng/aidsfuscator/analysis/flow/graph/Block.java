@@ -41,6 +41,10 @@ public class Block {
         this.trapHandlers = new ArrayList<>();
     }
 
+    public boolean isInitialized(int local) {
+        return !start.getLocal(local).isUninitialized();
+    }
+
     public boolean deadEnd() {
         return defaultBlock == null;
     }

@@ -40,6 +40,7 @@ public class IntegerEncryptTransformer extends Transformer {
                 if(Exclusions.INTEGER_ENCRYPTION.excluded(method))
                     continue;
 
+                var frames = method.frames(context);
                 for(var insn : method.insns()) {
                     if(!ASMUtils.isIntPush(insn))
                         continue;
@@ -58,7 +59,7 @@ public class IntegerEncryptTransformer extends Transformer {
 
                     // ---- INSTRUCTIONS ----
                     var builder = new InsnBuilder()._int(idxValue);
-                    if(method.hasSalt()) {
+                    if(method.canSalt(frames.get(insn))) {
                         builder.add(method.salt().load());
                     } else {
                         builder._int(key);

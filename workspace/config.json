@@ -24,6 +24,10 @@
       "enabled": true,
       "seedUselessMethods": false
     },
+    "classSalting": {
+      "enabled": true,
+      "unifyAccess": true
+    },
     "integerEncrypt": {
       "enabled": true
     },
@@ -34,7 +38,6 @@
     },
     "controlFlowFlatten": {
       "enabled": true,
-      "mode": "NORMAL",
       "useSalt": true
     },
     "controlFlowShuffle": {

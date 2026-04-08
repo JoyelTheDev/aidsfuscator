@@ -1,12 +1,13 @@
 package dev.lvstrng.aidsfuscator.tree;
 
+import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleInterpreter;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
-import dev.lvstrng.aidsfuscator.salt.MethodSalt;
+import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -134,6 +135,18 @@ public class JMethod {
         return salt;
     }
 
+    public boolean canSalt(Block block) {
+        if(!hasSalt()) return false;
+        return block.isInitialized(salt.local());
+    }
+
+    public boolean canSalt(Frame<SimpleValue> frame) {
+        if(frame == null) return false;
+        if(!hasSalt()) return false;
+
+        return !frame.getLocal(salt.local()).isUninitialized();
+    }
+
     public PropertyContainer properties() {
         return properties;
     }
@@ -177,6 +190,10 @@ public class JMethod {
 
     public boolean isVirtual() {
         return !Modifier.isStatic(access());
+    }
+
+    public boolean isNative() {
+        return Modifier.isNative(access());
     }
 
     public boolean isAbstract() {

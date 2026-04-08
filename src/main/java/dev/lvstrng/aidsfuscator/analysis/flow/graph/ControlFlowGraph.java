@@ -227,4 +227,8 @@ public class ControlFlowGraph {
     public Block blockContaining(AbstractInsnNode insn) {
         return blocks.stream().filter(e -> e.insns().contains(insn)).findFirst().orElseThrow(RuntimeException::new);
     }
+
+    public JMethod method() {
+        return method;
+    }
 }
