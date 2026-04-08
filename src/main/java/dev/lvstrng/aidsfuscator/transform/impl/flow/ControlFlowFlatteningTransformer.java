@@ -33,7 +33,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
         if(block.expectsValue())    return false;
 
         var method = graph.method();
-        if(useSalt.value() && !method.canSalt(block))
+        if((useSalt.value() && method.hasSalt()) && !method.canSalt(block))
             return false;
 
         return graph.firstBlock() != block;
