@@ -1,12 +1,8 @@
 [
-	["dev.sim0n.app.Main", "dev.sim0n.app.Application"],
-	["dev.sim0n.app.Application", "dev.sim0n.app.test.factory.TestRepositoryFactory"],
-	["dev.sim0n.app.test.factory.TestRepositoryFactory", "dev.sim0n.app.test.factory.SimpleTestRepositoryFactory"],
-	["dev.sim0n.app.test.factory.SimpleTestRepositoryFactory", "dev.sim0n.app.test.factory.PartitioningTestRepositoryFactory"],
-	["dev.sim0n.app.test.factory.PartitioningTestRepositoryFactory", "dev.sim0n.app.test.TestRepository"],
-	["dev.sim0n.app.test.TestRepository", "dev.sim0n.app.test.Test"],
-
-	["dev.sim0n.app.test.impl.flow.OpaqueConditionTest", "dev.sim0n.app.test.impl.flow.AES"],
-	["dev.sim0n.app.test.impl.numbers.NumberComparisonTest", "dev.sim0n.iridium.math.statistic.Stats"],
-	["dev.sim0n.iridium.math.statistic.Stats", "dev.sim0n.iridium.math.statistic.function.StatisticFunction"]
+	["Main", "Window"],
+	["Window", "ThreadsController"],
+	["Window", "DataOfSquare"],
+	["DataOfSquare", "SquarePanel"],
+	["Window", "Tuple"],
+	["Window", "KeyboardListener"]
 ]

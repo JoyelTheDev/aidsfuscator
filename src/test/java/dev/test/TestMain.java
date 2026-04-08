@@ -19,11 +19,12 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("in.jar")
                 .libs("libs/")
-                .out("out-out.jar")
+                .out("out.jar")
                 .initialize();
 
+        new ClassInitOrderLoader(context, "initOrder.json").load();
         context.transform(
                 new FieldRenameTransformer(),
                 new MethodRenameTransformer(),

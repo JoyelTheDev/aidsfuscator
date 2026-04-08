@@ -30,7 +30,9 @@ public class JClass {
     private List<JClass> parents, children;
     private final List<JField> fields;
     private final List<JMethod> methods;
+
     private ClassSalt salt;
+    private JClass initializerClass; // class that initializes
 
     public JClass(ClassNode core) {
         this.properties = new PropertyContainer();
@@ -44,6 +46,18 @@ public class JClass {
 
         core.methods.forEach(this::add);
         core.fields.forEach(this::add);
+    }
+
+    public void setFirstInitializerClass(JClass clazz) {
+        this.initializerClass = clazz;
+    }
+
+    public JClass getFirstInitializerClass() {
+        return initializerClass;
+    }
+
+    public boolean hasFirstInitializerClass() {
+        return initializerClass != null;
     }
 
     public boolean hasSalt() {
