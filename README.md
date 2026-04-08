@@ -16,7 +16,7 @@ I make a poll on [Aidsfuscators/Cryptics discord server](https://discord.gg/4JGA
 - Download the zip file from [the releases page](https://github.com/LvStrnggg/aidsfuscator/releases).
 - Extract the ZIP file
 - Your config.json and exclusions.json files should stay in your workspace folder, everything else can stay outside.
-- Run the obfuscator with Java 25: `java -jar aidsfuscator.jar config.json exclusions.json`
+- Run the obfuscator with Java 25: `java -jar aidsfuscator.jar --config=config.json --exclusions=exclusions.json`
 
 ### Default structure
 
@@ -28,4 +28,4 @@ workspace
 ```
 
 ### What not to do
-- Do not run it with `java -jar aidsfuscator workspace/config.json workspace/exclusions.json`. Aidsfuscator automatically prefixes `workspace/` before any workspace item, that isn't the libs folder or input file.
+- Do not run it with `java -jar aidsfuscator --config=workspace/config.json --exclusions=workspace/exclusions.json`. Aidsfuscator automatically prefixes `workspace/` before any workspace item, that isn't the libs folder or input file.
