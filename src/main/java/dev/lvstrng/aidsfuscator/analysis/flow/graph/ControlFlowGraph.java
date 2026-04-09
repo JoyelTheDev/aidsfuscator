@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.analysis.flow.graph;
 
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
@@ -22,7 +23,7 @@ public class ControlFlowGraph {
     private final Map<JumpInsnNode, LabelNode> flows;
 
     private final Map<LabelNode, LabelNode> labels;
-    private Map<AbstractInsnNode, Frame<SimpleValue>> frames;
+    private Map<AbstractInsnNode, SimpleFrame> frames;
 
     public ControlFlowGraph(Context context, JMethod method) {
         this.context = context;
@@ -211,7 +212,7 @@ public class ControlFlowGraph {
         return blocks;
     }
 
-    public Frame<SimpleValue> frameAt(AbstractInsnNode insn) {
+    public SimpleFrame frameAt(AbstractInsnNode insn) {
         return frames.get(insn);
     }
 

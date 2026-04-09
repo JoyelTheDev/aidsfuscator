@@ -4,10 +4,13 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.utils.NamedOpcodes;
 import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.analysis.Frame;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class FrameTest extends Transformer {
     public FrameTest() {
@@ -23,52 +26,33 @@ public class FrameTest extends Transformer {
                 if(frames == null)
                     return;
 
+                var lbls = new ArrayList<LabelNode>();
                 for(var insn : method.insns()) {
-                    if(!(insn instanceof FrameNode node))
-                        continue;
-
                     var frame = frames.get(insn);
                     if(frame == null)
                         continue;
 
-                    System.out.println(frameString(frame));
+                    if(insn instanceof LabelNode l) {
+                        int idx;
+                        if(lbls.contains(l)) {
+                            idx = lbls.indexOf(l);
+                        } else {
+                            idx = lbls.size();
+                            lbls.add(l);
+                        }
+
+                        System.out.println("L" + idx + ":");
+                        continue;
+                    }
+
+                    var suffix = "";
+                    if(method.name().equals("<init>")) {
+                        suffix = " initializedThis: " + frame.getLocal(0).isInitializedThis();
+                    }
+                    System.out.println("\t" + NamedOpcodes.map(insn.getOpcode()) + suffix);
                 }
+                System.out.println();
             }
         }
-    }
-
-    private String frameString(FrameNode frame) {
-        var sb = new StringBuilder("{");
-        if(frame.local != null) {
-            for (var local : frame.local) {
-                sb.append(local).append("; ");
-            }
-        }
-        sb.append("} {");
-
-        if(frame.stack != null) {
-            for (var stack : frame.stack) {
-                sb.append(stack).append("; ");
-            }
-        }
-
-        return sb.append("}").toString();
-    }
-
-    private String frameString(Frame<SimpleValue> frame) {
-        var sb = new StringBuilder("{");
-
-        for(int i = 0; i < frame.getLocals(); i++) {
-            var local = frame.getLocal(i);
-            sb.append(local).append("; ");
-        }
-
-        sb.append("} {");
-        for(int i = 0; i < frame.getStackSize(); i++) {
-            var stack = frame.getStack(i);
-            sb.append(stack).append("; ");
-        }
-
-        return sb.append("}").toString();
     }
 }

@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 import java.util.Collections;
 
 public class MethodRenameTransformer extends Transformer {
+    private final Setting<String> prefix = setting("prefix", "");
     private final Setting<Boolean> shuffle = setting("shuffle", false);
 
     public MethodRenameTransformer() {
@@ -68,7 +69,7 @@ public class MethodRenameTransformer extends Transformer {
             }
 
             if(newName.isEmpty())
-                newName = context.dictionary().newMethodName(clazz, method.desc());
+                newName = context.dictionary().newMethodName(prefix.value(), clazz, method.desc());
 
             for(var member : clazz.tree()) {
                 if(member.isLibrary())

@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 import java.util.Collections;
 
 public class FieldRenameTransformer extends Transformer {
+    private final Setting<String> prefix = setting("prefix", "");
     private final Setting<Boolean> shuffle = setting("shuffle", false);
 
     public FieldRenameTransformer() {
@@ -65,7 +66,7 @@ public class FieldRenameTransformer extends Transformer {
             }
 
             if(newName.isEmpty())
-                newName = context.dictionary().newFieldName(clazz, field.desc());
+                newName = context.dictionary().newFieldName(prefix.value(), clazz, field.desc());
 
             for(var member : clazz.tree()) {
                 if(member.isLibrary())

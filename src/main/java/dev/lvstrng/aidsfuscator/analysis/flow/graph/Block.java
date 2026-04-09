@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.analysis.flow.graph;
 
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import org.objectweb.asm.Opcodes;
@@ -17,13 +18,13 @@ public class Block {
     private final int idx;
     private final LabelNode label;
     private final List<AbstractInsnNode> insns;
-    private final Map<AbstractInsnNode, Frame<SimpleValue>> frames;
+    private final Map<AbstractInsnNode, SimpleFrame> frames;
 
     private Block defaultBlock;
     private final List<Block> predecessors, successors;
     private final List<TryCatchBlockNode> traps, trapEnds, trapHandlers;
 
-    private Frame<SimpleValue> start, end;
+    private SimpleFrame start, end;
     private boolean expectsValue, carryingValue;
     private AbstractInsnNode lastInsn;
 
@@ -73,7 +74,7 @@ public class Block {
         return expectsValue;
     }
 
-    public Map<AbstractInsnNode, Frame<SimpleValue>> frames() {
+    public Map<AbstractInsnNode, SimpleFrame> frames() {
         return frames;
     }
 
@@ -81,7 +82,7 @@ public class Block {
         return frames.get(insn);
     }
 
-    public Frame<SimpleValue> start() {
+    public SimpleFrame start() {
         return start;
     }
 
@@ -89,11 +90,11 @@ public class Block {
         return end;
     }
 
-    public void setStart(Frame<SimpleValue> start) {
+    public void setStart(SimpleFrame start) {
         this.start = start;
     }
 
-    public void setEnd(Frame<SimpleValue> end) {
+    public void setEnd(SimpleFrame end) {
         this.end = end;
     }
 

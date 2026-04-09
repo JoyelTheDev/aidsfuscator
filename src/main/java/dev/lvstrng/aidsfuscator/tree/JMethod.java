@@ -2,6 +2,8 @@ package dev.lvstrng.aidsfuscator.tree;
 
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleAnalyzer;
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleInterpreter;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
@@ -242,21 +244,23 @@ public class JMethod {
         return new ControlFlowGraph(context, this).build();
     }
 
-    public Map<AbstractInsnNode, Frame<SimpleValue>> frames(Context context) {
+    public Map<AbstractInsnNode, SimpleFrame> frames(Context context) {
         try {
-            var frameArr = new Analyzer<>(new SimpleInterpreter(context)).analyzeAndComputeMaxs(owner.name(), core);
-            var frames = new HashMap<AbstractInsnNode, Frame<SimpleValue>>();
+            var frameArr = new SimpleAnalyzer(new SimpleInterpreter(context, this)).analyzeAndComputeMaxs(owner.name(), core);
+            var frames = new HashMap<AbstractInsnNode, SimpleFrame>();
 
             for(int i = 0; i < insns().size(); i++) {
                 var insn = insns().get(i);
                 var frame = frameArr[i];
+                if(frame == null)
+                    continue;
 
-                frames.put(insn, frame);
+                frames.put(insn, SimpleFrame.of(frame));
             }
 
             return frames;
         } catch (AnalyzerException e) {
-            Logger.error("Error analyzing frames: %s", e.getLocalizedMessage());
+            Logger.error("Error analyzing frames in (%s): %s", fullName(), e.getLocalizedMessage());
             return null;
         }
     }

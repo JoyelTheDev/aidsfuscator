@@ -16,6 +16,7 @@ public class SimpleValue implements Value {
 
     private final Type type;
     private final AbstractInsnNode uninitializedInsn;
+    private boolean isThis, initializedThis;
 
     public SimpleValue(Type type) {
         this.type = type;
@@ -25,6 +26,24 @@ public class SimpleValue implements Value {
     public SimpleValue(Type type, AbstractInsnNode uninitializedInsn) {
         this.type = type;
         this.uninitializedInsn = uninitializedInsn;
+    }
+
+    public SimpleValue setThis() {
+        this.isThis = true;
+        return this;
+    }
+
+    public SimpleValue setInitializedThis() {
+        this.initializedThis = true;
+        return this;
+    }
+
+    public boolean isThis() {
+        return isThis;
+    }
+
+    public boolean isInitializedThis() {
+        return initializedThis;
     }
 
     @Override

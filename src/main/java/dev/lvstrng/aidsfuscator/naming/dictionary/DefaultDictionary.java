@@ -19,38 +19,53 @@ public class DefaultDictionary implements IDictionary {
     }
 
     @Override
-    public String newClassName() {
+    public String newClassName(String prefix) {
         var result = "";
 
         do {
-            result = newName(classCounter++);
+            result = prefix + newName(classCounter++);
         } while (isClassMapped(result));
 
         return result;
     }
 
     @Override
-    public String newMethodName(JClass owner, String desc) {
+    public String newMethodName(String prefix, JClass owner, String desc) {
         int counter = 0;
         var result = "";
 
         do {
-            result = newName(counter++);
+            result = prefix + newName(counter++);
         } while (isMethodMapped(owner, result, desc));
 
         return result;
     }
 
     @Override
-    public String newFieldName(JClass owner, String desc) {
+    public String newFieldName(String prefix, JClass owner, String desc) {
         int counter = 0;
         var result = "";
 
         do {
-            result = newName(counter++);
+            result = prefix + newName(counter++);
         } while (isFieldMapped(owner, result, desc));
 
         return result;
+    }
+
+    @Override
+    public String newClassName() {
+        return newClassName("");
+    }
+
+    @Override
+    public String newMethodName(JClass owner, String desc) {
+        return newMethodName("", owner, desc);
+    }
+
+    @Override
+    public String newFieldName(JClass owner, String desc) {
+        return newFieldName("", owner, desc);
     }
 
     @Override

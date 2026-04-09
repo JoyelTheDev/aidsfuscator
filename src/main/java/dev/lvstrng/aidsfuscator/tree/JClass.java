@@ -260,6 +260,8 @@ public class JClass {
         if(!core.methods.contains(method.core()))
             core.methods.add(method.core());
 
+        if(library)
+            method.setLibrary();
         method.setOwner(this);
         return method;
     }
@@ -269,8 +271,42 @@ public class JClass {
         if(!core.fields.contains(field.core()))
             core.fields.add(field.core());
 
+        if(library)
+            field.setLibrary();
         field.setOwner(this);
         return field;
+    }
+
+    public boolean isLibrary(JMethod method) {
+        if(method.isLibrary())
+            return true;
+
+        for(var member : tree()) {
+            var f = member.findMethod(method.name(), method.desc());
+            if(f.isEmpty())
+                continue;
+
+            if(f.get().isLibrary())
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean isLibrary(JField field) {
+        if(field.isLibrary())
+            return true;
+
+        for(var member : tree()) {
+            var f = member.findMethod(field.name(), field.desc());
+            if(f.isEmpty())
+                continue;
+
+            if(f.get().isLibrary())
+                return true;
+        }
+
+        return false;
     }
 
     public List<JClass> parents() {

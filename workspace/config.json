@@ -7,14 +7,17 @@
   "transformers": {
     "renameFields": {
       "enabled": true,
+      "prefix": "",
       "shuffle": true
     },
     "renameMethods": {
       "enabled": true,
+      "prefix": "",
       "shuffle": true
     },
     "renameClasses": {
       "enabled": true,
+      "prefix": "a.",
       "randomize": true
     },
     "localNames": {

@@ -38,6 +38,7 @@ public class StringEncryptTransformer extends Transformer {
             var decryptorName = context.dictionary().newMethodName(clazz, "(II)Ljava/lang/String;");
             var keys = CryptUtils.generateKeys(random, 32, 255);
             var idxXor = random.nextInt();
+            var traceXor = random.nextInt() >> 16;
 
             for(var method : clazz.methods()) {
                 if(Exclusions.STRING_ENCRYPTION.excluded(method))
@@ -62,8 +63,14 @@ public class StringEncryptTransformer extends Transformer {
                         continue;
                     }
 
+                    // ---- stack trace element stuff ----
+                    var callerClass = clazz.name().replace('/', '.');
+                    var callerMethod = method.name();
+                    var traceKey = ((callerClass.hashCode() ^ callerMethod.hashCode()) >> 16) ^ traceXor;
+
+                    // ---- enc ----
                     var key = method.hasSalt() ? method.salt().value() >> 16 : random.nextInt() >> 16;
-                    var encryptedString = CryptUtils.xor(str, key, keys, keys[0]);
+                    var encryptedString = CryptUtils.xor(str, key ^ traceKey, keys, keys[0]);
                     var idx = strings.size();
                     var idxVal = idx ^ idxXor;
 
@@ -86,37 +93,100 @@ public class StringEncryptTransformer extends Transformer {
             if(strings.isEmpty())
                 continue;
 
-
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
             clazz.add(new FieldNode(access, fieldName, "[Ljava/lang/String;", null, null));
-            generateClinit(context, clazz, fieldName, strings);
-            generateDecryptor(context, clazz, fieldName, decryptorName, idxXor, keys);
+
+            var cacheName = context.dictionary().newFieldName(clazz, "[Ljava/lang/Object;");
+            clazz.add(new FieldNode(access, cacheName, "[Ljava/lang/Object;", null, null));
+
+            generateClinit(context, clazz, fieldName, cacheName, strings);
+            generateDecryptor(context, clazz, fieldName, cacheName, decryptorName, idxXor, traceXor, keys);
         }
     }
 
-    private void generateDecryptor(Context context, JClass clazz, String fieldName, String decryptorName, int idxXor, int[] keys) {
+    private void generateDecryptor(Context context, JClass clazz, String fieldName, String cacheName, String decryptorName, int idxXor, int traceXor, int[] keys) {
         var method = clazz.add(new MethodNode(ACC_PRIVATE | ACC_STATIC, decryptorName, "(II)Ljava/lang/String;", null, null));
 
         // ---- LOCALS ----
         var idxValVar = method.allocVar(Type.INT_TYPE); // param1
         var xorValueVar = method.allocVar(Type.INT_TYPE); // param2
 
+        var cachedTraceVar = method.allocVar(Type.INT_TYPE);
+        var idxVar = method.allocVar(Type.INT_TYPE);
         var charArrVar = method.allocVar();
+        var stackElementsVar = method.allocVar();
+        var elementVar = method.allocVar();
+        var hashVar = method.allocVar(Type.INT_TYPE);
         var iVar = method.allocVar(Type.INT_TYPE);
         var xorKey = method.allocVar(Type.INT_TYPE);
 
         // ---- CODE ----
         var loop = new LabelNode();
+        var newTraceLabel = new LabelNode();
+        var exitLabel = new LabelNode();
 
         var builder = new InsnBuilder()
                 .label(new LabelNode())
-                .field(GETSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
                 ._var(ILOAD, idxValVar)
                 .add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER))
                 .ixor()
+                ._var(ISTORE, idxVar)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
+                ._var(ILOAD, idxVar)
                 .aaload()
                 .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
                 ._var(ASTORE, charArrVar)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
+                ._var(ILOAD, idxVar)
+                .aaload()
+                .type(CHECKCAST, "[Ljava/lang/StackTraceElement;")
+                ._var(ASTORE, cachedTraceVar)
+
+                .label(new LabelNode())
+                ._var(ALOAD, cachedTraceVar)
+                .jump(IFNULL, newTraceLabel)
+
+                .label(new LabelNode())
+                ._var(ALOAD, cachedTraceVar)
+                ._var(ASTORE, stackElementsVar)
+                ._goto(exitLabel)
+
+                .label(newTraceLabel)
+                .type(NEW, "java/lang/Throwable")
+                .dup()
+                .method(INVOKESPECIAL, "java/lang/Throwable", "<init>", "()V")
+                .method(INVOKEVIRTUAL, "java/lang/Throwable", "getStackTrace", "()[Ljava/lang/StackTraceElement;")
+                ._var(ASTORE, stackElementsVar)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
+                ._var(ILOAD, idxVar)
+                ._var(ALOAD, stackElementsVar)
+                .aastore()
+
+                .label(exitLabel)
+                ._var(ALOAD, stackElementsVar)
+                ._const(1)
+                .aaload()
+                ._var(ASTORE, elementVar)
+
+                .label(new LabelNode())
+                ._var(ALOAD, elementVar)
+                .method(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getClassName", "()Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/String", "hashCode", "()I")
+                ._var(ALOAD, elementVar)
+                .method(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getMethodName", "()Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/String", "hashCode", "()I")
+                .ixor()
+                ._const(16)
+                .ishr()
+                ._const(traceXor)
+                .ixor()
+                ._var(ISTORE, hashVar)
 
                 .label(new LabelNode())
                 ._int(0)
@@ -124,8 +194,8 @@ public class StringEncryptTransformer extends Transformer {
 
                 .label(loop)
                 ._var(ILOAD, iVar)
-                .add(context.properties().add(ASMUtils.pushInt(keys.length), Property.IGNORE_INTEGER))
-                .irem();
+                .add(context.properties().add(ASMUtils.pushInt(keys.length - 1), Property.IGNORE_INTEGER))
+                .iand(); // do this instead of IREM, since `i` isn't supposed to be negative anyway
 
         var end = new LabelNode();
         var routeBuilder = new InsnBuilder();
@@ -158,6 +228,8 @@ public class StringEncryptTransformer extends Transformer {
                 .add(context.properties().add(ASMUtils.pushInt(16), Property.IGNORE_INTEGER))
                 .ishr()
                 .ixor()
+                ._var(ILOAD, hashVar)
+                .ixor()
                 .castore()
 
                 .label(new LabelNode())
@@ -181,7 +253,7 @@ public class StringEncryptTransformer extends Transformer {
         method.properties().add(Property.STRING_DECRYPTOR);
     }
 
-    private void generateClinit(Context context, JClass clazz, String fieldName, List<String> strings) {
+    private void generateClinit(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {
         // ---- INIT ----
         int key = random.nextInt(Short.MAX_VALUE);
         var strBuilder = new StringBuilder();
@@ -302,7 +374,13 @@ public class StringEncryptTransformer extends Transformer {
 
                 .label(new LabelNode())
                 ._var(ALOAD, strArrVar)
-                .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;");
+                .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
+
+                .label(new LabelNode())
+                ._var(ALOAD, strArrVar)
+                .arraylength()
+                .anewarray("java/lang/Object")
+                .field(PUTSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;");
 
         method.insertSafe(builder.result());
     }

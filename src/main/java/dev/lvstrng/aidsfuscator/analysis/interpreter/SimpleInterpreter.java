@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.analysis.interpreter;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.TypeUtils;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
@@ -14,13 +15,15 @@ import java.util.List;
 
 public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcodes {
     private final Context context;
+    private final JMethod method;
 
     public static Type NULL_TYPE = Type.getObjectType("null");
     public static Type REFERENCE_TYPE = Type.getObjectType("java/lang/Object");
 
-    public SimpleInterpreter(Context context) {
+    public SimpleInterpreter(Context context, JMethod method) {
         super(ASM9);
         this.context = context;
+        this.method = method;
     }
 
     @Override
@@ -112,6 +115,11 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
 
     @Override
     public SimpleValue copyOperation(AbstractInsnNode insn, SimpleValue value) throws AnalyzerException {
+        if(insn instanceof VarInsnNode v && v.var == 0 && method.isVirtual() && !value.isThis()) {
+            value.setThis();
+            if(!method.name().equals("<init>"))
+                value.setInitializedThis();
+        }
         return value;
     }
 
@@ -229,6 +237,15 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
         }
     }
 
+    public SimpleValue handleInitializer(AbstractInsnNode insn, String desc, List<? extends SimpleValue> values, SimpleFrame frame) {
+        var value = values.getFirst();
+        if(value.isThis() && !value.isInitializedThis()) {
+            frame.setLocal(0, newValue(value.type()).setThis().setInitializedThis());
+        }
+
+        return newValue(Type.getReturnType(desc));
+    }
+
     @Override
     public void returnOperation(AbstractInsnNode insn, SimpleValue value, SimpleValue expected) throws AnalyzerException {
         // do nothing
@@ -255,5 +272,13 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
         }
 
         return SimpleValue.UNINITIALIZED_VALUE;
+    }
+
+    public Context context() {
+        return context;
+    }
+
+    public JMethod method() {
+        return method;
     }
 }

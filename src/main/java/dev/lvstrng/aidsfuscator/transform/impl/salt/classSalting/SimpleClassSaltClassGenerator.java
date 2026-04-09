@@ -67,6 +67,7 @@ public class SimpleClassSaltClassGenerator {
                  var classClinit = saltClass.findOrCreateClinit();
                  var list = new InsnList();
                  list.add(new LdcInsnNode(saltClass.type()));
+
                  if(saltClass.hasFirstInitializerClass() && saltClass.getFirstInitializerClass().hasSalt()) {
                      var otherSalt = saltClass.getFirstInitializerClass().salt();
                      list.add(context.properties().add(ASMUtils.pushInt(key ^ otherSalt.value()), Property.IGNORE_INTEGER));
@@ -75,6 +76,7 @@ public class SimpleClassSaltClassGenerator {
                  } else {
                      list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                  }
+
                  list.add(new MethodInsnNode(INVOKESTATIC, clazz.name(), retrieverMethod.name(), retrieverMethod.desc()));
                  list.add(saltClass.salt().store());
 
