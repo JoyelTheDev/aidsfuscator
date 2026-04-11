@@ -34,6 +34,8 @@ public class ConfigLoader {
 
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();
+        else
+            Logger.warn("\n------------------------\n You've disabled frame computation, you will not recieve any support. Enable it in config with computeFrames \n------------------------");
 
         // ---- TRANSFORMERS ----
         var transformers = configObject.get("transformers").getAsJsonObject();
