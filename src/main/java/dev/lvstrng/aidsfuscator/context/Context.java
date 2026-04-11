@@ -67,6 +67,11 @@ public class Context {
 
     // ---- INITIALIZE OBFUSCATOR ----
     public Context initialize() {
+        if (!computeFrames) {
+            Logger.warn("------------------------------------------------");
+            Logger.warn("You've disabled frame computation, you will not recieve any support. Enable it in config with computeFrames");
+            Logger.warn("------------------------------------------------");
+        }
         this.dictionary         = new DefaultDictionary(this, dictionaryString);
 
         Logger.info("Loading libraries...");
