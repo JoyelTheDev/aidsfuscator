@@ -1,12 +1,12 @@
-package dev.lvstrng.aidsfuscator.config.initOrder;
+package dev.lvstrng.aidsfuscator.config.impl.initOrder;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import dev.lvstrng.aidsfuscator.config.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
-public class ClassInitOrderLoader {
+public class ClassInitOrderLoader implements Loader {
     private final Context context;
     private final String orderPath;
 
@@ -15,12 +15,11 @@ public class ClassInitOrderLoader {
         this.orderPath = orderPath;
     }
 
+    @Override
     public void load() {
         var file = Context.getFromWorkspace(orderPath);
-        if(!file.exists()) {
-            Logger.warn("Couldn't find class init order config. Running with no set class init order.");
+        if(!file.exists())
             return;
-        }
 
         var pairs = new Gson().fromJson(Context.readWorkspaceString(orderPath), JsonArray.class);
         for(var elem : pairs) {

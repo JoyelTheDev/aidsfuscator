@@ -4,7 +4,7 @@ package dev.lvstrng.aidsfuscator;
  * Used to display version text or other info.
  */
 public class AidsfuscatorInfo {
-    private static final int major = 2, minor = 4, patch = 1;
+    private static final int major = 2, minor = 5, patch = 0;
 
     public static String build() {
         return String.format("v%s.%s.%s", major, minor, patch);

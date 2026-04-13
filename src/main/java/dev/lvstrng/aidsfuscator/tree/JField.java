@@ -118,7 +118,7 @@ public class JField {
     }
 
     public String simpleOriginalName() {
-        return "%s%s".formatted(originalName, originalDesc);
+        return "%s %s".formatted(originalName, originalDesc);
     }
 
     public String fullOriginalName() {

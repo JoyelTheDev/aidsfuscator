@@ -9,10 +9,12 @@ import org.objectweb.asm.tree.FieldInsnNode;
 public class FieldReferenceCandidate implements IReferenceCandidate {
     private final Context context;
     private final StringFilter filter;
+    private final String filterString;
 
     public FieldReferenceCandidate(Context context, String filter) {
         this.context = context;
         this.filter = new StringFilter(filter);
+        this.filterString = filter;
     }
 
     @Override
@@ -25,5 +27,10 @@ public class FieldReferenceCandidate implements IReferenceCandidate {
         } else {
             return filter.test(field.fullOriginalName());
         }
+    }
+
+    @Override
+    public String getFilterString() {
+        return filterString;
     }
 }

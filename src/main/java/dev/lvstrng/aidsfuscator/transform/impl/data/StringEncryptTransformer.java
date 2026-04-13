@@ -81,7 +81,7 @@ public class StringEncryptTransformer extends Transformer {
                         //                                                                            add useless bits on purpose
                         builder.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
                     }
-                    builder.method(INVOKESTATIC, clazz.name(), decryptorName, "(II)Ljava/lang/String;");
+                    builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, clazz.name(), decryptorName, "(II)Ljava/lang/String;"), Property.IGNORE_REF_OBFUSCATION));
 
                     method.insns().insertBefore(ldc, builder.result());
                     method.insns().remove(ldc);

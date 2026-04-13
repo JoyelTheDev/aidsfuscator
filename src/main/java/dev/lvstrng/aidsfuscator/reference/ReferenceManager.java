@@ -39,4 +39,12 @@ public class ReferenceManager {
     public List<IReferenceCandidate> references() {
         return references;
     }
+
+    public List<IReferenceCandidate> fieldReferences() {
+        return references.stream().filter(FieldReferenceCandidate.class::isInstance).toList();
+    }
+
+    public List<IReferenceCandidate> methodReferences() {
+        return references.stream().filter(MethodReferenceCandidate.class::isInstance).toList();
+    }
 }

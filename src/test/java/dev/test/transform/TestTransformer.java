@@ -5,6 +5,7 @@ import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.classgen.impl.SimpleClassSaltClassGenerator;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 
 public class TestTransformer extends Transformer {
     public TestTransformer() {
@@ -14,16 +15,15 @@ public class TestTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
-            var val = random.nextInt();
-            var name = context.dictionary().newFieldName(clazz, "I");
+            for(var method : clazz.methods()) {
+                for(var insn : method.insns()) {
+                    if(!(insn instanceof JumpInsnNode))
+                        continue;
 
-            var field = clazz.add(new FieldNode(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I", null, null));
-            clazz.setSalt(new ClassSalt(clazz, field, val));
+                    System.out.println(insn.getOpcode());
+                    markChange();
+                }
+            }
         }
-
-        var gen = new SimpleClassSaltClassGenerator();
-        var clazz = gen.create(context);
-
-        context.addArtificial(clazz);
     }
 }

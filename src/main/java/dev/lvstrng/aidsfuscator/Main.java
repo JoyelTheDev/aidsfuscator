@@ -1,11 +1,13 @@
 package dev.lvstrng.aidsfuscator;
 
-import dev.lvstrng.aidsfuscator.config.ConfigLoader;
-import dev.lvstrng.aidsfuscator.config.ConfigWriter;
-import dev.lvstrng.aidsfuscator.config.exclusions.ExclusionLoader;
-import dev.lvstrng.aidsfuscator.config.exclusions.ExclusionWriter;
-import dev.lvstrng.aidsfuscator.config.initOrder.ClassInitOrderLoader;
-import dev.lvstrng.aidsfuscator.config.initOrder.ClassInitOrderWriter;
+import dev.lvstrng.aidsfuscator.config.impl.ConfigLoader;
+import dev.lvstrng.aidsfuscator.config.impl.ConfigWriter;
+import dev.lvstrng.aidsfuscator.config.impl.exclusions.ExclusionLoader;
+import dev.lvstrng.aidsfuscator.config.impl.exclusions.ExclusionWriter;
+import dev.lvstrng.aidsfuscator.config.impl.initOrder.ClassInitOrderLoader;
+import dev.lvstrng.aidsfuscator.config.impl.initOrder.ClassInitOrderWriter;
+import dev.lvstrng.aidsfuscator.config.impl.references.ReferenceLoader;
+import dev.lvstrng.aidsfuscator.config.impl.references.ReferenceWriter;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ public class Main {
     private static final String configPrefix = "--config=";
     private static final String exclusionPrefix = "--exclusions=";
     private static final String initOrderPrefix = "--initOrder=";
+    private static final String referencePrefix = "--references=";
 
     private static final String BAD_ARGS = """
             Usage tutorial.
@@ -22,6 +25,7 @@ public class Main {
             \t`--config=` (Required)
             \t`--exclusions=` (Optional)
             \t`--initOrder=` (Optional)
+            \t`--references=` (Optional)
             """;
 
     public static void main(String[] args) {
@@ -35,6 +39,7 @@ public class Main {
         var configPath = "";
         var exclusionPath = "";
         var initOrderPath = "";
+        var referencePath = "";
         for(var arg : args) {
             if(arg.startsWith(configPrefix))
                 configPath = arg.substring(configPrefix.length());
@@ -44,6 +49,9 @@ public class Main {
 
             if(arg.startsWith(initOrderPrefix))
                 initOrderPath = arg.substring(initOrderPrefix.length());
+
+            if(arg.startsWith(referencePrefix))
+                referencePath = arg.substring(referencePrefix.length());
         }
 
         if(configPath.isEmpty()) {
@@ -62,6 +70,9 @@ public class Main {
         if(!initOrderPath.isEmpty())
             new ClassInitOrderLoader(context, initOrderPath).load();
 
+        if(!referencePath.isEmpty())
+            new ReferenceLoader(context, referencePath).load();
+
         // ---- RUN OBFUSCATOR ----
         context.initialize()
                 .transform()
@@ -75,6 +86,9 @@ public class Main {
 
             if(!initOrderPath.isEmpty())
                 new ClassInitOrderWriter(context, initOrderPath).write();
+
+            if(!referencePath.isEmpty())
+                new ReferenceWriter(context, referencePath).write();
         } catch (IOException e) {
             Logger.error("An exception was thrown when saving configs:");
             e.printStackTrace();

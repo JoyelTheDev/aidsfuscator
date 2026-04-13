@@ -9,6 +9,7 @@ import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
@@ -35,15 +36,37 @@ public class ReferenceObfuscationTransformer extends Transformer {
             if(Exclusions.REFERENCE_OBFUSCATE.excluded(clazz))
                 continue;
 
+            if(clazz.isEnum())
+                continue;
+
+            if(clazz.version() < Opcodes.V1_7)
+                continue;
+
             for(var method : clazz.methods()) {
                 if(Exclusions.REFERENCE_OBFUSCATE.excluded(method))
                     continue;
 
+                if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
+                    continue;
+
                 var frames = method.frames(context);
                 for(var insn : method.insns()) {
+                    var frame = frames.get(insn);
+                    if(frame == null)
+                        continue;
+
+                    if(!frame.isInitThis())
+                        continue;
+
                     switch (insn) {
                         case MethodInsnNode call -> {
+                            if(call.owner.startsWith("["))
+                                continue;
+
                             if(!context.referenceManager().canObfuscate(call))
+                                continue;
+
+                            if(context.properties().get(call).has(Property.IGNORE_REF_OBFUSCATION))
                                 continue;
 
                             char callSiteChar;
@@ -55,7 +78,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                                 continue;
                             }
 
-                            var decKey = method.canSalt(frames.get(insn)) ? method.salt().value() >> 16 : random.nextInt() >> 16;
+                            var decKey = method.canSalt(frame) ? method.salt().value() >> 16 : random.nextInt() >> 16;
                             var idx = add(call.owner, call.name, call.desc, decKey);
 
                             var handle = new Handle(H_INVOKESTATIC, refClass.name(), gen.outerInvoker.name(), gen.outerInvoker.desc(), false);
@@ -70,7 +93,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
-                            if(method.canSalt(frames.get(call))) {
+                            if(method.canSalt(frame)) {
                                 list.add(method.salt().load());
                             } else {
                                 list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
@@ -79,9 +102,13 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             method.insns().insertBefore(call, list);
                             method.insns().remove(call);
+                            markChange();
                         }
                         case FieldInsnNode field -> {
                             if(!context.referenceManager().canObfuscate(field))
+                                continue;
+
+                            if(context.properties().get(field).has(Property.IGNORE_REF_OBFUSCATION))
                                 continue;
 
                             var getter = field.getOpcode() == GETSTATIC || field.getOpcode() == GETFIELD;
@@ -132,7 +159,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             int idxXor = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER));
-                            if(method.canSalt(frames.get(field))) {
+                            if(method.canSalt(frame)) {
                                 list.add(method.salt().load());
                             } else {
                                 list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
@@ -141,6 +168,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             method.insns().insertBefore(field, list);
                             method.insns().remove(field);
+                            markChange();
                         }
                         default -> {}
                     }

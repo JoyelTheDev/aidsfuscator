@@ -64,7 +64,8 @@ public class IntegerEncryptTransformer extends Transformer {
                     } else {
                         builder._int(key);
                     }
-                    builder.method(INVOKESTATIC, clazz.name(), decryptorName, "(II)I");
+                    builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, clazz.name(), decryptorName, "(II)I"), Property.IGNORE_REF_OBFUSCATION));
+
                     method.insns().insertBefore(insn, builder.result());
                     method.insns().remove(insn);
                     markChange();

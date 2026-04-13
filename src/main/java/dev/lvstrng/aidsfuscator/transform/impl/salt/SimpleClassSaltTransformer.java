@@ -62,6 +62,9 @@ public class SimpleClassSaltTransformer extends Transformer {
                 if(method.isAbstract() || method.isNative() || method.insns().size() == 0)
                     continue;
 
+                if(method.name().equals("<clinit>"))
+                    continue;
+
                 var saltLocal = method.allocVar(Type.INT_TYPE);
                 var saltValue = random.nextInt();
                 prepSalt(context, clazz, method, saltLocal, saltValue);

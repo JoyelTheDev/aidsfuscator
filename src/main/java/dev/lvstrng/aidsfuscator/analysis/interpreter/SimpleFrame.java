@@ -59,7 +59,8 @@ public class SimpleFrame extends Frame<SimpleValue> {
             valueList.addFirst(pop());
         }
 
-        valueList.addFirst(pop());
+        if(insn.getOpcode() != Opcodes.INVOKESTATIC)
+            valueList.addFirst(pop());
         if(Type.getReturnType(methodDescriptor) == Type.VOID_TYPE) {
             interpreter.handleInitializer(insn, methodDescriptor, valueList, this);
         } else {

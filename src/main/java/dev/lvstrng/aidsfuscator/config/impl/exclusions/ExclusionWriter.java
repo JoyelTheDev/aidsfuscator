@@ -1,9 +1,10 @@
-package dev.lvstrng.aidsfuscator.config.exclusions;
+package dev.lvstrng.aidsfuscator.config.impl.exclusions;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import dev.lvstrng.aidsfuscator.config.Writer;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
@@ -11,13 +12,14 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ExclusionWriter {
+public class ExclusionWriter implements Writer {
     private final String exclusionPath;
 
     public ExclusionWriter(String exclusionPath) {
         this.exclusionPath = exclusionPath;
     }
 
+    @Override
     public void write() throws IOException {
         var configFile = Context.getFromWorkspace(exclusionPath);
         if(!configFile.exists() && !configFile.createNewFile())

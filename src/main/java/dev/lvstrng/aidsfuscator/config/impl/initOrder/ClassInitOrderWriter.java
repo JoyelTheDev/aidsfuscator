@@ -1,14 +1,14 @@
-package dev.lvstrng.aidsfuscator.config.initOrder;
+package dev.lvstrng.aidsfuscator.config.impl.initOrder;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import dev.lvstrng.aidsfuscator.config.Writer;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.log.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ClassInitOrderWriter {
+public class ClassInitOrderWriter implements Writer {
     private final Context context;
     private final String orderPath;
 
@@ -17,6 +17,7 @@ public class ClassInitOrderWriter {
         this.orderPath = orderPath;
     }
 
+    @Override
     public void write() throws IOException {
         var configFile = Context.getFromWorkspace(orderPath);
         if(!configFile.exists() && !configFile.createNewFile())

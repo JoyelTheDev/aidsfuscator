@@ -71,16 +71,17 @@ public class ControlFlowGraph {
 
             switch (insn) {
                 case JumpInsnNode jmp -> {
-                    var target = get(jmp.label);
-                    currentBlock.vertex(target);
+                    var fallThru = get(flows.get(jmp));
 
                     if(jmp.getOpcode() == Opcodes.GOTO) {
-                        currentBlock.setDefaultBlock(target);
+                        currentBlock.setDefaultBlock(fallThru);
                         currentBlock = null;
                         break;
                     }
 
-                    var fallThru = get(flows.get(jmp));
+                    var target = get(jmp.label);
+                    currentBlock.vertex(target);
+
                     currentBlock.setDefaultBlock(fallThru);
                     currentBlock.vertex(fallThru);
 

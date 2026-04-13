@@ -28,12 +28,12 @@ public final class TransformerOrder {
             new MethodSaltTransformer(),
             new SimpleClassSaltTransformer(),
 
-            new ReferenceObfuscationTransformer(),
             new IntegerEncryptTransformer(),
             new StringEncryptTransformer(),
 
             new ControlFlowFlatteningTransformer(),
-            new ControlFlowShufflingTransformer()
+            new ControlFlowShufflingTransformer(),
+            new ReferenceObfuscationTransformer()
     );
 
     @SuppressWarnings("unchecked")

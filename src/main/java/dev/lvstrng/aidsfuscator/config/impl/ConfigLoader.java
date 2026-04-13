@@ -1,13 +1,14 @@
-package dev.lvstrng.aidsfuscator.config;
+package dev.lvstrng.aidsfuscator.config.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.lvstrng.aidsfuscator.config.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.TransformerOrder;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 
-public class ConfigLoader {
+public class ConfigLoader implements Loader {
     private final String configPath;
     private final Context context;
 
@@ -17,6 +18,7 @@ public class ConfigLoader {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void load() {
         var file = Context.getFromWorkspace(configPath);
         if(!file.exists()) {

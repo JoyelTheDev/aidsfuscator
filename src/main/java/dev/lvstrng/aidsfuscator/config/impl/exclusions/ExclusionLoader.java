@@ -1,18 +1,20 @@
-package dev.lvstrng.aidsfuscator.config.exclusions;
+package dev.lvstrng.aidsfuscator.config.impl.exclusions;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dev.lvstrng.aidsfuscator.config.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
-public class ExclusionLoader {
+public class ExclusionLoader implements Loader {
     private final String exclusionPath;
 
     public ExclusionLoader(String exclusionPath) {
         this.exclusionPath = exclusionPath;
     }
 
+    @Override
     public void load() {
         var file = Context.getFromWorkspace(exclusionPath);
         if(!file.exists()) {

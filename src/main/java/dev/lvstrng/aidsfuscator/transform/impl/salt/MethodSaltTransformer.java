@@ -166,10 +166,14 @@ public class MethodSaltTransformer extends Transformer {
             var res = result.get();
             methods.put(id, res);
             res.makeSalt(salt, -1);
+            if((res.access() & ACC_VARARGS) != 0)
+                res.core().access &= ~ACC_VARARGS;
         }
 
         salts.put(self, salt);
         methods.put(self, method);
         method.makeSalt(salt, -1);
+        if((method.access() & ACC_VARARGS) != 0)
+            method.core().access &= ~ACC_VARARGS;
     }
 }
