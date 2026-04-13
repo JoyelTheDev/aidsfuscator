@@ -30,7 +30,8 @@ public class ConfigLoader {
         context.in(configObject.get("in").getAsString())
                 .out(configObject.get("out").getAsString())
                 .libs(configObject.get("libs").getAsString())
-                .setDictionary(configObject.get("dictionary").getAsString());
+                .setDictionary(configObject.get("dictionary").getAsString())
+                .setWatermark(configObject.get("watermark").getAsString());
 
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();

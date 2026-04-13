@@ -38,6 +38,7 @@ public class Context {
     private int version;
     private boolean computeFrames;
     private String dictionaryString;
+    private String watermark;
 
     private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
@@ -52,6 +53,7 @@ public class Context {
 
     private Context() {
         this.dictionaryString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        this.watermark = ""; // empty by default => no watermark
         this.classes = new HashMap<>();
         this.artificials = new HashMap<>();
         this.libraries = new HashMap<>();
@@ -338,6 +340,10 @@ public class Context {
         return dictionaryString;
     }
 
+    public String watermark() {
+        return watermark;
+    }
+
     // -----------------
     // ---- BUILDER ----
     // -----------------
@@ -369,6 +375,11 @@ public class Context {
 
     public Context setDictionary(String str) {
         this.dictionaryString = str;
+        return this;
+    }
+
+    public Context setWatermark(String str) {
+        this.watermark = str;
         return this;
     }
 }

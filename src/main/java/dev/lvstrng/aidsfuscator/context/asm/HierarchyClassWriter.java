@@ -11,6 +11,9 @@ public class HierarchyClassWriter extends ClassWriter {
     public HierarchyClassWriter(Context context) {
         super(context.writerFlags());
         this.context = context;
+        if (!context.watermark().isEmpty()) {
+            this.newUTF8(context.watermark());
+        }
     }
 
     @Override

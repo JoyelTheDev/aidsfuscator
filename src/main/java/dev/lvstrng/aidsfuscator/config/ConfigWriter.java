@@ -33,6 +33,7 @@ public class ConfigWriter {
         configObject.add("libs", new JsonPrimitive(context.libs()));
         configObject.add("dictionary", new JsonPrimitive(context.dictionaryString()));
         configObject.add("computeFrames", new JsonPrimitive(context.doesComputeFrames()));
+        configObject.add("watermark", new JsonPrimitive(context.watermark()));
 
         for(var transformer : TransformerOrder.transformers()) {
             var transformerObject = new JsonObject();
