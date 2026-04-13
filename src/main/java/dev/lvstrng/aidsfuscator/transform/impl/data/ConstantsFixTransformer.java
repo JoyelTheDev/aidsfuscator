@@ -1,10 +1,3 @@
-/*
- * Copyright (C) 2026 Jones Development
- *
- * All rights reserved.
- * This software is proprietary and cannot be copied, modified, or distributed without explicit permission.
- */
-
 package dev.lvstrng.aidsfuscator.transform.impl.data;
 
 import dev.lvstrng.aidsfuscator.context.Context;
