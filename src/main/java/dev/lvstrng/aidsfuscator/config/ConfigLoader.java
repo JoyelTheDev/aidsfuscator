@@ -34,8 +34,7 @@ public class ConfigLoader {
 
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();
-
-        // ---- TRANSFORMERS ----
+      // ---- TRANSFORMERS ----
         var transformers = configObject.get("transformers").getAsJsonObject();
         for(var transformer : TransformerOrder.transformers()) {
             var e = transformers.get(transformer.key());

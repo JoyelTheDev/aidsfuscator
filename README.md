@@ -6,6 +6,23 @@ Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not 
   Join the [discord server](https://discord.gg/4JGANqEZsK)!
 </br>
 
+## Features
+- Class Renaming
+- Field Renaming
+- Method Renaming
+- Control Flow Flattening
+- Control Flow Shuffling
+- LocalVariableTable clearing
+- Method salting
+- Class salting
+- Integer encryption
+- String Encryption (with anti-tamper + concatenation obfuscation)
+- Custom dictionary support
+- Fat JAR support
+- CLI
+- Config system
+- Exclusion system
+
 ## Why?
 Over these 2 years of me working with java bytecode, I noticed There's not many good free java bytecode obfuscator options out there, so I decided to make one myself. It is also a passion project.
 
