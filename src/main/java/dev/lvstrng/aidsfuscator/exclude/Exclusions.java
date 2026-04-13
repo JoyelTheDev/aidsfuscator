@@ -19,6 +19,7 @@ public enum Exclusions {
     PARAMETER_OBFUSCATE("methodParameterObfuscate", true, false, true),
 
     REFERENCE_OBFUSCATE("referenceObfuscate", true, false, true),
+    FIX_CONSTANTS("fixConstants", true, true, false),
     INTEGER_ENCRYPTION("integerEncrypt", true, false, true),
     STRING_ENCRYPTION("stringEncrypt", true, false, true),
 

@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.transform;
 
+import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
@@ -28,6 +29,7 @@ public final class TransformerOrder {
             new MethodSaltTransformer(),
             new SimpleClassSaltTransformer(),
 
+            new ConstantsFixTransformer(),
             new IntegerEncryptTransformer(),
             new StringEncryptTransformer(),
 
