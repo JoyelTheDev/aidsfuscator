@@ -6,9 +6,6 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
-import org.objectweb.asm.tree.FieldNode;
-
-import java.lang.reflect.Modifier;
 
 /**
  * Moves constants (final, static fields) into <clinit>.
