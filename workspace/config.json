@@ -4,6 +4,7 @@
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
+  "watermark": "aids",
   "transformers": {
     "renameFields": {
       "enabled": true,
