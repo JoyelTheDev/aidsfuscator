@@ -75,7 +75,8 @@ public class IntegerEncryptTransformer extends Transformer {
                 continue;
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
-            clazz.add(new FieldNode(access, fieldName, "[I", null, null));
+            clazz.createField(access, fieldName, "[I");
+
             generateDecryptor(clazz, fieldName, decryptorName, idxXor);
             generateClinit(context, clazz, fieldName, numbers);
         }
@@ -85,7 +86,7 @@ public class IntegerEncryptTransformer extends Transformer {
         int access = (clazz.isInterface())
                 ? ACC_PUBLIC | ACC_STATIC
                 : ACC_PRIVATE | ACC_STATIC;
-        var method = clazz.add(new MethodNode(access, decryptorName, "(II)I", null, null));
+        var method = clazz.createMethod(access, decryptorName, "(II)I");
         // ---- LOCALS ----
         if(clazz.isInterface()) method.allocVar();
 

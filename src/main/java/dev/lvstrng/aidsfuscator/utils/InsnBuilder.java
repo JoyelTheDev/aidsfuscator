@@ -469,6 +469,11 @@ public class InsnBuilder {
         return this;
     }
 
+    public InsnBuilder athrow() {
+        list.add(new InsnNode(ATHROW));
+        return this;
+    }
+
     public InsnBuilder i2s() {
         list.add(new InsnNode(I2S));
         return this;

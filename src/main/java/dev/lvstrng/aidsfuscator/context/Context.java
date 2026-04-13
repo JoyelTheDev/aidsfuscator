@@ -14,11 +14,13 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.dictionary.DefaultDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
+import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 import dev.lvstrng.aidsfuscator.utils.Utils;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,6 +45,7 @@ public class Context {
     private final ReferenceGraph referenceGraph;
     private final GlobalPropertyContainer propertyContainer;
     private final ClassInitOrderHandler initOrder;
+    private final ReferenceManager referenceManager;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
@@ -61,6 +64,7 @@ public class Context {
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
         this.initOrder          = new ClassInitOrderHandler(this);
+        this.referenceManager   = new ReferenceManager(this);
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -215,6 +219,10 @@ public class Context {
         return initOrder;
     }
 
+    public ReferenceManager referenceManager() {
+        return referenceManager;
+    }
+
     public int writerFlags() {
         return writerFlags;
     }
@@ -248,6 +256,16 @@ public class Context {
     // -----------------
     // ---- CLASSES ----
     // -----------------
+
+    public JClass createClass(String superName, int access) {
+        var _node = new ClassNode();
+        _node.name = dictionary.newClassName();
+        _node.superName = superName;
+        _node.access = access;
+        _node.version = version;
+
+        return new JClass(_node);
+    }
 
     public JClass forName(String name) {
         var clazz = classes.get(name);

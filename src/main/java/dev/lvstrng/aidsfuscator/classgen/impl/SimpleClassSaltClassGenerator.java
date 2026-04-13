@@ -1,5 +1,6 @@
-package dev.lvstrng.aidsfuscator.transform.impl.salt.classSalting;
+package dev.lvstrng.aidsfuscator.classgen.impl;
 
+import dev.lvstrng.aidsfuscator.classgen.IClassGen;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.tree.JClass;
@@ -14,19 +15,14 @@ import java.util.Random;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class SimpleClassSaltClassGenerator {
+public class SimpleClassSaltClassGenerator implements IClassGen {
     public JMethod retrieverMethod;
 
+    @Override
     public JClass create(Context context) {
-        var _node = new ClassNode();
-        _node.name = context.dictionary().newClassName();
-        _node.superName = "java/lang/Object";
-        _node.version = context.version();
-        _node.access = ACC_PUBLIC;
-
-        var clazz = new JClass(_node);
+        var clazz = context.createClass("java/lang/Object", ACC_PUBLIC | ACC_SUPER);
         var fieldName = context.dictionary().newFieldName(clazz, "Ljava/util/Map;");
-        var field = clazz.add(new FieldNode(ACC_STATIC, fieldName, "Ljava/util/Map;", null, null));
+        var field = clazz.createField(ACC_STATIC, fieldName, "Ljava/util/Map;");
 
         generateRetrieverMethod(context, field, clazz);
         generateInitializersAndClinit(context, field, clazz);
@@ -48,7 +44,7 @@ public class SimpleClassSaltClassGenerator {
         int j = 0;
         for(int i = 0; i < count; i++) {
              var name = context.dictionary().newMethodName(clazz, "()V");
-             var method = clazz.add(new MethodNode(ACC_STATIC, name, "()V", null, null));
+             var method = clazz.createMethod(ACC_STATIC, name, "()V");
 
              var builder = new InsnBuilder(method.insns())
                      .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc());
@@ -94,7 +90,7 @@ public class SimpleClassSaltClassGenerator {
     private void generateRetrieverMethod(Context context, JField mapField, JClass clazz) {
         var desc = "(Ljava/lang/Object;I)I";
         var name = context.dictionary().newMethodName(clazz, desc);
-        retrieverMethod = clazz.add(new MethodNode(ACC_PUBLIC | ACC_STATIC, name, desc, null, null));
+        retrieverMethod = clazz.createMethod(ACC_PUBLIC | ACC_STATIC, name, desc);
 
         // ---- LOCALS ----
         var objVar = retrieverMethod.allocVar();

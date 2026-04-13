@@ -18,6 +18,7 @@ public enum Exclusions {
     CLASS_SALTING("classSalting", true, false, true),
     PARAMETER_OBFUSCATE("methodParameterObfuscate", true, false, true),
 
+    REFERENCE_OBFUSCATE("referenceObfuscate", true, false, true),
     INTEGER_ENCRYPTION("integerEncrypt", true, false, true),
     STRING_ENCRYPTION("stringEncrypt", true, false, true),
 

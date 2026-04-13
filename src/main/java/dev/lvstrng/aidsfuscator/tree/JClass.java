@@ -247,6 +247,18 @@ public class JClass {
         core.fields.remove(field.core());
     }
 
+    public JMethod createMethod(int access, String name, String desc) {
+        return add(new MethodNode(access, name, desc, null, null));
+    }
+
+    public JField createField(int access, String name, String desc, Object value) {
+        return add(new FieldNode(access, name, desc, null, value));
+    }
+
+    public JField createField(int access, String name, String desc) {
+        return createField(access, name, desc, null);
+    }
+
     public JMethod add(MethodNode method) {
         return add(new JMethod(method));
     }

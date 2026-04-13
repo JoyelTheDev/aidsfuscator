@@ -1,5 +1,6 @@
-package dev.lvstrng.aidsfuscator.transform.impl.salt.classSalting;
+package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
+import dev.lvstrng.aidsfuscator.classgen.impl.SimpleClassSaltClassGenerator;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
@@ -48,7 +49,7 @@ public class SimpleClassSaltTransformer extends Transformer {
             var val = random.nextInt();
             var name = context.dictionary().newFieldName(clazz, "I");
 
-            var field = clazz.add(new FieldNode(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I", null, null));
+            var field = clazz.createField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I");
             clazz.setSalt(new ClassSalt(clazz, field, val));
 
             for(var method : clazz.methods()) {

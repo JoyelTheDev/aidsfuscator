@@ -3,7 +3,7 @@ package dev.test.transform;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.impl.salt.classSalting.SimpleClassSaltClassGenerator;
+import dev.lvstrng.aidsfuscator.classgen.impl.SimpleClassSaltClassGenerator;
 import org.objectweb.asm.tree.FieldNode;
 
 public class TestTransformer extends Transformer {

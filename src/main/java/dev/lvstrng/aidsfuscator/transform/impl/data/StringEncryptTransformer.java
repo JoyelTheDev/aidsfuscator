@@ -94,10 +94,10 @@ public class StringEncryptTransformer extends Transformer {
                 continue;
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
-            clazz.add(new FieldNode(access, fieldName, "[Ljava/lang/String;", null, null));
+            clazz.createField(access, fieldName, "[Ljava/lang/String;");
 
             var cacheName = context.dictionary().newFieldName(clazz, "[Ljava/lang/Object;");
-            clazz.add(new FieldNode(access, cacheName, "[Ljava/lang/Object;", null, null));
+            clazz.createField(access, cacheName, "[Ljava/lang/Object;");
 
             generateClinit(context, clazz, fieldName, cacheName, strings);
             generateDecryptor(context, clazz, fieldName, cacheName, decryptorName, idxXor, traceXor, keys);
@@ -105,7 +105,7 @@ public class StringEncryptTransformer extends Transformer {
     }
 
     private void generateDecryptor(Context context, JClass clazz, String fieldName, String cacheName, String decryptorName, int idxXor, int traceXor, int[] keys) {
-        var method = clazz.add(new MethodNode(ACC_PRIVATE | ACC_STATIC, decryptorName, "(II)Ljava/lang/String;", null, null));
+        var method = clazz.createMethod(ACC_PRIVATE | ACC_STATIC, decryptorName, "(II)Ljava/lang/String;");
 
         // ---- LOCALS ----
         var idxValVar = method.allocVar(Type.INT_TYPE); // param1

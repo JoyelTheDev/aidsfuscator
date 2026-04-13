@@ -2,13 +2,14 @@ package dev.lvstrng.aidsfuscator.transform;
 
 import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.salt.classSalting.SimpleClassSaltTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
 
 import java.util.Comparator;
@@ -27,6 +28,7 @@ public final class TransformerOrder {
             new MethodSaltTransformer(),
             new SimpleClassSaltTransformer(),
 
+            new ReferenceObfuscationTransformer(),
             new IntegerEncryptTransformer(),
             new StringEncryptTransformer(),
 

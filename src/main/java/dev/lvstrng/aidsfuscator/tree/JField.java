@@ -81,6 +81,10 @@ public class JField {
         return !Modifier.isStatic(access());
     }
 
+    public boolean isFinal() {
+        return Modifier.isFinal(access());
+    }
+
     public FieldNode core() {
         return core;
     }
