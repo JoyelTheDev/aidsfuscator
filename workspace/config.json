@@ -32,6 +32,9 @@
       "enabled": true,
       "unifyAccess": true
     },
+    "fixConstants": {
+      "enabled": true
+    },
     "integerEncrypt": {
       "enabled": true
     },
