@@ -29,7 +29,7 @@ public class ConstantsFixTransformer extends Transformer {
           continue;
         }
 
-        if (!field.isVirtual()) {
+        if (field.isVirtual()) {
           continue;
         }
 
