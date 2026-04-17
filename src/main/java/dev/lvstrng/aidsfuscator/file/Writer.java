@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.config;
+package dev.lvstrng.aidsfuscator.file;
 
 import java.io.IOException;
 

@@ -16,6 +16,8 @@ import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransforme
 import dev.test.transform.ClassSaltTransformer;
 import dev.test.transform.TestTransformer;
 
+import java.lang.invoke.MethodHandles;
+
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()

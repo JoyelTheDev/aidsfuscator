@@ -1,9 +1,9 @@
-package dev.lvstrng.aidsfuscator.config.impl;
+package dev.lvstrng.aidsfuscator.file.impl;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import dev.lvstrng.aidsfuscator.config.Writer;
+import dev.lvstrng.aidsfuscator.file.Writer;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.TransformerOrder;

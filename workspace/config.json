@@ -9,49 +9,49 @@
     "renameFields": {
       "enabled": true,
       "prefix": "",
-      "shuffle": true
+      "shuffle": false
     },
     "renameMethods": {
       "enabled": true,
       "prefix": "",
-      "shuffle": true
+      "shuffle": false
     },
     "renameClasses": {
       "enabled": true,
       "prefix": "a.",
-      "randomize": true
+      "randomize": false
     },
     "localNames": {
       "enabled": true
     },
     "methodSalting": {
-      "enabled": true,
+      "enabled": false,
       "seedUselessMethods": false
     },
     "classSalting": {
-      "enabled": true,
+      "enabled": false,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": true
+      "enabled": false
     },
     "integerEncrypt": {
-      "enabled": true
+      "enabled": false
     },
     "encryptStrings": {
-      "enabled": true,
+      "enabled": false,
       "translateConcat": true,
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": true,
+      "enabled": false,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": true
+      "enabled": false
     },
     "referenceObfuscate": {
-      "enabled": true
+      "enabled": false
     }
   }
 }

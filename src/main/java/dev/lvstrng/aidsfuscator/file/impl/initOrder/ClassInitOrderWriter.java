@@ -1,8 +1,8 @@
-package dev.lvstrng.aidsfuscator.config.impl.initOrder;
+package dev.lvstrng.aidsfuscator.file.impl.initOrder;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import dev.lvstrng.aidsfuscator.config.Writer;
+import dev.lvstrng.aidsfuscator.file.Writer;
 import dev.lvstrng.aidsfuscator.context.Context;
 
 import java.io.IOException;

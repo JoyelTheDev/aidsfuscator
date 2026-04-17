@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -42,6 +43,26 @@ public class JMethod {
         this.originalDesc = core.desc;
 
         this.setCore(core);
+    }
+
+    public boolean isPublic() {
+        return Modifier.isPublic(access());
+    }
+
+    public boolean isPrivate() {
+        return Modifier.isPrivate(access());
+    }
+
+    public boolean isProtected() {
+        return Modifier.isProtected(access());
+    }
+
+    public boolean isBridge() {
+        return (access() & Opcodes.ACC_BRIDGE) != 0;
+    }
+
+    public boolean isSynthetic() {
+        return (access() & Opcodes.ACC_BRIDGE) != 0;
     }
 
     public void insertSafe(InsnList list) {

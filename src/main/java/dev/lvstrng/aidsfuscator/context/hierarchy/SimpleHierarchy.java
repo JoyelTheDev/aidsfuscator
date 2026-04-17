@@ -18,7 +18,7 @@ import java.util.function.Predicate;
  */
 public class SimpleHierarchy implements IHierarchy {
     private final Context context;
-    private final Predicate<JMethod> blacklistedMethod = (e -> e.name().equals("<init>") || !e.isVirtual()); // these methods do not have hierarchy at all
+    private final Predicate<JMethod> blacklistedMethod = (e -> e.name().equals("<init>") || !e.isVirtual() || e.isPrivate()); // these methods do not have hierarchy at all
     private final Predicate<JField> blacklistedField = (e -> !e.isVirtual()); // static fields do not have hierarchy
 
     public SimpleHierarchy(Context context) {

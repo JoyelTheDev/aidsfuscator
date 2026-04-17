@@ -1,10 +1,9 @@
-package dev.lvstrng.aidsfuscator.config.impl.initOrder;
+package dev.lvstrng.aidsfuscator.file.impl.initOrder;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import dev.lvstrng.aidsfuscator.config.Loader;
+import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class ClassInitOrderLoader implements Loader {
     private final Context context;

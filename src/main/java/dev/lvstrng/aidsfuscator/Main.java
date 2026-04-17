@@ -1,13 +1,14 @@
 package dev.lvstrng.aidsfuscator;
 
-import dev.lvstrng.aidsfuscator.config.impl.ConfigLoader;
-import dev.lvstrng.aidsfuscator.config.impl.ConfigWriter;
-import dev.lvstrng.aidsfuscator.config.impl.exclusions.ExclusionLoader;
-import dev.lvstrng.aidsfuscator.config.impl.exclusions.ExclusionWriter;
-import dev.lvstrng.aidsfuscator.config.impl.initOrder.ClassInitOrderLoader;
-import dev.lvstrng.aidsfuscator.config.impl.initOrder.ClassInitOrderWriter;
-import dev.lvstrng.aidsfuscator.config.impl.references.ReferenceLoader;
-import dev.lvstrng.aidsfuscator.config.impl.references.ReferenceWriter;
+import dev.lvstrng.aidsfuscator.file.impl.ConfigLoader;
+import dev.lvstrng.aidsfuscator.file.impl.ConfigWriter;
+import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionLoader;
+import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionWriter;
+import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
+import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderWriter;
+import dev.lvstrng.aidsfuscator.file.impl.references.ReferenceLoader;
+import dev.lvstrng.aidsfuscator.file.impl.references.ReferenceWriter;
+import dev.lvstrng.aidsfuscator.file.mapping.MappingExport;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 import java.io.IOException;
@@ -67,15 +68,15 @@ public class Main {
         if(!exclusionPath.isEmpty())
             new ExclusionLoader(exclusionPath).load();
 
-        if(!initOrderPath.isEmpty())
-            new ClassInitOrderLoader(context, initOrderPath).load();
-
         if(!referencePath.isEmpty())
             new ReferenceLoader(context, referencePath).load();
 
         // ---- RUN OBFUSCATOR ----
-        context.initialize()
-                .transform()
+        context.initialize();
+        if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
+            new ClassInitOrderLoader(context, initOrderPath).load();
+
+        context.transform()
                 .exportJar();
 
         // ---- SAVE CONFIGS ----
@@ -89,6 +90,8 @@ public class Main {
 
             if(!referencePath.isEmpty())
                 new ReferenceWriter(context, referencePath).write();
+
+            new MappingExport(context).write();
         } catch (IOException e) {
             Logger.error("An exception was thrown when saving configs:");
             e.printStackTrace();
