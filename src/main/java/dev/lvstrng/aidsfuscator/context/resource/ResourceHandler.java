@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.context.resource;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.resource.handled.FabricModJsonHandler;
 import dev.lvstrng.aidsfuscator.context.resource.handled.ManifestHandler;
 
 import java.io.IOException;
@@ -15,7 +16,8 @@ public class ResourceHandler {
     private final Map<String, byte[]> resources = new HashMap<>();
 
     private final Map<String, Supplier<HandledResource>> handledResources = Map.of(
-            "MANIFEST.MF", ManifestHandler::new
+            "MANIFEST.MF", ManifestHandler::new,
+            "fabric.mod.json", FabricModJsonHandler::new
     );
 
     public ResourceHandler(Context context) {

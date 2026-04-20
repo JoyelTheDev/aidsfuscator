@@ -1,5 +1,5 @@
 {
-  "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
+  "in": "in.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -18,40 +18,40 @@
     },
     "renameClasses": {
       "enabled": true,
-      "prefix": "a.",
+      "prefix": "",
       "randomize": false
     },
     "localNames": {
       "enabled": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "seedUselessMethods": false
     },
     "classSalting": {
-      "enabled": false,
+      "enabled": true,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": false
+      "enabled": true
     },
     "integerEncrypt": {
-      "enabled": false
+      "enabled": true
     },
     "encryptStrings": {
-      "enabled": false,
+      "enabled": true,
       "translateConcat": true,
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": false,
+      "enabled": true,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": false
+      "enabled": true
     },
     "referenceObfuscate": {
-      "enabled": false
+      "enabled": true
     }
   }
 }

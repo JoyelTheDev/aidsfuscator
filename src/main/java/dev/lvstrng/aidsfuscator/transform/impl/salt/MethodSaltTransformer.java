@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
@@ -37,7 +38,19 @@ public class MethodSaltTransformer extends Transformer {
         var graph = context.referenceGraph().build();
 
         for(var clazz : context.classes()) {
+            if(Exclusions.METHOD_SALTING.excluded(clazz))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(Exclusions.METHOD_SALTING::excluded))
+                continue;
+
             for(var method : clazz.methods()) {
+                if(Exclusions.METHOD_SALTING.excluded(method))
+                    continue;
+
+                if(clazz.tree().stream().anyMatch(e -> Exclusions.METHOD_SALTING.excluded(e, method)))
+                    continue;
+
                 var refs = graph.refs(method);
                 if(!seedUselessMethods.value()) {
                     var methodsIn = graph.methodRefsIn(method);

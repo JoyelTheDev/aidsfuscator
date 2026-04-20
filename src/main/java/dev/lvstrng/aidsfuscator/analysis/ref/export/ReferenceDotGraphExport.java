@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.analysis.ref.exprot;
+package dev.lvstrng.aidsfuscator.analysis.ref.export;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.tree.JMethod;

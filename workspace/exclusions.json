@@ -1,7 +1,12 @@
 {
-  "renameMethod": {
+  "global": {
+    "class": [
+      "mixin/*"
+    ]
+  },
+  "methodSalting": {
     "method": [
-      "*.main([Ljava/lang/String;)V"
+      "*(*/events/*)V"
     ]
   }
 }

@@ -1,6 +1,6 @@
 package dev.test.transform;
 
-import dev.lvstrng.aidsfuscator.analysis.ref.exprot.ReferenceDotGraphExport;
+import dev.lvstrng.aidsfuscator.analysis.ref.export.ReferenceDotGraphExport;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 
