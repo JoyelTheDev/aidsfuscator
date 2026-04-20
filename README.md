@@ -17,6 +17,7 @@ Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not 
 - Class salting
 - Integer encryption
 - String Encryption (with anti-tamper + concatenation obfuscation)
+- Reference obfuscation (fields and methods)
 - Custom dictionary support
 - Fat JAR support
 - CLI
