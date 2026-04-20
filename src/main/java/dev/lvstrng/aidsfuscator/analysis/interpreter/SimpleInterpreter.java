@@ -114,7 +114,7 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
     }
 
     @Override
-    public SimpleValue copyOperation(AbstractInsnNode insn, SimpleValue value) throws AnalyzerException {
+    public SimpleValue copyOperation(AbstractInsnNode insn, SimpleValue value) {
         if(insn instanceof VarInsnNode v && v.var == 0 && method.isVirtual() && !value.isThis()) {
             value.setThis();
             if(!method.name().equals("<init>"))
@@ -199,10 +199,13 @@ public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcod
                 return SimpleValue.DOUBLE_VALUE;
             case AALOAD: {
                 var arrayType = value1.type();
-                if(!arrayType.getDescriptor().startsWith("["))
-                    throw new AnalyzerException(insn, "Illegal object array load, array type: " + arrayType.getDescriptor());
+                if(arrayType.getDescriptor().startsWith("["))
+                    return newValue(TypeUtils.getElementType(arrayType));
 
-                return newValue(TypeUtils.getElementType(arrayType));
+                if(arrayType == NULL_TYPE)
+                    return newValue(REFERENCE_TYPE);
+
+                throw new AnalyzerException(insn, "Illegal object array load, array type: " + arrayType.getDescriptor());
             }
             case IF_ICMPEQ:
             case IF_ICMPNE:

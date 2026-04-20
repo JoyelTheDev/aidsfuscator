@@ -18,40 +18,40 @@
     },
     "renameClasses": {
       "enabled": true,
-      "prefix": "",
+      "prefix": "a.",
       "randomize": false
     },
     "localNames": {
-      "enabled": true
+      "enabled": false
     },
     "methodSalting": {
-      "enabled": true,
+      "enabled": false,
       "seedUselessMethods": false
     },
     "classSalting": {
-      "enabled": true,
+      "enabled": false,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": true
+      "enabled": false
     },
     "integerEncrypt": {
-      "enabled": true
+      "enabled": false
     },
     "encryptStrings": {
-      "enabled": true,
+      "enabled": false,
       "translateConcat": true,
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": true,
+      "enabled": false,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": true
+      "enabled": false
     },
     "referenceObfuscate": {
-      "enabled": true
+      "enabled": false
     }
   }
 }
