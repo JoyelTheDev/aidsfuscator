@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
 
 import java.util.Comparator;
@@ -26,6 +27,7 @@ public final class TransformerOrder {
             new ClassRenameTransformer(),
 
             new LocalVariableNameTransformer(),
+            new LineNumberTransformer(),
             new MethodSaltTransformer(),
             new SimpleClassSaltTransformer(),
 

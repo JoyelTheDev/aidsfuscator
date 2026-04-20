@@ -14,6 +14,7 @@ public enum Exclusions {
     RENAME_METHOD("renameMethod", true, false, true),
 
     LOCAL_NAMES("localNames", true, false, true),
+    LINE_NUMBERS("lineNumbers", true, false, true),
     METHOD_SALTING("methodSalting", true, false, true),
     CLASS_SALTING("classSalting", true, false, true),
     PARAMETER_OBFUSCATE("methodParameterObfuscate", true, false, true),
