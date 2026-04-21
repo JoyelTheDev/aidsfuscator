@@ -7,12 +7,14 @@ Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not 
 </br>
 
 ## Features
+- Trimming
 - Class Renaming
 - Field Renaming
 - Method Renaming
 - Control Flow Flattening
 - Control Flow Shuffling
 - LocalVariableTable clearing
+- LineNumberTable mutation
 - Method salting
 - Class salting
 - Integer encryption
@@ -23,6 +25,7 @@ Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not 
 - CLI
 - Config system
 - Exclusion system
+- Automatic `fabric.mod.json` handling
 
 ## Why?
 Over these 2 years of me working with java bytecode, I noticed There's not many good free java bytecode obfuscator options out there, so I decided to make one myself. It is also a passion project.
