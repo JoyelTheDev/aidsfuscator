@@ -12,7 +12,9 @@ import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.trim.TrimTransformer;
 import dev.test.transform.ClassSaltTransformer;
 import dev.test.transform.TestTransformer;
 
@@ -22,26 +24,16 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("in.jar")
                 .libs("libs/")
-                .out("out.jar")
+                .out("out-out.jar")
                 .initialize();
 
-        context.referenceManager().addMethodCandidate("*");
-        context.referenceManager().addFieldCandidate("*");
-
         context.transform(
-                new LocalVariableNameTransformer(),
-                new MethodSaltTransformer(),
-                new SimpleClassSaltTransformer(),
+                new TrimTransformer(),
 
-                new ConstantsFixTransformer(),
-                new IntegerEncryptTransformer(),
-                new StringEncryptTransformer(),
-
-                new ControlFlowFlatteningTransformer(),
-                new ControlFlowShufflingTransformer(),
-                new ReferenceObfuscationTransformer()
+                new LineNumberTransformer(),
+                new LocalVariableNameTransformer()
         ).exportJar();
     }
 }

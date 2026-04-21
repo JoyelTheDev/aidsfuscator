@@ -7,7 +7,7 @@ import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import org.objectweb.asm.tree.LineNumberNode;
 
 public class LineNumberTransformer extends Transformer {
-    private final Setting<Boolean> remove = setting("Remove", true);
+    private final Setting<Boolean> remove = setting("remove", true);
 
     public LineNumberTransformer() {
         super("Line Number Mutation", "lineNumbers");

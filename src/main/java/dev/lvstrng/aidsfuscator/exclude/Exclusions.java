@@ -15,6 +15,8 @@ public enum Exclusions {
 
     LOCAL_NAMES("localNames", true, false, true),
     LINE_NUMBERS("lineNumbers", true, false, true),
+    TRIM("trim", true, true, true),
+
     METHOD_SALTING("methodSalting", true, false, true),
     CLASS_SALTING("classSalting", true, false, true),
     PARAMETER_OBFUSCATE("methodParameterObfuscate", true, false, true),
