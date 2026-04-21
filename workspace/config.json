@@ -1,5 +1,5 @@
 {
-  "in": "in.jar",
+  "in": "eval.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -7,7 +7,7 @@
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
@@ -28,40 +28,40 @@
       "randomize": false
     },
     "localNames": {
-      "enabled": false
+      "enabled": true
     },
     "lineNumbers": {
-      "enabled": false,
+      "enabled": true,
       "remove": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "seedUselessMethods": false
     },
     "classSalting": {
-      "enabled": false,
+      "enabled": true,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": false
+      "enabled": true
     },
     "integerEncrypt": {
-      "enabled": false
+      "enabled": true
     },
     "encryptStrings": {
-      "enabled": false,
+      "enabled": true,
       "translateConcat": true,
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": false,
+      "enabled": true,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": false
+      "enabled": true
     },
     "referenceObfuscate": {
-      "enabled": false
+      "enabled": true
     }
   }
 }
