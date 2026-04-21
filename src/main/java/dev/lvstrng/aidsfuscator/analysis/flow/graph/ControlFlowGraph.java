@@ -71,20 +71,18 @@ public class ControlFlowGraph {
 
             switch (insn) {
                 case JumpInsnNode jmp -> {
-                    var fallThru = get(flows.get(jmp));
+                    var target = get(jmp.label);
+                    currentBlock.vertex(target);
 
                     if(jmp.getOpcode() == Opcodes.GOTO) {
-                        currentBlock.setDefaultBlock(fallThru);
+                        currentBlock.setDefaultBlock(target);
                         currentBlock = null;
                         break;
                     }
 
-                    var target = get(jmp.label);
-                    currentBlock.vertex(target);
-
+                    var fallThru = get(flows.get(jmp));
                     currentBlock.setDefaultBlock(fallThru);
                     currentBlock.vertex(fallThru);
-
                     currentBlock = null;
                 }
                 case LookupSwitchInsnNode sw -> {
