@@ -6,6 +6,12 @@
   "computeFrames": true,
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
+    "trim": {
+      "enabled": false,
+      "classes": true,
+      "fields": true,
+      "methods": true
+    },
     "renameFields": {
       "enabled": true,
       "prefix": "",
@@ -23,6 +29,10 @@
     },
     "localNames": {
       "enabled": false
+    },
+    "lineNumbers": {
+      "enabled": false,
+      "remove": true
     },
     "methodSalting": {
       "enabled": false,
