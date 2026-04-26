@@ -1,8 +1,26 @@
 [
-	["Main", "Window"],
-	["Window", "ThreadsController"],
-	["Window", "DataOfSquare"],
-	["DataOfSquare", "SquarePanel"],
-	["Window", "Tuple"],
-	["Window", "KeyboardListener"]
+  [
+    "Window",
+    "DataOfSquare"
+  ],
+  [
+    "Main",
+    "Window"
+  ],
+  [
+    "Window",
+    "ThreadsController"
+  ],
+  [
+    "Window",
+    "KeyboardListener"
+  ],
+  [
+    "DataOfSquare",
+    "SquarePanel"
+  ],
+  [
+    "Window",
+    "Tuple"
+  ]
 ]

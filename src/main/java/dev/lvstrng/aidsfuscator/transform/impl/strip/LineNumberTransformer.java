@@ -32,6 +32,7 @@ public class LineNumberTransformer extends Transformer {
                     } else {
                         ln.line = random.nextInt(Short.MAX_VALUE);
                     }
+                    markChange();
                 }
             }
         }
