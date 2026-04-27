@@ -13,7 +13,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.trim.TrimTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 
 import java.util.Comparator;
 import java.util.List;

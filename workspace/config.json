@@ -35,7 +35,7 @@
       "remove": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "seedUselessMethods": false
     },
     "classSalting": {

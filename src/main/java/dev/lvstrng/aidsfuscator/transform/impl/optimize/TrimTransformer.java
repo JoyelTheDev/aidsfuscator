@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.impl.trim;
+package dev.lvstrng.aidsfuscator.transform.impl.optimize;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
