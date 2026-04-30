@@ -24,6 +24,7 @@ public class ClassInitOrderHandler {
         var secondClass = context.forName(after);
 
         secondClass.setFirstInitializerClass(firstClass);
+        firstClass.initializes().add(secondClass);
         pairs.add(new Pair<>(firstClass, secondClass));
     }
 

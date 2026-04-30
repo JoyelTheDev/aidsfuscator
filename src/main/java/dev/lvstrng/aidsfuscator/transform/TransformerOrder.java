@@ -6,6 +6,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
@@ -40,6 +41,7 @@ public final class TransformerOrder {
 
             new ControlFlowFlatteningTransformer(),
             new ControlFlowShufflingTransformer(),
+            new DeadCodeCleanTransformer(),
             new ReferenceObfuscationTransformer()
     );
 

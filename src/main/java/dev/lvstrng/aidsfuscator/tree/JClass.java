@@ -33,6 +33,7 @@ public class JClass {
 
     private ClassSalt salt;
     private JClass initializerClass; // class that initializes
+    private List<JClass> initializes; // initialized these classes
 
     public JClass(ClassNode core) {
         this.properties = new PropertyContainer();
@@ -41,6 +42,7 @@ public class JClass {
 
         this.fields = new ArrayList<>();
         this.methods = new ArrayList<>();
+        this.initializes= new ArrayList<>();
 
         this.setCore(core);
 
@@ -58,6 +60,10 @@ public class JClass {
 
     public boolean hasFirstInitializerClass() {
         return initializerClass != null;
+    }
+
+    public List<JClass> initializes() {
+        return initializes;
     }
 
     public boolean hasSalt() {

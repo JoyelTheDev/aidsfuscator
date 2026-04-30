@@ -43,45 +43,45 @@ public class SimpleClassSaltClassGenerator implements IClassGen {
 
         int j = 0;
         for(int i = 0; i < count; i++) {
-             var name = context.dictionary().newMethodName(clazz, "()V");
-             var method = clazz.createMethod(ACC_STATIC, name, "()V");
+            var name = context.dictionary().newMethodName(clazz, "()V");
+            var method = clazz.createMethod(ACC_STATIC, name, "()V");
 
-             var builder = new InsnBuilder(method.insns())
-                     .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc());
+            var builder = new InsnBuilder(method.insns())
+                    .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc());
 
-             for(int n = Math.min(j + 1000, saltyClasses.size()); j < n; j++) {
-                 var saltClass = saltyClasses.get(j);
-                 var key = new Random().nextInt();
+            for(int n = Math.min(j + 1000, saltyClasses.size()); j < n; j++) {
+                var saltClass = saltyClasses.get(j);
+                var key = new Random().nextInt();
 
-                 builder.dup()
-                         ._const(saltClass.type())
-                         ._int(key ^ saltClass.salt().value())
-                         .method(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
-                         .method(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
-                         .pop();
+                builder.dup()
+                        ._const(saltClass.type())
+                        ._int(key ^ saltClass.salt().value())
+                        .method(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
+                        .method(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+                        .pop();
 
-                 var classClinit = saltClass.findOrCreateClinit();
-                 var list = new InsnList();
-                 list.add(new LdcInsnNode(saltClass.type()));
+                var classClinit = saltClass.findOrCreateClinit();
+                var list = new InsnList();
+                list.add(new LdcInsnNode(saltClass.type()));
 
-                 if(saltClass.hasFirstInitializerClass() && saltClass.getFirstInitializerClass().hasSalt()) {
-                     var otherSalt = saltClass.getFirstInitializerClass().salt();
-                     list.add(context.properties().add(ASMUtils.pushInt(key ^ otherSalt.value()), Property.IGNORE_INTEGER));
-                     list.add(otherSalt.load());
-                     list.add(new InsnNode(IXOR));
-                 } else {
-                     list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
-                 }
+                if(saltClass.hasFirstInitializerClass() && saltClass.getFirstInitializerClass().hasSalt()) {
+                    var otherSalt = saltClass.getFirstInitializerClass().salt();
+                    list.add(context.properties().add(ASMUtils.pushInt(key ^ otherSalt.value()), Property.IGNORE_INTEGER));
+                    list.add(otherSalt.load());
+                    list.add(new InsnNode(IXOR));
+                } else {
+                    list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                }
 
-                 list.add(new MethodInsnNode(INVOKESTATIC, clazz.name(), retrieverMethod.name(), retrieverMethod.desc()));
-                 list.add(saltClass.salt().store());
+                list.add(new MethodInsnNode(INVOKESTATIC, clazz.name(), retrieverMethod.name(), retrieverMethod.desc()));
+                list.add(saltClass.salt().store());
 
-                 classClinit.setSafeInsn(list.getLast());
-                 classClinit.insns().insert(list);
-             }
+                classClinit.setSafeInsn(list.getLast());
+                classClinit.insns().insert(list);
+            }
 
-             builder._return();
-             clinitBuilder.method(INVOKESTATIC, clazz.name(), name, "()V");
+            builder._return();
+            clinitBuilder.method(INVOKESTATIC, clazz.name(), name, "()V");
         }
 
         clinit.insns().insert(clinitBuilder.result());

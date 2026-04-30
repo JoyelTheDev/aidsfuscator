@@ -1,6 +1,8 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.polymorph.IntPolymorphStack;
+import dev.lvstrng.aidsfuscator.polymorph.impl.*;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
@@ -15,6 +17,11 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.NamedOpcodes;
+import dev.test.transform.CFGTest;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LdcInsnNode;
 
 public class TestMain {
     public static void main(String[] args) {
@@ -29,24 +36,7 @@ public class TestMain {
         context.referenceManager().addFieldCandidate("*");
 
         context.transform(
-                new TrimTransformer(),
-
-                new FieldRenameTransformer(),
-                new MethodRenameTransformer(),
-                new ClassRenameTransformer(),
-
-                new LocalVariableNameTransformer(),
-                new LineNumberTransformer(),
-                new MethodSaltTransformer(),
-                new SimpleClassSaltTransformer(),
-
-                new ConstantsFixTransformer(),
-                new IntegerEncryptTransformer(),
-                new StringEncryptTransformer(),
-
-                new ControlFlowFlatteningTransformer(),
-                new ControlFlowShufflingTransformer(),
-                new ReferenceObfuscationTransformer()
+                new SimpleClassSaltTransformer()
         ).exportJar();
     }
 }
