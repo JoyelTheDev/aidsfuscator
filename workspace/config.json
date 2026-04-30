@@ -7,23 +7,23 @@
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
     },
     "renameFields": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "shuffle": false
     },
     "renameMethods": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "shuffle": false
     },
     "renameClasses": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "randomize": false
     },
@@ -35,7 +35,7 @@
       "remove": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "seedUselessMethods": false
     },
     "classSalting": {
@@ -54,10 +54,13 @@
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": false,
+      "enabled": true,
       "useSalt": true
     },
     "controlFlowShuffle": {
+      "enabled": true
+    },
+    "cleanDeadCode": {
       "enabled": false
     },
     "referenceObfuscate": {

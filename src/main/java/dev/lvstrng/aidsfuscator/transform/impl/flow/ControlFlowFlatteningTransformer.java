@@ -89,8 +89,9 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                         if(useSalt.value() && method.canSalt(block)) {
                             list.add(method.salt().load());
-                            list.add(context.properties().add(ASMUtils.pushInt(method.salt().value() ^ key), Property.IGNORE_INTEGER));
-                            list.add(new InsnNode(IXOR));
+                            list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                            list.add(new InsnNode(IAND));
+                            key = method.salt().value() & key;
                         } else {
                             list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                         }
