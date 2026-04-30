@@ -14,10 +14,7 @@ import dev.lvstrng.aidsfuscator.utils.SwitchUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiPredicate;
 
 /**
@@ -85,7 +82,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                     for(var block : group) {
                         var list = new InsnList();
                         var lbl = new LabelNode();
-                        var key = random.nextInt();
+                        var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE);
 
                         if(useSalt.value() && method.canSalt(block)) {
                             list.add(method.salt().load());
@@ -115,6 +112,15 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 markChange();
             }
         }
+    }
+
+    private int uniqueInt(Map<LabelNode, Integer> cases, int mask) {
+        int res;
+        do {
+            res = random.nextInt();
+        } while (cases.containsValue(res & mask));
+
+        return res;
     }
 
     private List<List<Block>> grouped(ControlFlowGraph graph) {
