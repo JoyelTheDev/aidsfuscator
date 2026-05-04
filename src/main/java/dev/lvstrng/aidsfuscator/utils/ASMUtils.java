@@ -188,16 +188,21 @@ public class ASMUtils implements Opcodes {
         }
     }
 
-    public static void box(InsnList list, Type type) {
+    public static AbstractInsnNode box(InsnList list, Type type) {
+        MethodInsnNode m;
         switch (type.getSort()) {
-            case Type.CHAR -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;"));
-            case Type.INT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false));
-            case Type.SHORT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false));
-            case Type.FLOAT -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false));
-            case Type.DOUBLE -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false));
-            case Type.LONG -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false));
-            case Type.BOOLEAN -> list.add(new MethodInsnNode(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false));
+            case Type.CHAR -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Character", "valueOf", "(C)Ljava/lang/Character;", false));
+            case Type.INT -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false));
+            case Type.BYTE -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", false));
+            case Type.SHORT -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", false));
+            case Type.FLOAT -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false));
+            case Type.DOUBLE -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false));
+            case Type.LONG -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false));
+            case Type.BOOLEAN -> list.add(m = new MethodInsnNode(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;", false));
+            default -> m = null;
         }
+
+        return m;
     }
 
     public static MethodInsnNode unbox(InsnList list, Type type) {

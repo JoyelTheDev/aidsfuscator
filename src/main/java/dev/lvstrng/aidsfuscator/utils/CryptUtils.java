@@ -63,8 +63,7 @@ public class CryptUtils {
             c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv));
             return Base64.getEncoder().encodeToString(c.doFinal(str.getBytes()));
         } catch (Throwable e) {
-            System.err.println(e.getMessage());
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -76,8 +75,7 @@ public class CryptUtils {
 
             return new String(c.doFinal(bytes));
         } catch (Throwable e) {
-            System.err.println(e.getMessage());
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }

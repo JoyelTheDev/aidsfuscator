@@ -1,12 +1,14 @@
 package dev.lvstrng.aidsfuscator.context.hierarchy;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,28 +29,39 @@ public class SimpleHierarchy implements IHierarchy {
 
     @Override
     public void build() {
-        for(var clazz : context.classes()) {
+        var classes = allNonLibraryClasses();
+        clearHierarchy(classes);
+
+        for(var clazz : classes) {
             build(clazz);
         }
 
-        for(var clazz : context.classes()) {
-            for(var method : clazz.methods())
+        for(var clazz : classes) {
+            for(var method : clazz.methods()) {
                 build(method);
+            }
 
-            for(var field : clazz.fields())
+            for(var field : clazz.fields()) {
                 build(field);
+            }
         }
     }
 
     @Override
     public void build(JClass clazz) {
-        var tree = getTree(clazz).stream()
-                .map(context::forName)
-                .filter(cw -> cw != clazz).toList();
+        var parents = getTree(clazz).stream()
+                .map(this::resolveClass)
+                .filter(e -> e != null && e != clazz)
+                .toList();
 
-        clazz.parents().addAll(tree);
-        for(var parent : tree) {
-            parent.children().add(clazz);
+        for(var parent : parents) {
+            if(!clazz.parents().contains(parent)) {
+                clazz.parents().add(parent);
+            }
+
+            if(!parent.children().contains(clazz)) {
+                parent.children().add(clazz);
+            }
         }
     }
 
@@ -65,8 +78,15 @@ public class SimpleHierarchy implements IHierarchy {
                 continue;
 
             var parentMethod = opt.get();
-            method.parents().add(parentMethod);
-            parentMethod.children().add(method);
+            if(blacklistedMethod.test(parentMethod))
+                continue;
+
+            if(!method.parents().contains(parentMethod)) {
+                method.parents().add(parentMethod);
+            }
+            if(!parentMethod.children().contains(method)) {
+                parentMethod.children().add(method);
+            }
         }
 
         // ---- CHILD METHOD HIERARCHY ----
@@ -76,8 +96,15 @@ public class SimpleHierarchy implements IHierarchy {
                 continue;
 
             var childMethod = opt.get();
-            method.children().add(childMethod);
-            childMethod.parents().add(method);
+            if(blacklistedMethod.test(childMethod))
+                continue;
+
+            if(!method.children().contains(childMethod)) {
+                method.children().add(childMethod);
+            }
+            if(!childMethod.parents().contains(method)) {
+                childMethod.parents().add(method);
+            }
         }
     }
 
@@ -94,8 +121,15 @@ public class SimpleHierarchy implements IHierarchy {
                 continue;
 
             var parentField = opt.get();
-            field.parents().add(parentField);
-            parentField.children().add(field);
+            if(blacklistedField.test(parentField))
+                continue;
+
+            if(!field.parents().contains(parentField)) {
+                field.parents().add(parentField);
+            }
+            if(!parentField.children().contains(field)) {
+                parentField.children().add(field);
+            }
         }
 
         // ---- CHILD FIELD HIERARCHY ----
@@ -105,8 +139,15 @@ public class SimpleHierarchy implements IHierarchy {
                 continue;
 
             var childField = opt.get();
-            field.children().add(childField);
-            childField.parents().add(field);
+            if(blacklistedField.test(childField))
+                continue;
+
+            if(!field.children().contains(childField)) {
+                field.children().add(childField);
+            }
+            if(!childField.parents().contains(field)) {
+                childField.parents().add(field);
+            }
         }
     }
 
@@ -143,8 +184,10 @@ public class SimpleHierarchy implements IHierarchy {
             return commonArray(type1, type2);
         }
 
-        var node = context.forName(type1);
-        var other = context.forName(type2);
+        var node = resolveClass(type1);
+        var other = resolveClass(type2);
+        if(node == null || other == null)
+            return object;
 
         // interfaces can only have super class "java/lang/Object", so don't waste time.
         if(node.isInterface() || other.isInterface())
@@ -164,15 +207,14 @@ public class SimpleHierarchy implements IHierarchy {
         getSuperClasses(node, nodeClasses);
         getSuperClasses(other, otherClasses);
 
-        // walk down the hierarchy and find the first common super class.
-        for(var clazz : nodeClasses) {
-            for(var otherClass : otherClasses) {
-                if(otherClass.equals(clazz))
-                    return clazz.name();
+        if(otherClasses.contains(node))
+            return node.name();
+        if(nodeClasses.contains(other))
+            return other.name();
 
-                if(otherClass.equals(node))
-                    return clazz.name();
-            }
+        for(var clazz : nodeClasses) {
+            if(otherClasses.contains(clazz))
+                return clazz.name();
         }
 
         return object; // fallback if no common superclass is found
@@ -212,13 +254,79 @@ public class SimpleHierarchy implements IHierarchy {
         if(clazz.superName() == null)
             return;
 
-        getSuperClasses(context.forName(clazz.superName()), classes);
+        var superClazz = resolveClass(clazz.superName());
+        if(superClazz == null)
+            return;
+
+        getSuperClasses(superClazz, classes);
     }
 
     private List<String> getTree(JClass clazz) {
         var tree = new ArrayList<String>();
-        trace(context, clazz, tree);
+        traceSafe(clazz, tree);
 
         return tree;
+    }
+
+    private void clearHierarchy(List<JClass> classes) {
+        for(var clazz : classes) {
+            clazz.parents().clear();
+            clazz.children().clear();
+
+            for(var method : clazz.methods()) {
+                method.parents().clear();
+                method.children().clear();
+            }
+
+            for(var field : clazz.fields()) {
+                field.parents().clear();
+                field.children().clear();
+            }
+        }
+    }
+
+    private List<JClass> allNonLibraryClasses() {
+        var all = new ArrayList<JClass>();
+        all.addAll(context.jarClasses());
+        all.addAll(context.artificials().values());
+
+        var dedup = new HashSet<String>();
+        var out = new ArrayList<JClass>();
+        for(var clazz : all) {
+            if(clazz.isLibrary())
+                continue;
+
+            if(!dedup.add(clazz.name()))
+                continue;
+
+            out.add(clazz);
+        }
+
+        return out;
+    }
+
+    private JClass resolveClass(String name) {
+        try {
+            return context.forName(name);
+        } catch (MissingMemberException _) {
+            return null;
+        }
+    }
+
+    private void traceSafe(JClass clazz, List<String> used) {
+        if(clazz == null)
+            return;
+
+        if(used.contains(clazz.name()))
+            return;
+
+        used.add(clazz.name());
+        if(clazz.superName() != null && !clazz.isInterface()) {
+            traceSafe(resolveClass(clazz.superName()), used);
+        }
+
+        for(var itf : clazz.interfaces()) {
+            traceSafe(resolveClass(itf), used);
+        }
     }
 }

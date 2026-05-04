@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.transform;
 
 import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.IntegerEncryptTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.data.StringEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;

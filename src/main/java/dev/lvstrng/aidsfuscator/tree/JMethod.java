@@ -281,7 +281,7 @@ public class JMethod {
 
             return frames;
         } catch (AnalyzerException e) {
-            Logger.error("Error analyzing frames in (%s): %s", fullName(), e.getLocalizedMessage());
+            Logger.error("Error analyzing frames in (%s): %s", fullOriginalName(), e.getLocalizedMessage());
             return null;
         }
     }

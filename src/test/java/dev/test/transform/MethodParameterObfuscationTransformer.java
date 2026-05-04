@@ -1,5 +1,6 @@
 package dev.test.transform;
 
+import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
@@ -8,12 +9,15 @@ import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
+import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 public class MethodParameterObfuscationTransformer extends Transformer {
@@ -28,10 +32,6 @@ public class MethodParameterObfuscationTransformer extends Transformer {
 
         for(var clazz : context.classes()) {
             for(var method : clazz.methods()) {
-                var refs = graph.refs(method);
-                if(refs.stream().anyMatch(e -> !e.canEdit()))
-                    continue;
-
                 registerMethod(graph, clazz, method, methods);
             }
         }
@@ -42,7 +42,10 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             var desc = entry.getValue();
 
             var args = Type.getArgumentTypes(desc);
-            var refs = graph.refs(method);
+            var refs = new LinkedHashSet<MethodCallNode>();
+            for(var member : this.populateHierarchy(method)) {
+                refs.addAll(graph.refs(member));
+            }
 
             for(var node : refs) {
                 var call = (MethodInsnNode) node.insn();
@@ -112,64 +115,112 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             method.insns().insert(builder.result());
             method.core().access &= ~ACC_VARARGS;
             method.core().maxLocals++;
+            markChange();
         }
     }
 
     private void registerMethod(ReferenceGraph graph, JClass clazz, JMethod method, Map<JMethod, String> methods) {
-        if(cantEditMethod(clazz, method))
+        if(this.cantEditMethod(clazz, method))
             return;
 
-        if((method.access() & ACC_SYNTHETIC) != 0)
+        if(this.isIgnoredSynthetic(method))
             return;
 
-        for(var member : method.tree()) {
-            if(cantEditMethod(member.owner(), member))
-                return;
-
-            if((member.access() & ACC_SYNTHETIC) != 0)
-                return;
-        }
-
-        // ---- CHECK NON-EDITABLE REFS ----
-        var cont = true;
-        for(var member : method.tree()) {
-            var refs = graph.refs(member);
-
-            if(refs.stream().anyMatch(e -> !e.canEdit())) {
-                cont = false;
-                break;
-            }
-        }
-
-        if(!cont)
+        var hierarchy = this.populateHierarchy(method);
+        if(this.shouldSkipHierarchy(graph, hierarchy))
             return;
 
         var returnType = method.returnType();
         var newDesc = "([Ljava/lang/Object;)" + returnType.getDescriptor();
 
-        // ---- CHECK DUPLICATE METHODS ----
-        for(var member : clazz.tree()) {
-            if(member.findMethod(method.name(), newDesc).isPresent())
-                return;
-        }
-
-        if(clazz.findMethod(method.name(), newDesc).isPresent())
+        if(this.hasDuplicateSignature(hierarchy, method.name(), newDesc))
             return;
 
-        // ---- REGISTER METHODS ----
-        for(var member : clazz.tree()) {
-            var foundOpt = member.findMethod(method.name(), method.desc());
-            if(foundOpt.isEmpty())
+        for(var member : hierarchy) {
+            if(member.isLibrary())
                 continue;
 
-            var func = foundOpt.get();
-            methods.put(func, func.desc());
-            func.core().desc = newDesc;
-            func.core().signature = null;
+            if(methods.containsKey(member))
+                continue;
+
+            methods.put(member, member.desc());
+            member.core().desc = newDesc;
+            member.core().signature = null;
+        }
+    }
+
+    private Set<JMethod> populateHierarchy(JMethod method) {
+        var hierarchy = new LinkedHashSet<JMethod>();
+        hierarchy.add(method);
+        hierarchy.addAll(method.tree());
+        return hierarchy;
+    }
+
+    private boolean shouldSkipHierarchy(ReferenceGraph graph, Set<JMethod> hierarchy) {
+        for(var member : hierarchy) {
+            if(member.isLibrary())
+                continue;
+
+            if(this.cantEditMethod(member.owner(), member))
+                return true;
+
+            if(this.isIgnoredSynthetic(member))
+                return true;
+
+            var refs = graph.refs(member);
+            if(refs.stream().anyMatch(e -> !e.canEdit()))
+                return true;
         }
 
-        methods.put(method, method.desc());
-        method.core().desc = newDesc;
-        method.core().signature = null;
+        return false;
+    }
+
+    private boolean hasDuplicateSignature( Set<JMethod> hierarchy, String name, String desc) {
+        var simpleName = MemberUtils.methodDesc(name, desc);
+        var classes = new LinkedHashSet<JClass>();
+        for(var member : hierarchy) {
+            var owner = member.owner();
+            if(owner.isLibrary())
+                continue;
+
+            classes.add(owner);
+            for(var related : owner.tree()) {
+                if(related.isLibrary())
+                    continue;
+
+                classes.add(related);
+            }
+        }
+
+        for(var clazz : classes) {
+            if(this.hasDuplicateSignatureInClass(clazz, hierarchy, simpleName))
+                return true;
+
+            for(var related : clazz.tree()) {
+                if(related.isLibrary())
+                    continue;
+
+                if(this.hasDuplicateSignatureInClass(related, hierarchy, simpleName))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasDuplicateSignatureInClass(JClass clazz, Set<JMethod> hierarchy, String simpleName) {
+        for(var method : clazz.methods()) {
+            if(hierarchy.contains(method))
+                continue;
+
+            if(method.simpleName().equals(simpleName))
+                return true;
+        }
+
+        return false;
+    }
+
+    private boolean isIgnoredSynthetic(JMethod method) {
+        return (method.access() & ACC_SYNTHETIC) != 0 && !method.isBridge();
     }
 }
