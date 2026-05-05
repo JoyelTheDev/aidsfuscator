@@ -137,7 +137,7 @@ public class Context {
         for(var transformer : transformers) {
             Logger.info("Running '%s'", transformer.name());
             transformer.transform(this);
-            Logger.info("Completed '%s' with %s changes", transformer.name(), transformer.changes());
+            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
             Logger.info("");
         }
 

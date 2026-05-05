@@ -13,6 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 // TODO fix broken decryption for some strings
+/**
+ * Simple string initializer that uses AES to decrypt strings from the main blob.
+ * @author lvstrng
+ */
 public class AESStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {

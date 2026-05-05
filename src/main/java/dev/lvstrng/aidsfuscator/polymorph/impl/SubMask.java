@@ -11,6 +11,11 @@ public class SubMask extends IntMask<SubMask> {
     }
 
     @Override
+    public int applyInverse(int num) {
+        return num + value;
+    }
+
+    @Override
     public InsnList insns() {
         return new InsnBuilder()._int(value).isub().result();
     }

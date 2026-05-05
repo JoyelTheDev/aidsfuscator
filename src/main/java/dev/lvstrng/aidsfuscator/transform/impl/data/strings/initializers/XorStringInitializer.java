@@ -12,6 +12,10 @@ import org.objectweb.asm.tree.LabelNode;
 
 import java.util.List;
 
+/**
+ * String initializer that uses a loop and a switch to XOR strings.
+ * @author lvstrng
+ */
 public class XorStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {

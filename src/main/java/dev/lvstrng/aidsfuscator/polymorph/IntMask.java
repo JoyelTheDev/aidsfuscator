@@ -12,6 +12,10 @@ public abstract class IntMask<T extends IntMask<T>> {
     public abstract int apply(int num);
     public abstract InsnList insns();
 
+    public int applyInverse(int num) {
+        throw new RuntimeException("No Implementation for applyInverse in class (%s)".formatted(getClass()));
+    }
+
     public T ofValue(int value) {
         this.value = value;
         return (T) this;

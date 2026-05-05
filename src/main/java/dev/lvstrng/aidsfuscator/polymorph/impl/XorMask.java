@@ -11,6 +11,11 @@ public class XorMask extends IntMask<XorMask> {
     }
 
     @Override
+    public int applyInverse(int num) {
+        return apply(num);
+    }
+
+    @Override
     public InsnList insns() {
         return new InsnBuilder()._int(value).ixor().result();
     }
