@@ -9,6 +9,7 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -23,7 +24,7 @@ import java.util.*;
 /**
  * A MethodNode wrapper for easier use.
  */
-public class JMethod {
+public class JMethod implements ISaltable<MethodSalt> {
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
@@ -150,19 +151,23 @@ public class JMethod {
         this.salt = new MethodSalt(value, local);
     }
 
+    @Override
     public boolean hasSalt() {
         return salt != null;
     }
 
+    @Override
     public MethodSalt salt() {
         return salt;
     }
 
+    @Override
     public boolean canSalt(Block block) {
         if(!hasSalt()) return false;
         return block.isInitialized(salt.local());
     }
 
+    @Override
     public boolean canSalt(Frame<SimpleValue> frame) {
         if(frame == null) return false;
         if(!hasSalt()) return false;

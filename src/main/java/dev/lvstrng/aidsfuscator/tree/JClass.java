@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.tree;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
@@ -20,7 +21,7 @@ import java.util.Optional;
 /**
  * A ClassNode wrapper for easier use.
  */
-public class JClass {
+public class JClass implements ISaltable<ClassSalt> {
     private ClassNode core;
     private final PropertyContainer properties;
 
@@ -66,10 +67,12 @@ public class JClass {
         return initializes;
     }
 
+    @Override
     public boolean hasSalt() {
         return salt != null;
     }
 
+    @Override
     public ClassSalt salt() {
         return salt;
     }
