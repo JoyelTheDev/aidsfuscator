@@ -1,5 +1,7 @@
 package dev.lvstrng.aidsfuscator.utils;
 
+import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.*;
@@ -546,6 +548,11 @@ public class InsnBuilder {
 
     public InsnBuilder f2d() {
         list.add(new InsnNode(F2D));
+        return this;
+    }
+
+    public InsnBuilder addProps(Context context, Property... properties) {
+        context.properties().add(list.getLast(), properties);
         return this;
     }
 }

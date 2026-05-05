@@ -5,6 +5,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -61,6 +63,7 @@ public class CryptUtils {
         try {
             var c = Cipher.getInstance("AES/CBC/PKCS5Padding");
             c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new IvParameterSpec(iv));
+
             return Base64.getEncoder().encodeToString(c.doFinal(str.getBytes()));
         } catch (Throwable e) {
             throw new RuntimeException(e);

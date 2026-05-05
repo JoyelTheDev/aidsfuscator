@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.IStringInitializer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.CryptUtils;
@@ -11,11 +12,12 @@ import org.objectweb.asm.tree.LabelNode;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+// TODO fix broken decryption for some strings
 public class AESStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {
         // ---- PREP ----
-        var key = random.nextInt(Short.MAX_VALUE);
+        var key = (char) random.nextInt(Character.MAX_VALUE);
         var strBuilder = new StringBuilder();
         var lengthStr = new StringBuilder();
 
@@ -76,24 +78,24 @@ public class AESStringInitializer implements IStringInitializer {
                 ._const(lenStr)
                 .dup()
                 ._var(ASTORE, lenStrVar)
-                .method(INVOKEVIRTUAL, "java/lang/String", "length", "()I")
+                .method(INVOKEVIRTUAL, "java/lang/String", "length", "()I").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ISTORE, lenVar)
 
                 .label(new LabelNode())
                 ._const(keyStr)
                 ._const("ISO-8859-1")
-                .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
+                .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ASTORE, keyVar)
 
                 .label(new LabelNode())
                 ._const(ivStr)
                 ._const("ISO-8859-1")
-                .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
+                .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ASTORE, ivVar)
 
                 .label(new LabelNode())
                 ._const("AES/CBC/PKCS5Padding")
-                .method(INVOKESTATIC, "javax/crypto/Cipher", "getInstance", "(Ljava/lang/String;)Ljavax/crypto/Cipher;")
+                .method(INVOKESTATIC, "javax/crypto/Cipher", "getInstance", "(Ljava/lang/String;)Ljavax/crypto/Cipher;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ASTORE, cipherVar)
 
                 .label(new LabelNode())
@@ -108,13 +110,15 @@ public class AESStringInitializer implements IStringInitializer {
                 .dup()
                 ._var(ALOAD, lenStrVar)
                 ._var(ILOAD, iVar)
-                .method(INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C")
+                .method(INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ILOAD, xorKeyVar)
                 .ixor()
+                ._int(0xffff)
+                .iand()
                 .dup()
                 ._var(ISTORE, strLen)
                 .iadd()
-                .method(INVOKEVIRTUAL, "java/lang/String", "substring", "(II)Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/String", "substring", "(II)Ljava/lang/String;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ASTORE, subStrVar)
 
                 .label(new LabelNode()) //cipher.init(2, new SecretKeySpec(x, "AES"), new IvParameterSpec(y))
@@ -129,17 +133,18 @@ public class AESStringInitializer implements IStringInitializer {
                 .dup()
                 ._var(ALOAD, ivVar)
                 .method(INVOKESPECIAL, "javax/crypto/spec/IvParameterSpec", "<init>", "([B)V")
-                .method(INVOKEVIRTUAL, "javax/crypto/Cipher", "init", "(ILjava/security/Key;Ljava/security/spec/AlgorithmParameterSpec;)V")
+                .method(INVOKEVIRTUAL, "javax/crypto/Cipher", "init", "(ILjava/security/Key;Ljava/security/spec/AlgorithmParameterSpec;)V").addProps(context, Property.IGNORE_REF_OBFUSCATION)
 
                 .label(new LabelNode())
                 .type(NEW, "java/lang/String")
                 .dup()
                 ._var(ALOAD, cipherVar)
-                .method(INVOKESTATIC, "java/util/Base64", "getDecoder", "()Ljava/util/Base64$Decoder;")
+                .method(INVOKESTATIC, "java/util/Base64", "getDecoder", "()Ljava/util/Base64$Decoder;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                 ._var(ALOAD, subStrVar)
-                .method(INVOKEVIRTUAL, "java/util/Base64$Decoder", "decode", "(Ljava/lang/String;)[B")
-                .method(INVOKEVIRTUAL, "javax/crypto/Cipher", "doFinal", "([B)[B")
-                .method(INVOKESPECIAL, "java/lang/String", "<init>", "([B)V")
+                .method(INVOKEVIRTUAL, "java/util/Base64$Decoder", "decode", "(Ljava/lang/String;)[B").addProps(context, Property.IGNORE_REF_OBFUSCATION)
+                .method(INVOKEVIRTUAL, "javax/crypto/Cipher", "doFinal", "([B)[B").addProps(context, Property.IGNORE_REF_OBFUSCATION)
+                ._const("UTF-8")
+                .method(INVOKESPECIAL, "java/lang/String", "<init>", "([BLjava/lang/String;)V")
                 ._var(ASTORE, subStrVar)
 
                 .label(new LabelNode())
@@ -160,18 +165,18 @@ public class AESStringInitializer implements IStringInitializer {
                 .label(new LabelNode())
                 ._var(ILOAD, iVar)
                 ._var(ILOAD, lenVar)
-                .jump(IF_ICMPLT, loopLabel)
+                .jump(IF_ICMPNE, loopLabel)
 
                 .label(new LabelNode())
                 ._var(ALOAD, arrVar)
                 .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
 
                 .label(new LabelNode())
-                ._int(lenVar)
+                ._var(ILOAD, lenVar)
                 .anewarray("java/lang/Object")
                 .field(PUTSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
         ;
 
-        method.insns().insert(body.result());
+        method.insertSafe(body.result());
     }
 }
