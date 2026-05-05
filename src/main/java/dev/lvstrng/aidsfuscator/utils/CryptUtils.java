@@ -16,7 +16,7 @@ public class CryptUtils {
     public static int[] generateKeys(Random random, int size, int maxValue) {
         int[] keys = new int[size];
         for(int i = 0; i < size; i++)
-            keys[i] = random.nextInt(maxValue);
+            keys[i] = random.nextInt(maxValue + 1);
 
         return keys;
     }

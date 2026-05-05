@@ -8,6 +8,7 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.AESStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.DefaultStringInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.XorStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -26,7 +27,7 @@ public class StringEncryptTransformer extends Transformer {
 
     private static final List<Supplier<IStringInitializer>> initializers = List.of(
             DefaultStringInitializer::new,
-            AESStringInitializer::new
+            XorStringInitializer::new
     );
 
     private static final List<Supplier<IStringDecryptor>> decryptors = List.of(

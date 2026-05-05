@@ -15,24 +15,24 @@
     "renameFields": {
       "enabled": false,
       "prefix": "",
-      "shuffle": false
+      "shuffle": true
     },
     "renameMethods": {
       "enabled": false,
       "prefix": "",
-      "shuffle": false
+      "shuffle": true
     },
     "renameClasses": {
       "enabled": false,
       "prefix": "",
-      "randomize": false
+      "randomize": true
     },
     "localNames": {
       "enabled": false
     },
     "lineNumbers": {
       "enabled": false,
-      "remove": false
+      "remove": true
     },
     "methodSalting": {
       "enabled": false,
