@@ -2,27 +2,49 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.polymorph.IntMask;
+import dev.lvstrng.aidsfuscator.polymorph.IntPolymorphStack;
+import dev.lvstrng.aidsfuscator.polymorph.impl.AddMask;
+import dev.lvstrng.aidsfuscator.polymorph.impl.SubMask;
+import dev.lvstrng.aidsfuscator.polymorph.impl.XorMask;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.IStringDecryptor;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PolymorphicStringDecryptor implements IStringDecryptor {
     private String name;
     private final int idxXor, traceXor;
+    private final IntPolymorphStack stack;
 
     public PolymorphicStringDecryptor() {
-        this.idxXor = random.nextInt(Character.MAX_VALUE);
-        this.traceXor = random.nextInt(Character.MAX_VALUE);
+        this.idxXor = random.nextInt(Short.MAX_VALUE);
+        this.traceXor = random.nextInt(Short.MAX_VALUE);
+
+        this.stack = new IntPolymorphStack();
+        int masks = random.nextInt(3, 10) + 1;
+
+        List<Supplier<IntMask<?>>> types = List.of(
+                () -> new XorMask().ofRandomValue(Short.MAX_VALUE),
+                () -> new SubMask().ofRandomValue(Short.MAX_VALUE),
+                () -> new AddMask().ofRandomValue(Short.MAX_VALUE)
+        );
+
+        for(int i = 0; i < masks; i++) {
+            stack.push(types.get(random.nextInt(types.size())).get());
+        }
     }
 
     @Override
@@ -35,23 +57,162 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var keyParamVar = method.allocVar(Type.INT_TYPE); // param2
 
         var idxVar = method.allocVar(Type.INT_TYPE);
-        var cachedTraceVar = method.allocVar();
         var charArrVar = method.allocVar();
+        var cachedTraceVar = method.allocVar();
+        var stackElementsVar = method.allocVar();
+        var elementVar = method.allocVar();
+        var hashVar = method.allocVar(Type.INT_TYPE);
         var iVar = method.allocVar(Type.INT_TYPE);
 
         // ---- CODE ----
-        var body = new InsnBuilder()
+        var loop = new LabelNode();
+        var newTraceLabel = new LabelNode();
+        var exitLabel = new LabelNode();
+
+        var body = new InsnBuilder(method.insns())
                 .label(new LabelNode())
                 ._var(ILOAD, idxValVar)
                 .add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER))
                 .ixor()
-                ._var(ISTORE, idxVar);
+                ._var(ISTORE, idxVar)
 
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
+                ._var(ILOAD, idxVar)
+                .aaload()
+                .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
+                ._var(ASTORE, charArrVar)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
+                ._var(ILOAD, idxVar)
+                .aaload()
+                .type(CHECKCAST, "[Ljava/lang/StackTraceElement;")
+                ._var(ASTORE, cachedTraceVar)
+
+                .label(new LabelNode())
+                ._var(ALOAD, cachedTraceVar)
+                .jump(IFNULL, newTraceLabel)
+
+                .label(new LabelNode())
+                ._var(ALOAD, cachedTraceVar)
+                ._var(ASTORE, stackElementsVar)
+                ._goto(exitLabel)
+
+                .label(newTraceLabel)
+                .type(NEW, "java/lang/Throwable")
+                .dup()
+                .method(INVOKESPECIAL, "java/lang/Throwable", "<init>", "()V")
+                .method(INVOKEVIRTUAL, "java/lang/Throwable", "getStackTrace", "()[Ljava/lang/StackTraceElement;")
+                ._var(ASTORE, stackElementsVar)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
+                ._var(ILOAD, idxVar)
+                ._var(ALOAD, stackElementsVar)
+                .aastore()
+                .label(exitLabel)
+                ._var(ALOAD, stackElementsVar)
+                ._const(1)
+                .aaload()
+                ._var(ASTORE, elementVar)
+
+                .label(new LabelNode())
+                ._var(ALOAD, elementVar)
+                .method(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getClassName", "()Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/String", "hashCode", "()I")
+                ._var(ALOAD, elementVar)
+                .method(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getMethodName", "()Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/String", "hashCode", "()I")
+                .ixor()
+                ._const(16)
+                .ishr()
+                ._const(traceXor)
+                .ixor()
+                ._var(ISTORE, hashVar)
+
+                .label(new LabelNode())
+                ._int(0)
+                ._var(ISTORE, iVar)
+
+                .label(loop)
+                ._var(ALOAD, charArrVar)
+                ._var(ILOAD, iVar)
+                .dup2()
+                .caload();
+
+        for(var mask : stack) {
+            body
+                    ._var(ALOAD, charArrVar)
+                    ._var(ILOAD, iVar)
+                    .dup2()
+                    .caload()
+                    .add(mask.insns())
+                    .castore();
+        }
+
+        body._var(ILOAD, hashVar)
+                .ixor()
+                ._var(ILOAD, xorValueVar)
+                .ixor()
+                ._var(ILOAD, keyParamVar)
+                .add(context.properties().add(ASMUtils.pushInt(16), Property.IGNORE_INTEGER))
+                .ishr()
+                .ixor()
+
+                .i2c()
+                .castore()
+
+                .label(new LabelNode())
+                .iinc(iVar, 1)
+
+                .label(new LabelNode())
+                ._var(ILOAD, iVar)
+                ._var(ALOAD, charArrVar)
+                .arraylength()
+                .jump(IF_ICMPLT, loop)
+
+                .label(new LabelNode())
+                .type(NEW, "java/lang/String")
+                .dup()
+                ._var(ALOAD, charArrVar)
+                .method(INVOKESPECIAL, "java/lang/String", "<init>", "([C)V")
+                .method(INVOKEVIRTUAL, "java/lang/String", "intern", "()Ljava/lang/String;")
+                ._areturn()
+
+                ;
     }
 
     @Override
     public InsnList addAndCall(Context context, JMethod method, AbstractInsnNode callSite, Map<AbstractInsnNode, SimpleFrame> frames, List<String> strings, String str) {
-        return null;
+        // ---- stack trace element stuff ----
+        var callerClass = method.owner().name().replace('/', '.');
+        var callerMethod = method.name();
+        var traceKey = ((callerClass.hashCode() ^ callerMethod.hashCode()) >> 16) ^ traceXor;
+        var key = method.hasSalt() ? method.salt().value() >> 16 : random.nextInt() >> 16;
+        var idx = strings.size();
+
+        var idxVal = idx ^ idxXor;
+        var firstKey = random.nextInt() >> 16;
+
+        var list = new InsnList();
+        list.add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
+        list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
+        if(method.canSalt(frames.get(callSite))) {
+            list.add(method.salt().load());
+        } else {
+            list.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
+        }
+        list.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor()), Property.IGNORE_REF_OBFUSCATION));
+
+        var chars = str.toCharArray();
+        for(int i = 0; i < chars.length; i++) {
+            chars[i] = (char) (chars[i] ^ traceKey ^ firstKey ^ key);
+            chars[i] = (char) stack.applyInverse(chars[i]);
+        }
+
+        strings.add(new String(chars));
+        return list;
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class IntPolymorphStack extends Stack<IntMask<?>> {
     private static final List<Supplier<IntMask<?>>> allMasks = List.of(
             AddMask::new,
-            AndMask::new,
+            SubMask::new,
 
             MulMask::new,
             DivMask::new,
@@ -41,6 +41,14 @@ public class IntPolymorphStack extends Stack<IntMask<?>> {
     public int apply(int n) {
         for(var mask : this) {
             n = mask.apply(n);
+        }
+
+        return n;
+    }
+
+    public int applyInverse(int n) {
+        for(var mask : this.reversed()) {
+            n = mask.applyInverse(n);
         }
 
         return n;

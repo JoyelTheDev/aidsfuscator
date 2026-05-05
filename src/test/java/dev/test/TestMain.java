@@ -1,6 +1,7 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
@@ -13,7 +14,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("in.jar")
                 .libs("libs/")
                 .out("out.jar")
                 .initialize();
@@ -22,13 +23,7 @@ public class TestMain {
         //context.referenceManager().addFieldCandidate("*");
 
         context.transform(
-                new ClassRenameTransformer(),
-                new FieldRenameTransformer(),
-                new MethodRenameTransformer(),
-                new MethodSaltTransformer(),
-                new MethodParameterObfuscationTransformer(),
-                new ControlFlowFlatteningTransformer(),
-                new ControlFlowShufflingTransformer()
+                new StringEncryptTransformer()
         ).exportJar();
     }
 }
