@@ -1,7 +1,8 @@
 {
-  "renameMethod": {
-    "method": [
-      "*.main([Ljava/lang/String;)V"
+  "global": {
+    "class": [
+      "!inclusionExample/*/Main",
+      "exclusionExample/*/Other"
     ]
   }
 }
