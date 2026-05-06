@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//FIXME ClassCastException (InvokeDynamicInsnNode -> MethodInsnNode) @ line 78
 public class MethodSaltTransformer extends Transformer {
     private final Map<JMethod, List<AbstractInsnNode>> seedInsns;
     private final Setting<Boolean> seedUselessMethods = setting("seedUselessMethods", true);

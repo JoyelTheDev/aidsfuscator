@@ -11,11 +11,14 @@ public record MethodCallNode(JClass callerClass, JMethod caller, JMethod method,
     public boolean isDynamic() {
         var isCondy = insn instanceof LdcInsnNode ldc && ldc.cst instanceof ConstantDynamic;
         var isIndy = insn instanceof InvokeDynamicInsnNode;
-        return isCondy || isIndy;
+        return isIndy || isCondy;
     }
 
     public boolean canEdit() {
-        return !isDynamic() && !method.isLibrary();
+        if(isDynamic())
+            return false;
+
+        return !method.isLibrary();
     }
 
     @Override

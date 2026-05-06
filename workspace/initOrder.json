@@ -1,3 +1,26 @@
 [
-  ["example/InitializerClass", "example/InitializedAfterFirstClass"]
+  [
+    "DataOfSquare",
+    "SquarePanel"
+  ],
+  [
+    "Window",
+    "KeyboardListener"
+  ],
+  [
+    "Window",
+    "DataOfSquare"
+  ],
+  [
+    "Main",
+    "Window"
+  ],
+  [
+    "Window",
+    "ThreadsController"
+  ],
+  [
+    "Window",
+    "Tuple"
+  ]
 ]
