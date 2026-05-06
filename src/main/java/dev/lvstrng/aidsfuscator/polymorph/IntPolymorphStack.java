@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.polymorph;
 
 import dev.lvstrng.aidsfuscator.polymorph.impl.*;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 
 import java.util.ArrayList;
@@ -58,6 +59,26 @@ public class IntPolymorphStack extends Stack<IntMask<?>> {
         var ls = new InsnList();
         for(var mask : this) {
             ls.add(mask.insns());
+        }
+
+        return ls;
+    }
+
+    public InsnList dumpWithInsn(Supplier<AbstractInsnNode> between) {
+        var ls = new InsnList();
+        for(var mask : this) {
+            ls.add(mask.insns());
+            ls.add(between.get());
+        }
+
+        return ls;
+    }
+
+    public InsnList dumpWithList(Supplier<InsnList> between) {
+        var ls = new InsnList();
+        for(var mask : this) {
+            ls.add(mask.insns());
+            ls.add(between.get());
         }
 
         return ls;

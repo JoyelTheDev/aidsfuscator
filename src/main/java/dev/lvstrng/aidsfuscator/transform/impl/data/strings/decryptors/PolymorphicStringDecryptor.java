@@ -12,7 +12,6 @@ import dev.lvstrng.aidsfuscator.transform.impl.data.strings.IStringDecryptor;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -20,6 +19,8 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -28,6 +29,9 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
     private String name;
     private final int idxXor, traceXor;
     private final IntPolymorphStack stack;
+    private final List<Arg> args = new ArrayList<>(List.of(
+            Arg.INDEX, Arg.KEY1, Arg.KEY2)
+    );
 
     public PolymorphicStringDecryptor() {
         this.idxXor = random.nextInt(Short.MAX_VALUE);
@@ -45,6 +49,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         for(int i = 0; i < masks; i++) {
             stack.push(types.get(random.nextInt(types.size())).get());
         }
+        Collections.shuffle(args);
     }
 
     @Override
@@ -52,9 +57,17 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var method = clazz.createMethod(ACC_PRIVATE | ACC_STATIC, name, getDescriptor());
 
         // ---- LOCALS ----
-        var idxValVar = method.allocVar(Type.INT_TYPE); // param1
-        var xorValueVar = method.allocVar(Type.INT_TYPE); // param2
-        var keyParamVar = method.allocVar(Type.INT_TYPE); // param2
+        var idxValVar = -1; // index
+        var xorValueVar = -1; // key1
+        var keyParamVar = -1; // key2
+
+        for(var arg : args) {
+            switch (arg) {
+                case INDEX -> idxValVar = method.allocVar(Type.INT_TYPE);
+                case KEY1 -> xorValueVar = method.allocVar(Type.INT_TYPE);
+                case KEY2 -> keyParamVar = method.allocVar(Type.INT_TYPE);
+            }
+        }
 
         var idxVar = method.allocVar(Type.INT_TYPE);
         var charArrVar = method.allocVar();
@@ -63,6 +76,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var elementVar = method.allocVar();
         var hashVar = method.allocVar(Type.INT_TYPE);
         var iVar = method.allocVar(Type.INT_TYPE);
+        var valueVar = method.allocVar(Type.INT_TYPE);
 
         // ---- CODE ----
         var loop = new LabelNode();
@@ -141,15 +155,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .dup2()
                 .caload();
 
-        for(var mask : stack) {
-            body
-                    ._var(ALOAD, charArrVar)
-                    ._var(ILOAD, iVar)
-                    .dup2()
-                    .caload()
-                    .add(mask.insns())
-                    .castore();
-        }
+        body.add(stack.dumpWithList(() -> new InsnBuilder()._var(ISTORE, valueVar)._var(ILOAD, valueVar).result()));
 
         body._var(ILOAD, hashVar)
                 .ixor()
@@ -196,12 +202,18 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var firstKey = random.nextInt() >> 16;
 
         var list = new InsnList();
-        list.add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
-        list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
-        if(method.canSalt(frames.get(callSite))) {
-            list.add(method.salt().load());
-        } else {
-            list.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
+        for(var arg : args) {
+            switch (arg) {
+                case INDEX -> list.add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
+                case KEY1 -> list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
+                case KEY2 -> {
+                    if(method.canSalt(frames.get(callSite))) {
+                        list.add(method.salt().load());
+                    } else {
+                        list.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
+                    }
+                }
+            }
         }
         list.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor()), Property.IGNORE_REF_OBFUSCATION));
 
@@ -223,5 +235,9 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
     @Override
     public String getDescriptor() {
         return "(III)Ljava/lang/String;";
+    }
+
+    private enum Arg {
+        INDEX, KEY1, KEY2;
     }
 }
