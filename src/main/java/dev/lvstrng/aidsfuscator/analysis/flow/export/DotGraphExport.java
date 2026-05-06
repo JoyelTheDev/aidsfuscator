@@ -3,6 +3,10 @@ package dev.lvstrng.aidsfuscator.analysis.flow.export;
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.utils.NamedOpcodes;
 
+/**
+ * Util that lets you visualize the control flow graph of a method via dot-graph. Currently only used by developers.
+ * @author lvstrng
+ */
 public class DotGraphExport {
     private final ControlFlowGraph cfg;
 

@@ -3,6 +3,11 @@ package dev.lvstrng.aidsfuscator.property;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The global property container keeps track of object's properties if they don't have a wrapper class like {@link dev.lvstrng.aidsfuscator.tree.JClass} or {@link dev.lvstrng.aidsfuscator.tree.JMethod}.
+ * This can be done to basically any object. Mostly used for giving AbstractInsnNodes properties to efficiently obfuscate the program.
+ * @author lvstrng
+ */
 public class GlobalPropertyContainer {
     private final Map<Object, PropertyContainer> properties;
 

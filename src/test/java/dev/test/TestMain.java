@@ -8,13 +8,15 @@ import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
+import dev.test.transform.ClassSaltTransformer;
 import dev.test.transform.MethodParameterObfuscationTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("eval.jar")
                 .libs("libs/")
                 .out("out.jar")
                 .initialize();
@@ -23,6 +25,8 @@ public class TestMain {
         //context.referenceManager().addFieldCandidate("*");
 
         context.transform(
+                new MethodSaltTransformer(),
+                new SimpleClassSaltTransformer(),
                 new StringEncryptTransformer()
         ).exportJar();
     }

@@ -5,6 +5,10 @@ import org.objectweb.asm.Opcodes;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Taken from narumii's deobfuscator.
+ * Converts an opcode to its corresponding name
+ */
 public class NamedOpcodes {
     private static final Map<Integer, String> names = new HashMap<>();
 

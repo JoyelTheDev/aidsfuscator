@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.analysis.order;
+package dev.lvstrng.aidsfuscator.context.order;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.tree.JClass;
@@ -7,6 +7,11 @@ import dev.lvstrng.aidsfuscator.utils.Pair;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Handles class initialization order used further in obfuscation by class salting.
+ * @see dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer
+ * @author lvstrng
+ */
 public class ClassInitOrderHandler {
     private final Context context;
     private final Set<Pair<JClass, JClass>> pairs; // before -> after

@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A block in a control flow graph.
+ * @see Block
+ * @author lvstrng
+ */
 public class Block {
     private final int idx;
     private final LabelNode label;

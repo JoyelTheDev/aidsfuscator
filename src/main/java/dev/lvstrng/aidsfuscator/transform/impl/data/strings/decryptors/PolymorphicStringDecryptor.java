@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * A string decryptor that changes arguments and body each time a new instance is being created. Uses the polymorphism engine/stack to achieve this.
+ * @author lvstrng
+ */
 public class PolymorphicStringDecryptor implements IStringDecryptor {
     private String name;
     private final int idxXor, traceXor;

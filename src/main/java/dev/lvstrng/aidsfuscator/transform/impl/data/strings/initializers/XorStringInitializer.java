@@ -30,7 +30,11 @@ public class XorStringInitializer implements IStringInitializer {
         for(var str : strings) {
             var enc = CryptUtils.xor(str, twice ? key : 0, keys, keys[0]);
             strBuilder.append(enc);
-            lengthStr.append((char) enc.length());
+            if(twice) {
+                lengthStr.append((char) enc.length());
+            } else {
+                lengthStr.append((char) (enc.length() ^ key));
+            }
         }
 
         var theStr = strBuilder.toString();
@@ -91,8 +95,10 @@ public class XorStringInitializer implements IStringInitializer {
                 .label(loop)
                 ._var(ALOAD, lenArrVar)
                 ._var(ILOAD, iVar)
-                .caload()
-                ._var(ISTORE, lenVar)
+                .caload();
+        if(!twice)
+            builder._var(ILOAD, keyVar).ixor();
+        builder._var(ISTORE, lenVar)
 
                 .label(new LabelNode())
                 ._var(ALOAD, strVar) // str

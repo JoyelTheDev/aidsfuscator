@@ -11,6 +11,10 @@ import java.util.function.Supplier;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+/**
+ * Class responsible for writing resources after obfuscation.
+ * @author lvstrng
+ */
 public class ResourceHandler {
     private final Context context;
     private final Map<String, byte[]> resources = new HashMap<>();

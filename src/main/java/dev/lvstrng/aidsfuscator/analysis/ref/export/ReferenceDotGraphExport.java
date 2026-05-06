@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Lets you visualize the reference graph via dot-graph.
+ * @author lvstrng
+ */
 public class ReferenceDotGraphExport {
     private final Context context;
 

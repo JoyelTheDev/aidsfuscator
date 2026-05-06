@@ -9,6 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+/**
+ * Exports old-to-new names of obfuscated members to make keeping track of crashes and other things easier after obfuscation.
+ * @author lvstrng
+ */
 public class MappingExport implements Writer {
     private final Context context;
     public MappingExport(Context context) {

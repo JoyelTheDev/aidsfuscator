@@ -19,6 +19,10 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The default 32 key string decryptor. Uses a simple XOR loop to obfuscate a strings contents depending on its index.
+ * @author lvstrng
+ */
 public class DefaultStringDecryptor implements IStringDecryptor {
     private String decryptorName;
     private final int[] keys;

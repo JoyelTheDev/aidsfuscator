@@ -1,6 +1,6 @@
 package dev.lvstrng.aidsfuscator.context;
 
-import dev.lvstrng.aidsfuscator.analysis.order.ClassInitOrderHandler;
+import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
@@ -31,6 +31,11 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * The obfuscator context "the core". This class is responsible for reading input JAR, transforming read classes, exporting output, handling global exclusions,
+ * and contains utils that can be used by the transformers, like for instance the reference graph or dictionary.
+ * @author lvstrng
+ */
 public class Context {
     private String input, output, libPath;
     private final Map<String, JClass> classes, artificials, libraries, excluded;

@@ -5,6 +5,12 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.analysis.Frame;
 
+/**
+ * Writes classes correctly using {@link dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy#commonSuperClass(String, String)} without touching reflection like OW2 ASM intended.
+ * Also handles watermarking.
+ * @author lvstrng
+ * @author jonesdevelopment (watermarking)
+ */
 public class HierarchyClassWriter extends ClassWriter {
     private final Context context;
 

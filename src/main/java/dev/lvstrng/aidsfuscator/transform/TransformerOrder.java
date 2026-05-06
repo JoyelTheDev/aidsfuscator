@@ -23,6 +23,9 @@ import java.util.List;
  * Aidsfuscator works in a fixed order, because when the user knows no better, we don't want useless issues on the GitHub page.
  */
 public final class TransformerOrder {
+    /*
+     * WARN LVSTRNG BEFORE CHANGING ORDER OR ADDING NEW TRANSFORMS.
+     */
     private static final List<Transformer> transformers = List.of(
             new TrimTransformer(),
 

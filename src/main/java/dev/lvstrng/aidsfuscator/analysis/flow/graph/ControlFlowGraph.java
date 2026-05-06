@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Constructs the control flow graph of a method.
+ * @see Block
+ * @author lvstrng
+ */
 public class ControlFlowGraph {
     private final Context context;
     private final JMethod method;

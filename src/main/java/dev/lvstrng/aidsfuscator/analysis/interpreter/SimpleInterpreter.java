@@ -13,6 +13,11 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 
 import java.util.List;
 
+/**
+ * Interpreter that keeps track of types and merges them accordingly.
+ * @author lvstrng
+ * @author brownie (proper merging)
+ */
 public class SimpleInterpreter extends Interpreter<SimpleValue> implements Opcodes {
     private final Context context;
     private final JMethod method;

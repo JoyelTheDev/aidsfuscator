@@ -4,8 +4,10 @@ import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Interpreter;
 
+/**
+ * Custom {@link Analyzer} implementation, in order to make `uninitializedThis` easier to keep track of.
+ */
 public class SimpleAnalyzer extends Analyzer<SimpleValue> {
-
     public SimpleAnalyzer(SimpleInterpreter interpreter) {
         super(interpreter);
     }

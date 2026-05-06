@@ -1,16 +1,17 @@
 package dev.lvstrng.aidsfuscator.polymorph;
 
 import dev.lvstrng.aidsfuscator.polymorph.impl.*;
-import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Supplier;
 
+/**
+ * Allows for easier managing of polymorphism for integers.
+ * @author lvstrng
+ */
 public class IntPolymorphStack extends Stack<IntMask<?>> {
     private static final List<Supplier<IntMask<?>>> allMasks = List.of(
             AddMask::new,
