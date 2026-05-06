@@ -144,6 +144,6 @@ Reference Obfuscation Inclusions is a file that specifies reference obfuscation 
   <br>`pkg/TestClass.test Ljava/lang/String;`</br>
 - Any field called `test` in any class that ends with `subpkg.TestClass` with `int` return type:
   <br>`*/subpkg/TestClass.test I`</br>
-- Any field called `test` in any class that's under a package called `pkg` return value
+- Any field called `test` in any class that's under a package called `pkg` with any return value
   <br>`*/pkg/*.test *`</br>
 Keep in mind: for fields, separate return type from name with a space.
