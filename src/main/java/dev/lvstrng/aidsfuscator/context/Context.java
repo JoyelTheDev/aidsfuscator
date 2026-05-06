@@ -37,7 +37,7 @@ import java.util.zip.ZipFile;
  * @author lvstrng
  */
 public class Context {
-    private String input, output, libPath;
+    private String input, output, libPath, javaPath;
     private final Map<String, JClass> classes, artificials, libraries, excluded;
     private int writerFlags;
     private int version;
@@ -67,7 +67,7 @@ public class Context {
 
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.libraryLoader      = new LibraryLoader(this);
+        this.libraryLoader      = new LibraryLoader(this, javaPath);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
         this.initOrder          = new ClassInitOrderHandler(this);
@@ -80,7 +80,7 @@ public class Context {
     public Context initialize() {
         if (!computeFrames) {
             Logger.warn("------------------------------------------------");
-            Logger.warn("You've disabled frame computation, you will not recieve any support. Enable it in config with computeFrames");
+            Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
             Logger.warn("------------------------------------------------");
         }
         this.dictionary         = new DefaultDictionary(this, dictionaryString);
@@ -369,6 +369,11 @@ public class Context {
 
     public Context libs(String libPath) {
         this.libPath = libPath;
+        return this;
+    }
+
+    public Context javaPath(String javaPath) {
+        this.javaPath = javaPath;
         return this;
     }
 

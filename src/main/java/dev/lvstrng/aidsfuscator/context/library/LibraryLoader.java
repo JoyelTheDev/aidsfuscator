@@ -8,14 +8,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.*;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -24,9 +20,11 @@ import java.util.zip.ZipInputStream;
 public class LibraryLoader {
     private static final Predicate<File> filter = f -> f.getName().endsWith(".jar") || f.getName().endsWith(".jmod");
     private final Context context;
+    private final String javaPath;
 
-    public LibraryLoader(Context context) {
+    public LibraryLoader(Context context, String javaPath) {
         this.context = context;
+        this.javaPath = javaPath;
     }
 
     public void loadLibraries(String path) {

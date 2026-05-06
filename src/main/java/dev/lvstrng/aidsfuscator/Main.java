@@ -18,16 +18,17 @@ public class Main {
     private static final String exclusionPrefix = "--exclusions=";
     private static final String initOrderPrefix = "--initOrder=";
     private static final String referencePrefix = "--references=";
+    private static final String javaPathPrefix = "--javaPath=";
 
     private static final String BAD_ARGS = """
             Usage tutorial.
             You ran aidsfuscator with no arguments (or bad arguments). Aidsfuscator is a CLI tool, run the obfuscator using any of these args:
             These files have to be in the `workspace/` folder provided in the ZIP file. If the path contains spaces, add double quotes.
-            \t`--config=` (Required)
+            \t`--config=`     (Required)
             \t`--exclusions=` (Optional)
-            \t`--initOrder=` (Optional)
+            \t`--initOrder=`  (Optional)
             \t`--references=` (Optional)
-            """;
+            """; // 	'--javaPath='   (Optional)
 
     public static void main(String[] args) {
         UpdateChecker.checkAndPrintUpdates();
@@ -41,6 +42,7 @@ public class Main {
         var exclusionPath = "";
         var initOrderPath = "";
         var referencePath = "";
+        var javaPath = "";
         for(var arg : args) {
             if(arg.startsWith(configPrefix))
                 configPath = arg.substring(configPrefix.length());
@@ -53,6 +55,9 @@ public class Main {
 
             if(arg.startsWith(referencePrefix))
                 referencePath = arg.substring(referencePrefix.length());
+
+            if(arg.startsWith(javaPathPrefix))
+                javaPath = arg.substring(javaPathPrefix.length());
         }
 
         if(configPath.isEmpty()) {
@@ -75,6 +80,9 @@ public class Main {
         context.initialize();
         if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
             new ClassInitOrderLoader(context, initOrderPath).load();
+
+        if(!javaPath.isEmpty())
+            context.javaPath(javaPath);
 
         context.transform()
                 .exportJar();
