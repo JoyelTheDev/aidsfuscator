@@ -31,7 +31,6 @@ import java.util.*;
  */
 public class MethodSaltTransformer extends Transformer {
     private final Setting<Boolean> advancedSalting = setting("advancedSalting", true); // adds a random number to AND gate the caller salt with another number, so salt values can not be traced backwards if callers are known
-    private final Setting<Boolean> seedUselessMethods = setting("seedUselessMethods", true);
 
     public MethodSaltTransformer() {
         super("Method Salting", "methodSalting");
