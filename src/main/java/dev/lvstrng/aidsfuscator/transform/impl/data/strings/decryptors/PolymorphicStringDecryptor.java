@@ -38,21 +38,22 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
     );
 
     public PolymorphicStringDecryptor() {
-        this.idxXor = random.nextInt(Short.MAX_VALUE);
+        this.idxXor = random.nextInt(Character.MAX_VALUE);
         this.traceXor = random.nextInt(Short.MAX_VALUE);
 
         this.stack = new IntPolymorphStack();
         int masks = random.nextInt(3, 10) + 1;
 
         List<Supplier<IntMask<?>>> types = List.of(
-                () -> new XorMask().ofRandomValue(Short.MAX_VALUE),
-                () -> new SubMask().ofRandomValue(Short.MAX_VALUE),
-                () -> new AddMask().ofRandomValue(Short.MAX_VALUE)
+                () -> new XorMask().ofRandomValue(Character.MAX_VALUE),
+                () -> new SubMask().ofRandomValue(Character.MAX_VALUE),
+                () -> new AddMask().ofRandomValue(Character.MAX_VALUE)
         );
 
         for(int i = 0; i < masks; i++) {
             stack.push(types.get(random.nextInt(types.size())).get());
         }
+        args.forEach(Arg::reset);
         Collections.shuffle(args);
     }
 
@@ -203,7 +204,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var idx = strings.size();
 
         var idxVal = idx ^ idxXor;
-        var firstKey = random.nextInt() >> 16;
+        var firstKey = random.nextInt(Character.MAX_VALUE);
 
         var list = new InsnList();
         for(var arg : args) {
@@ -238,10 +239,29 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
 
     @Override
     public String getDescriptor() {
-        return "(III)Ljava/lang/String;";
+        var format = new StringBuilder("(");
+        for(var arg : args) {
+            format.append(arg.type());
+        }
+        return format + ")Ljava/lang/String;";
     }
 
     private enum Arg {
-        INDEX, KEY1, KEY2;
+        INDEX("CCCI"), KEY1("CCSSSI"), KEY2("I");
+        private final String possibleTypes;
+        private String type;
+
+        Arg(String possibleTypes) {
+            this.possibleTypes = possibleTypes;
+            reset();
+        }
+
+        public String type() {
+            return type;
+        }
+
+        public void reset() {
+            this.type = String.valueOf(possibleTypes.charAt(random.nextInt(possibleTypes.length())));
+        }
     }
 }

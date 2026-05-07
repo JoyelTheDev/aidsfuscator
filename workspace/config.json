@@ -1,6 +1,6 @@
 {
-  "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
-  "out": "out-out.jar",
+  "in": "in.jar",
+  "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
@@ -36,7 +36,7 @@
     },
     "methodSalting": {
       "enabled": true,
-      "seedUselessMethods": false
+      "advancedSalting": true
     },
     "classSalting": {
       "enabled": true,
