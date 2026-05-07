@@ -147,8 +147,13 @@ public class MethodSaltTransformer extends Transformer {
             salt = random.nextInt();
 
         // make salts
-        for(var member : method.tree())
+        for(var member : method.tree()) {
             member.makeSalt(salt, -1);
+            if((member.access() & ACC_VARARGS) != 0)
+                member.core().access &= ~ACC_VARARGS;
+        }
         method.makeSalt(salt, -1);
+        if((method.access() & ACC_VARARGS) != 0)
+            method.core().access &= ~ACC_VARARGS;
     }
 }
