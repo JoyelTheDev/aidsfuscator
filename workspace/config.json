@@ -1,6 +1,6 @@
 {
   "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
-  "out": "out.jar",
+  "out": "out-out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,

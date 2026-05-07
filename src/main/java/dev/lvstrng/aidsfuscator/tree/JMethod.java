@@ -112,6 +112,9 @@ public class JMethod implements ISaltable<MethodSalt> {
             }
         }
 
+        if(signature() != null) {
+            core.signature = signature().replace(")", type.getDescriptor() + ")");
+        }
         core.desc = desc().replace(")", type.getDescriptor() + ")");
         core.maxLocals += type.getSize();
         return spot;

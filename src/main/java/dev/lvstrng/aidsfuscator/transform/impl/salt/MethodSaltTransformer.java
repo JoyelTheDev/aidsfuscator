@@ -1,14 +1,18 @@
 package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
+import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
+import dev.lvstrng.aidsfuscator.salt.ISalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -16,178 +20,136 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-//FIXME ClassCastException (InvokeDynamicInsnNode -> MethodInsnNode) @ line 78
+/**
+ * A transformer that adds an extra {@code int} parameter to methods where it's possible and strengthens other obfuscation transformers.
+ * <br>
+ * Rewritten on May 7, 2026
+ * </br>
+ * @author lvstrng
+ */
 public class MethodSaltTransformer extends Transformer {
-    private final Map<JMethod, List<AbstractInsnNode>> seedInsns;
+    private final Setting<Boolean> advancedSalting = setting("advancedSalting", true); // adds a random number to AND gate the caller salt with another number, so salt values can not be traced backwards if callers are known
     private final Setting<Boolean> seedUselessMethods = setting("seedUselessMethods", true);
 
     public MethodSaltTransformer() {
         super("Method Salting", "methodSalting");
-        this.seedInsns = new HashMap<>();
     }
 
     @Override
     public void transform(Context context) {
-        var salts = new HashMap<String, Integer>();
-        var methods = new HashMap<String, JMethod>();
-
         var graph = context.referenceGraph().build();
 
         for(var clazz : context.classes()) {
-            if(Exclusions.METHOD_SALTING.excluded(clazz))
-                continue;
-
-            if(clazz.tree().stream().anyMatch(Exclusions.METHOD_SALTING::excluded))
-                continue;
-
             for(var method : clazz.methods()) {
-                if(Exclusions.METHOD_SALTING.excluded(method))
+                if(cantEditMethod(clazz, method, true))
                     continue;
 
-                if(clazz.tree().stream().anyMatch(e -> Exclusions.METHOD_SALTING.excluded(e, method)))
-                    continue;
-
+                // ---- CHECK FOR INVALID CALLS ----
                 var refs = graph.refs(method);
-                if(!seedUselessMethods.value()) {
-                    var methodsIn = graph.methodRefsIn(method);
-                    var fieldsIn = graph.fieldRefsIn(method);
-                    if(refs.isEmpty()) {
-                        if(methodsIn.stream().allMatch(e -> e.method().owner().isLibrary()) && fieldsIn.stream().allMatch(e -> e.field().owner().isLibrary()))
-                            continue;
+                if(refs.stream().anyMatch(MethodCallNode::cantEdit))
+                    continue;
+
+                var foundInvalid = false;
+                for(var other : method.tree()) {
+                    var otherRefs = graph.refs(other);
+                    if(otherRefs.stream().noneMatch(MethodCallNode::cantEdit))
+                        continue;
+
+                    foundInvalid = true;
+                    break;
+                }
+
+                if(foundInvalid)
+                    continue;
+
+                // ---- REGISTER SALTS FOR METHODS ----
+                register(method);
+            }
+        }
+
+        // ---- ADD PARAMETER TO METHODS ----
+        var saltedMethods = new HashSet<JMethod>();
+        for(var clazz : context.classes()) {
+            for(var method : clazz.methods()) {
+                if(!method.hasSalt())
+                    continue;
+
+                method.salt().updateVar(method.allocParameter(Type.INT_TYPE));
+                saltedMethods.add(method);
+                markChange();
+            }
+        }
+
+        // ---- OBFUSCATE RAW SALTS ----
+        for(var method : saltedMethods) {
+            var refs = graph.refs(method);
+            var salt = method.salt();
+
+            for(var ref : refs) {
+                var caller = ref.caller();
+                var insn = (MethodInsnNode) ref.insn();
+
+                var list = new InsnBuilder();
+                if(caller.hasSalt()) {
+                    var callerSalt = caller.salt();
+
+                    if(callerSalt.value() != salt.value()) {
+                        saltTheSalt(context, salt, callerSalt, list);
+                    } else {
+                        list.add(callerSalt.load());
                     }
-                }
-
-                if(refs.stream().anyMatch(e -> !e.canEdit()))
-                    continue;
-
-                registerTree(graph, clazz, method, salts, methods);
-            }
-        }
-
-        for(var id : methods.keySet()) {
-            var seed = salts.get(id);
-            var method = methods.get(id);
-            var nodes = graph.refs(method);
-
-            for(var node : nodes) {
-                var insn = (MethodInsnNode) node.insn();
-
-                insn.desc = insn.desc.replace(")", "I)");
-                node.caller().insns().insertBefore(
-                        insn,
-                        add(context, node.caller(), ASMUtils.pushInt(seed))
-                );
-            }
-
-            method.salt().updateVar(method.allocParameter(Type.INT_TYPE));
-            markChange();
-        }
-
-        for(var method : seedInsns.keySet()) {
-            if(!method.hasSalt())
-                continue;
-
-            var frames = method.frames(context);
-            for(var insn : seedInsns.get(method)) {
-                if(frames.get(insn).getLocal(method.salt().local()).isUninitialized())
-                    continue;
-
-                var num = ASMUtils.getInt(insn);
-                var list = new InsnList();
-
-                if(num != method.salt().value()) {
-                    list.add(method.salt().load());
-                    list.add(context.properties().add(
-                            ASMUtils.pushInt(method.salt().value() ^ num),
-                            Property.IGNORE_INTEGER
-                    ));
-                    list.add(new InsnNode(IXOR));
                 } else {
-                    list.add(method.salt().load());
+                    list._int(salt.value()).addProps(context, Property.UNPROTECTED_SALT);
                 }
 
-                method.insns().insertBefore(insn, list);
-                method.insns().remove(insn);
+                caller.insns().insertBefore(insn, list.result());
+                insn.desc = insn.desc.replace(")", "I)");
             }
         }
     }
 
-    private AbstractInsnNode add(Context context, JMethod caller, AbstractInsnNode insn) {
-        seedInsns.computeIfAbsent(caller, _ -> new ArrayList<>()).add(
-                context.properties().add(insn, Property.UNPROTECTED_SALT)
-        );
-        return insn;
+    private void saltTheSalt(Context context, ISalt salt, ISalt callerSalt, InsnBuilder list) {
+        if(advancedSalting.value()) {
+            var mask = random.nextInt();
+            var maskedSalt = callerSalt.value() & mask;
+
+            list
+                    .add(callerSalt.load())
+                    ._int(mask).addProps(context, Property.IGNORE_INTEGER)
+                    .iand()
+                    ._int(maskedSalt ^ salt.value()).addProps(context, Property.IGNORE_INTEGER)
+                    .ixor();
+        } else {
+            list
+                    .add(callerSalt.load())
+                    ._int(callerSalt.value() ^ salt.value()).addProps(context, Property.IGNORE_INTEGER)
+                    .ixor();
+        }
     }
 
-    /**
-     * Registers a seed for the entire method's tree
-     * @param graph built reference graph
-     * @param clazz owner class
-     * @param method the method to start from
-     * @param salts registered salts
-     * @param methods registered methods
-     */
-    private void registerTree(ReferenceGraph graph, JClass clazz, JMethod method, Map<String, Integer> salts, Map<String, JMethod> methods) {
-        var self = method.fullName();
-        if(cantEditMethod(clazz, method, true))
-            return;
-
-        var canContinue = true;
+    private void register(JMethod method) {
+        // find maybe existing salts
+        int salt = -1;
         for(var member : method.tree()) {
-            var calls = graph.refs(member);
-
-            if(calls.stream().anyMatch(e -> !e.canEdit())) {
-                canContinue = false;
-                break;
-            }
-        }
-
-        if(!canContinue)
-            return;
-
-        Integer salt = null;
-        for(var member : clazz.tree()) {
-            var id = MemberUtils.fullMethod(member, method);
-            if(!salts.containsKey(id))
+            if(!member.hasSalt())
                 continue;
 
-            salt = salts.get(id);
+            salt = member.salt().value();
             break;
         }
 
-        if(salts.containsKey(self) && salt == null)
-            salt = salts.get(self);
+        if(method.hasSalt())
+            salt = method.salt().value();
 
-        if(salt == null)
+        // if no salt found, generate a new one
+        if(salt == -1)
             salt = random.nextInt();
 
-        for(var member : clazz.tree()) {
-            if(member.isLibrary())
-                continue;
-
-            var id = MemberUtils.fullMethod(member, method);
-            salts.put(id, salt);
-
-            var result = member.findMethod(method.name(), method.desc());
-            if(result.isEmpty())
-                continue;
-
-            var res = result.get();
-            methods.put(id, res);
-            res.makeSalt(salt, -1);
-            if((res.access() & ACC_VARARGS) != 0)
-                res.core().access &= ~ACC_VARARGS;
-        }
-
-        salts.put(self, salt);
-        methods.put(self, method);
+        // make salts
+        for(var member : method.tree())
+            member.makeSalt(salt, -1);
         method.makeSalt(salt, -1);
-        if((method.access() & ACC_VARARGS) != 0)
-            method.core().access &= ~ACC_VARARGS;
     }
 }

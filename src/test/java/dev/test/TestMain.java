@@ -16,7 +16,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("eval.jar")
+                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
                 .libs("libs/")
                 .out("out.jar")
                 .initialize();
@@ -26,7 +26,6 @@ public class TestMain {
 
         context.transform(
                 new MethodSaltTransformer(),
-                new SimpleClassSaltTransformer(),
                 new StringEncryptTransformer()
         ).exportJar();
     }

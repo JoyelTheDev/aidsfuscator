@@ -21,6 +21,10 @@ public record MethodCallNode(JClass callerClass, JMethod caller, JMethod method,
         return !method.isLibrary();
     }
 
+    public boolean cantEdit() {
+        return !canEdit();
+    }
+
     @Override
     public String toString() {
         return "{ " + caller + " -> " + method + " }";
