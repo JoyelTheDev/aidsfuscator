@@ -13,11 +13,7 @@ import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class MethodParameterObfuscationTransformer extends Transformer {
@@ -28,199 +24,126 @@ public class MethodParameterObfuscationTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         var graph = context.referenceGraph().build();
-        var methods = new HashMap<JMethod, String>(); // method -> old desc
+        var methods = new HashSet<JMethod>();
 
         for(var clazz : context.classes()) {
             for(var method : clazz.methods()) {
-                registerMethod(graph, clazz, method, methods);
+                if(cantEditMethod(clazz, method))
+                    continue;
+
+                var refs = graph.refs(method);
+                if(refs.stream().anyMatch(MethodCallNode::cantEdit))
+                    continue;
+
+                var foundInvalid = false;
+                for(var other : method.tree()) {
+                    var otherRefs = graph.refs(other);
+                    if(otherRefs.stream().noneMatch(MethodCallNode::cantEdit) && !cantEditMethod(other.owner(), other))
+                        continue;
+
+                    foundInvalid = true;
+                    break;
+                }
+
+                if(foundInvalid)
+                    continue;
+
+                register(method, methods);
             }
         }
 
-        var modified = new HashSet<AbstractInsnNode>();
-        for(var entry : methods.entrySet()) {
-            var method = entry.getKey();
-            var desc = entry.getValue();
+        for(var method : methods) {
+            var args = method.args();
 
-            var args = Type.getArgumentTypes(desc);
-            var refs = new LinkedHashSet<MethodCallNode>();
-            for(var member : this.populateHierarchy(method)) {
-                refs.addAll(graph.refs(member));
-            }
+            changeRefs(context, method, graph, args);
+            changeBody(context, method, args);
+        }
+    }
 
-            for(var node : refs) {
-                var call = (MethodInsnNode) node.insn();
-                if(!modified.add(call))
-                    continue;
+    private void changeBody(Context context, JMethod method, Type[] args) {
+        markChange();
 
-                var list = new InsnBuilder()
-                        .add(context.properties().add(ASMUtils.pushInt(args.length), Property.IGNORE_INTEGER))
-                        .anewarray("java/lang/Object");
+        method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
+        if(method.isAbstract() || method.insns().size() == 0)
+            return;
 
-                for(int i = args.length - 1; i >= 0; i--) {
-                    var arg = args[i];
+        int arrayIndex = method.isVirtual() ? 1 : 0;
+        var currentVar = arrayIndex + 1;
+        var builder = new InsnBuilder();
 
-                    if(arg.getSize() == 2) {
-                        list.dup_x2().dup_x2().pop();
-                    } else list.dup_x1().swap();
+        builder._var(ALOAD, arrayIndex);
+        for(int i = 0; i < args.length; i++) {
+            var arg = args[i];
 
-                    ASMUtils.box(list.result(), arg);
-                    list
-                            .add(context.properties().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
-                            .swap()
-                            .aastore();
+            builder
+                    .dup()
+                    ._int(i).addProps(context, Property.IGNORE_INTEGER)
+                    .aaload();
+            ASMUtils.unbox(builder.result(), arg);
+            builder._var(arg.getOpcode(ISTORE), currentVar);
+
+            currentVar += arg.getSize();
+        }
+        builder.pop();
+
+        for(var insn : method.insns()) {
+            switch (insn) {
+                case VarInsnNode v -> {
+                    if(method.isVirtual() && v.var == 0)
+                        continue;
+
+                    v.var++;
                 }
-
-                node.caller().insns().insertBefore(call, list.result());
-                call.desc = method.desc();
+                case IincInsnNode v -> v.var++;
+                default -> {}
             }
+        }
 
-            if(method.hasSalt())
-                method.salt().updateVar(method.salt().local() + 1);
+        method.insns().insert(builder.result());
+        method.allocVar();
+        method.core().access &= ~ACC_VARARGS;
+        if(method.hasSalt())
+            method.salt().updateVar(method.salt().local() + 1);
+    }
 
-            if(method.isAbstract() || method.insns().size() == 0)
-                continue;
+    private void changeRefs(Context context, JMethod method, ReferenceGraph graph, Type[] args) {
+        var refs = graph.refs(method);
 
-            var array = method.isVirtual() ? 1 : 0;
-            var current = array + 1;
-            var builder = new InsnBuilder();
+        for(var ref : refs) {
+            var insn = (MethodInsnNode) ref.insn();
 
-            builder._var(ALOAD, array);
-            for(int i = 0; i < args.length; i++) {
+            var list = new InsnBuilder()
+                    ._int(args.length).addProps(context, Property.IGNORE_INTEGER)
+                    .anewarray("java/lang/Object");
+
+            for(int i = args.length - 1; i >= 0; i--) {
                 var arg = args[i];
 
-                builder
-                        .dup()
-                        .add(context.properties().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER))
-                        .aaload();
-                ASMUtils.unbox(builder.result(), arg);
-                builder._var(arg.getOpcode(ISTORE), current);
+                if(arg.getSize() == 2) {
+                    list.dup_x2().dup_x2().pop();
+                } else list.dup_x1().swap();
 
-                current += arg.getSize();
-            }
-            builder.add(method.setSafeInsn(new InsnNode(POP)));
-
-            for(var insn : method.insns()) {
-                switch (insn) {
-                    case VarInsnNode v -> {
-                        if(method.isVirtual() && v.var == 0)
-                            continue;
-
-                        v.var++;
-                    }
-                    case IincInsnNode v -> v.var++;
-                    default -> {}
-                }
+                ASMUtils.box(list.result(), arg);
+                list.
+                        _int(i).addProps(context, Property.IGNORE_INTEGER)
+                        .swap()
+                        .aastore();
             }
 
-            method.insns().insert(builder.result());
+            ref.caller().insns().insertBefore(insn, list.result());
+            insn.desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
+        }
+    }
+
+    private void register(JMethod method, Set<JMethod> methods) {
+        for(var member : method.tree()) {
+            methods.add(member);
+            if((member.access() & ACC_VARARGS) != 0)
+                member.core().access &= ~ACC_VARARGS;
+        }
+
+        methods.add(method);
+        if((method.access() & ACC_VARARGS) != 0)
             method.core().access &= ~ACC_VARARGS;
-            method.core().maxLocals++;
-            markChange();
-        }
-    }
-
-    private void registerMethod(ReferenceGraph graph, JClass clazz, JMethod method, Map<JMethod, String> methods) {
-        if(this.cantEditMethod(clazz, method))
-            return;
-
-        if(this.isIgnoredSynthetic(method))
-            return;
-
-        var hierarchy = this.populateHierarchy(method);
-        if(this.shouldSkipHierarchy(graph, hierarchy))
-            return;
-
-        var returnType = method.returnType();
-        var newDesc = "([Ljava/lang/Object;)" + returnType.getDescriptor();
-
-        if(this.hasDuplicateSignature(hierarchy, method.name(), newDesc))
-            return;
-
-        for(var member : hierarchy) {
-            if(member.isLibrary())
-                continue;
-
-            if(methods.containsKey(member))
-                continue;
-
-            methods.put(member, member.desc());
-            member.core().desc = newDesc;
-            member.core().signature = null;
-        }
-    }
-
-    private Set<JMethod> populateHierarchy(JMethod method) {
-        var hierarchy = new LinkedHashSet<JMethod>();
-        hierarchy.add(method);
-        hierarchy.addAll(method.tree());
-        return hierarchy;
-    }
-
-    private boolean shouldSkipHierarchy(ReferenceGraph graph, Set<JMethod> hierarchy) {
-        for(var member : hierarchy) {
-            if(member.isLibrary())
-                continue;
-
-            if(this.cantEditMethod(member.owner(), member))
-                return true;
-
-            if(this.isIgnoredSynthetic(member))
-                return true;
-
-            var refs = graph.refs(member);
-            if(refs.stream().anyMatch(e -> !e.canEdit()))
-                return true;
-        }
-
-        return false;
-    }
-
-    private boolean hasDuplicateSignature( Set<JMethod> hierarchy, String name, String desc) {
-        var simpleName = MemberUtils.methodDesc(name, desc);
-        var classes = new LinkedHashSet<JClass>();
-        for(var member : hierarchy) {
-            var owner = member.owner();
-            if(owner.isLibrary())
-                continue;
-
-            classes.add(owner);
-            for(var related : owner.tree()) {
-                if(related.isLibrary())
-                    continue;
-
-                classes.add(related);
-            }
-        }
-
-        for(var clazz : classes) {
-            if(this.hasDuplicateSignatureInClass(clazz, hierarchy, simpleName))
-                return true;
-
-            for(var related : clazz.tree()) {
-                if(related.isLibrary())
-                    continue;
-
-                if(this.hasDuplicateSignatureInClass(related, hierarchy, simpleName))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean hasDuplicateSignatureInClass(JClass clazz, Set<JMethod> hierarchy, String simpleName) {
-        for(var method : clazz.methods()) {
-            if(hierarchy.contains(method))
-                continue;
-
-            if(method.simpleName().equals(simpleName))
-                return true;
-        }
-
-        return false;
-    }
-
-    private boolean isIgnoredSynthetic(JMethod method) {
-        return (method.access() & ACC_SYNTHETIC) != 0 && !method.isBridge();
     }
 }

@@ -16,17 +16,16 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("eval.jar")
                 .libs("libs/")
-                .out("out.jar")
+                .out("out-out.jar")
                 .initialize();
 
         //context.referenceManager().addMethodCandidate("*");
         //context.referenceManager().addFieldCandidate("*");
 
         context.transform(
-                new MethodSaltTransformer(),
-                new StringEncryptTransformer()
+                new MethodParameterObfuscationTransformer()
         ).exportJar();
     }
 }
