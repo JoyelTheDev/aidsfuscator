@@ -41,7 +41,19 @@ public class MethodSaltTransformer extends Transformer {
         var graph = context.referenceGraph().build();
 
         for(var clazz : context.classes()) {
+            if(Exclusions.METHOD_SALTING.excluded(clazz))
+                continue;
+
+            if(clazz.tree().stream().anyMatch(Exclusions.METHOD_SALTING::excluded))
+                continue;
+
             for(var method : clazz.methods()) {
+                if(Exclusions.METHOD_SALTING.excluded(method))
+                    continue;
+
+                if(clazz.tree().stream().anyMatch(e -> Exclusions.METHOD_SALTING.excluded(e, method)))
+                    continue;
+
                 if(cantEditMethod(clazz, method, true))
                     continue;
 
