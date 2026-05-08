@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
@@ -102,13 +103,19 @@ public class SimpleClassSaltTransformer extends Transformer {
     }
 
     private void prepSalt(Context context, JClass clazz, JMethod method, int saltLocal, int saltValue) {
-        var list = new InsnList();
-        list.add(clazz.salt().load());
-        list.add(context.properties().add(ASMUtils.pushInt(saltValue ^ clazz.salt().value()), Property.IGNORE_INTEGER));
-        list.add(new InsnNode(IXOR));
-        list.add(new VarInsnNode(ISTORE, saltLocal));
+        var list = new InsnBuilder();
+        var mask = random.nextInt();
+        var maskedSalt = clazz.salt().value() & mask;
+
+        list
+                .add(clazz.salt().load())
+                ._int(mask).addProps(context, Property.IGNORE_INTEGER)
+                .iand()
+                ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER)
+                .ixor()
+                ._var(ISTORE, saltLocal);
 
         method.makeSalt(saltValue, saltLocal);
-        method.insns().insert(list);
+        method.insns().insert(list.result());
     }
 }
