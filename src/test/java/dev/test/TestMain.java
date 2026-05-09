@@ -1,6 +1,7 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.SimpleClassSaltTransformer;
 
@@ -18,7 +19,9 @@ public class TestMain {
 
         context.transform(
                 new MethodSaltTransformer(),
-                new SimpleClassSaltTransformer()
+                new SimpleClassSaltTransformer(),
+
+                new StringEncryptTransformer()
         ).exportJar();
     }
 }

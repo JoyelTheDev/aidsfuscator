@@ -1,117 +1,21 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data;
+package dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.IIntegerInitializer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple number encryption transformer using XOR.
- */
-public class IntegerEncryptTransformer extends Transformer {
-    public IntegerEncryptTransformer() {
-        super("Encrypt Integer Constants", "integerEncrypt");
-    }
-
+public class DefaultIntegerInitializer implements IIntegerInitializer {
     @Override
-    public void transform(Context context) {
-        for(var clazz : context.classes()) {
-            if(clazz.isInterface() && clazz.version() < V1_8)
-                continue;
-
-            if(Exclusions.INTEGER_ENCRYPTION.excluded(clazz))
-                continue;
-
-            var numbers = new ArrayList<Integer>();
-            var decryptorName = context.dictionary().newMethodName(clazz, "(II)I");
-            var fieldName = context.dictionary().newFieldName(clazz, "[I");
-            int idxXor = random.nextInt();
-
-            for(var method : clazz.methods()) {
-                if(Exclusions.INTEGER_ENCRYPTION.excluded(method))
-                    continue;
-
-                var frames = method.frames(context);
-                for(var insn : method.insns()) {
-                    if(!ASMUtils.isIntPush(insn))
-                        continue;
-
-                    if(ASMUtils.isIconst(insn))
-                        continue;
-
-                    if(context.properties().get(insn).has(Property.IGNORE_INTEGER))
-                        continue;
-
-                    // ---- PREPARE KEYS -----
-                    var key = method.hasSalt() ? method.salt().value() : random.nextInt();
-                    int idxValue = numbers.size() ^ idxXor;
-                    var num = ASMUtils.getInt(insn) ^ key ^ idxValue;
-                    numbers.add(num);
-
-                    // ---- INSTRUCTIONS ----
-                    var builder = new InsnBuilder()._int(idxValue);
-                    if(method.canSalt(frames.get(insn))) {
-                        builder.add(method.salt().load());
-                    } else {
-                        builder._int(key);
-                    }
-                    builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, clazz.name(), decryptorName, "(II)I"), Property.IGNORE_REF_OBFUSCATION));
-
-                    method.insns().insertBefore(insn, builder.result());
-                    method.insns().remove(insn);
-                    markChange();
-                }
-            }
-
-            if(numbers.isEmpty())
-                continue;
-
-            int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
-            clazz.createField(access, fieldName, "[I");
-
-            generateDecryptor(clazz, fieldName, decryptorName, idxXor);
-            generateClinit(context, clazz, fieldName, numbers);
-        }
-    }
-
-    private void generateDecryptor(JClass clazz, String fieldName, String decryptorName, int idxXor) {
-        int access = (clazz.isInterface())
-                ? ACC_PUBLIC | ACC_STATIC
-                : ACC_PRIVATE | ACC_STATIC;
-        var method = clazz.createMethod(access, decryptorName, "(II)I");
-        // ---- LOCALS ----
-        if(clazz.isInterface()) method.allocVar();
-
-        var idxVal = method.allocVar(Type.INT_TYPE);
-        var key = method.allocVar(Type.INT_TYPE);
-
-        new InsnBuilder(method.insns())
-                .label(new LabelNode())
-
-                .label(new LabelNode())
-                .field(GETSTATIC, clazz.name(), fieldName, "[I")
-                ._var(ILOAD, idxVal)
-                ._int(idxXor)
-                .ixor()
-                .iaload()
-                ._var(ILOAD, key)
-                .ixor()
-                ._var(ILOAD, idxVal)
-                .ixor()
-                ._ireturn()
-        ;
-    }
-
-    private void generateClinit(Context context, JClass clazz, String fieldName, List<Integer> numbers) {
+    public void generate(Context context, JClass clazz, String fieldName, List<Integer> numbers) {
         var clinit = clazz.findOrCreateClinit();
         var key = random.nextInt();
         var theStr = new StringBuilder();
@@ -229,12 +133,5 @@ public class IntegerEncryptTransformer extends Transformer {
                 .jump(IF_ICMPLT, loop);
 
         clinit.insertSafe(builder.result());
-    }
-
-    private static byte[] intToBytes(int i) {
-        return new byte[] {
-                (byte) (i >> 24), (byte) (i >> 16),
-                (byte) (i >> 8), (byte) (i)
-        };
     }
 }

@@ -34,7 +34,7 @@ public class JClass implements ISaltable<ClassSalt> {
 
     private ClassSalt salt;
     private JClass initializerClass; // class that initializes
-    private List<JClass> initializes; // initialized these classes
+    private final List<JClass> initializes; // initialized these classes
 
     public JClass(ClassNode core) {
         this.properties = new PropertyContainer();
