@@ -203,7 +203,7 @@ public class DefaultStringDecryptor implements IStringDecryptor {
         } else {
             builder.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
         }
-        builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), decryptorName, "(II)Ljava/lang/String;"), Property.IGNORE_REF_OBFUSCATION));
+        builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), decryptorName, "(II)Ljava/lang/String;", method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION));
         strings.add(encryptedString);
 
         return builder.result();

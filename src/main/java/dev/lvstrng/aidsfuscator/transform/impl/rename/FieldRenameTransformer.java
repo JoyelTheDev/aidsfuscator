@@ -27,6 +27,9 @@ public class FieldRenameTransformer extends Transformer {
             if(clazz.tree().stream().anyMatch(Exclusions.RENAME_CLASS::excluded))
                 continue;
 
+            if(clazz.isRecord())
+                clazz.core().recordComponents.clear();
+
             mapFields(context, clazz);
         }
 

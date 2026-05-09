@@ -220,7 +220,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 }
             }
         }
-        list.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor()), Property.IGNORE_REF_OBFUSCATION));
+        list.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION));
 
         var chars = str.toCharArray();
         for(int i = 0; i < chars.length; i++) {
