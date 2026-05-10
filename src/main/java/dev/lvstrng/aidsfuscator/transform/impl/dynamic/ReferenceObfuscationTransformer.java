@@ -97,7 +97,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                                 list.add(method.salt().load());
                                 list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
                                 list.add(new InsnNode(IAND));
-                                list.add(context.properties().add(ASMUtils.pushInt(masked ^ decKey), Property.IGNORE_INTEGER));
+                                list.add(context.properties().add(ASMUtils.pushInt(masked ^ (decKey << 16)), Property.IGNORE_INTEGER));
                                 list.add(new InsnNode(IXOR));
                             } else {
                                 list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
