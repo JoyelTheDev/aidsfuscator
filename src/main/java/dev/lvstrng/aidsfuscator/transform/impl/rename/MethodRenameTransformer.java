@@ -28,9 +28,6 @@ public class MethodRenameTransformer extends Transformer {
             if(Exclusions.RENAME_METHOD.excluded(clazz))
                 continue;
 
-            if(clazz.tree().stream().anyMatch(Exclusions.RENAME_METHOD::excluded))
-                continue;
-
             mapMethods(context, clazz);
         }
 
@@ -45,6 +42,9 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : methods) {
+            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_METHOD.excluded(e) && e.hasMethodInTree(context, method)))
+                continue;
+
             if(Exclusions.RENAME_METHOD.excluded(method)) {
                 continue;
             }
@@ -62,7 +62,7 @@ public class MethodRenameTransformer extends Transformer {
                 continue;
             }
 
-            var impactedClasses = this.collectImpactedClasses(hierarchy);
+            var impactedClasses = this.collectImpactedClasses(context, hierarchy);
             var newName = this.findExistingName(hierarchy);
             if(newName.isEmpty()) {
                 newName = this.nextMethodName(context, impactedClasses, hierarchy, method.desc());
@@ -107,7 +107,7 @@ public class MethodRenameTransformer extends Transformer {
         return false;
     }
 
-    private Set<JClass> collectImpactedClasses(Set<JMethod> hierarchy) {
+    private Set<JClass> collectImpactedClasses(Context context, Set<JMethod> hierarchy) {
         var impactedClasses = new LinkedHashSet<JClass>();
         for(var member : hierarchy) {
             var owner = member.owner();
@@ -118,6 +118,10 @@ public class MethodRenameTransformer extends Transformer {
             impactedClasses.add(owner);
             for(var related : owner.tree()) {
                 if(related.isLibrary()) {
+                    continue;
+                }
+
+                if(!related.hasMethodInTree(context, member)) {
                     continue;
                 }
 

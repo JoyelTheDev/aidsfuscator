@@ -180,6 +180,22 @@ public class JClass implements ISaltable<ClassSalt> {
         return add(node);
     }
 
+    public boolean hasMethodInTree(Context context, String name, String desc) {
+        return findMethodFull(context, name, desc) != null;
+    }
+
+    public boolean hasMethodInTree(Context context, JMethod method) {
+        return hasMethodInTree(context, method.name(), method.desc());
+    }
+
+    public boolean hasFieldInTree(Context context, String name, String desc) {
+        return findFieldFull(context, name, desc) != null;
+    }
+
+    public boolean hasFieldInTree(Context context, JField field) {
+        return hasFieldInTree(context, field.name(), field.desc());
+    }
+
     public JMethod findMethodFull(Context context, String name, String desc) {
         var method = findMethod(name, desc).orElse(null);
         if(method != null)

@@ -24,12 +24,6 @@ public class FieldRenameTransformer extends Transformer {
             if(Exclusions.RENAME_FIELD.excluded(clazz))
                 continue;
 
-            if(clazz.tree().stream().anyMatch(Exclusions.RENAME_CLASS::excluded))
-                continue;
-
-            if(clazz.isRecord())
-                clazz.core().recordComponents.clear();
-
             mapFields(context, clazz);
         }
 
@@ -46,6 +40,12 @@ public class FieldRenameTransformer extends Transformer {
 
         // ---- REMAPPING ENTIRE TREE ----
         for(var field : fields) {
+            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_FIELD.excluded(e, field) && e.hasFieldInTree(context, field)))
+                continue;
+
+            if(clazz.isRecord())
+                clazz.core().recordComponents.clear();
+
             if(Exclusions.RENAME_FIELD.excluded(field))
                 continue;
 
