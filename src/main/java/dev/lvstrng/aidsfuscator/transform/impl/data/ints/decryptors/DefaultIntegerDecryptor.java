@@ -66,7 +66,7 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
     @Override
     public InsnList addAndCall(Context context, JMethod method, AbstractInsnNode callSite, Map<AbstractInsnNode, SimpleFrame> frames, List<Integer> numbers, int num) {
         // ---- PREPARE KEYS -----
-        var key = method.hasSalt() ? method.salt().value() : random.nextInt();
+        var key = random.nextInt();
         int idxValue = numbers.size() ^ idxXor;
         num = ASMUtils.getInt(callSite) ^ key ^ idxValue;
         numbers.add(num);
@@ -74,7 +74,16 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
         // ---- INSTRUCTIONS ----
         var builder = new InsnBuilder()._int(idxValue);
         if(method.canSalt(frames.get(callSite))) {
-            builder.add(method.salt().load());
+            var mask = random.nextInt();
+            var masked = method.salt().value() & mask;
+
+            builder
+                    .add(method.salt().load())
+                    ._int(mask).addProps(context, Property.IGNORE_INTEGER)
+                    .iand()
+                    ._int(masked ^ key).addProps(context, Property.IGNORE_INTEGER)
+                    .ixor()
+            ;
         } else {
             builder._int(key);
         }

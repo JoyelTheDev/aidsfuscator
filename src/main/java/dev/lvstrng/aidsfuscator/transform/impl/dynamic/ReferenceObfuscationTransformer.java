@@ -10,10 +10,7 @@ import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.*;
 
@@ -78,7 +75,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                                 continue;
                             }
 
-                            var decKey = method.canSalt(frame) ? method.salt().value() >> 16 : random.nextInt() >> 16;
+                            var decKey = random.nextInt() >> 16;
                             var idx = add(call.owner, call.name, call.desc, decKey);
 
                             var handle = new Handle(H_INVOKESTATIC, refClass.name(), gen.outerInvoker.name(), gen.outerInvoker.desc(), false);
@@ -94,7 +91,14 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
+                                var mask = random.nextInt();
+                                var masked = method.salt().value() & mask;
+
                                 list.add(method.salt().load());
+                                list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+                                list.add(new InsnNode(IAND));
+                                list.add(context.properties().add(ASMUtils.pushInt(masked ^ decKey), Property.IGNORE_INTEGER));
+                                list.add(new InsnNode(IXOR));
                             } else {
                                 list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
                             }

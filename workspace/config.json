@@ -1,5 +1,5 @@
 {
-  "in": "eval.jar",
+  "in": "in.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -18,7 +18,7 @@
       "shuffle": true
     },
     "renameMethods": {
-      "enabled": true,
+      "enabled": false,
       "prefix": "",
       "shuffle": true
     },
@@ -35,21 +35,21 @@
       "remove": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "advancedSalting": true
     },
     "classSalting": {
-      "enabled": false,
+      "enabled": true,
       "unifyAccess": true
     },
     "fixConstants": {
       "enabled": false
     },
     "integerEncrypt": {
-      "enabled": false
+      "enabled": true
     },
     "encryptStrings": {
-      "enabled": false,
+      "enabled": true,
       "translateConcat": true,
       "minLength": 2
     },
@@ -64,7 +64,7 @@
       "enabled": false
     },
     "referenceObfuscate": {
-      "enabled": false
+      "enabled": true
     }
   }
 }

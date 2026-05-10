@@ -192,16 +192,24 @@ public class DefaultStringDecryptor implements IStringDecryptor {
         var traceKey = ((callerClass.hashCode() ^ callerMethod.hashCode()) >> 16) ^ traceXor;
 
         // ---- enc ----
-        var key = method.hasSalt() ? method.salt().value() >> 16 : random.nextInt() >> 16;
+        var key = random.nextInt() >> 16;
         var encryptedString = CryptUtils.xor(str, key ^ traceKey, keys, keys[0]);
         var idx = strings.size();
         var idxVal = idx ^ idxXor;
 
         var builder = new InsnBuilder().add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
         if(method.canSalt(frames.get(callSite))) {
-            builder.add(method.salt().load());
+            var mask = random.nextInt();
+            var masked = method.salt().value() & mask;
+
+            builder
+                    .add(method.salt().load())
+                    ._int(mask)
+                    .iand()
+                    ._int(masked ^ (key << 16))
+                    .ixor();
         } else {
-            builder.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
+            builder._int((key << 16) | random.nextInt(Short.MAX_VALUE)).addProps(context, Property.IGNORE_INTEGER);
         }
         builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), decryptorName, "(II)Ljava/lang/String;", method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION));
         strings.add(encryptedString);

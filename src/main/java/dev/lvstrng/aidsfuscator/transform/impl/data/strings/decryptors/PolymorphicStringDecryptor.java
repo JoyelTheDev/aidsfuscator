@@ -14,10 +14,7 @@ import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -213,7 +210,14 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 case KEY1 -> list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
                 case KEY2 -> {
                     if(method.canSalt(frames.get(callSite))) {
+                        var mask = random.nextInt();
+                        var masked = method.salt().value() & mask;
+
                         list.add(method.salt().load());
+                        list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+                        list.add(new InsnNode(IAND));
+                        list.add(context.properties().add(ASMUtils.pushInt(masked ^ (key << 16)), Property.IGNORE_INTEGER));
+                        list.add(new InsnNode(IXOR));
                     } else {
                         list.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
                     }

@@ -1,7 +1,1 @@
-{
-  "renameMethod": {
-    "method": [
-      "*/Test.run()V"
-    ]
-  }
-}
+{}
