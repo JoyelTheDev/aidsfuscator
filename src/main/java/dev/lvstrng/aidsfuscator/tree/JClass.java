@@ -110,6 +110,10 @@ public class JClass implements ISaltable<ClassSalt> {
         return Modifier.isInterface(access());
     }
 
+    public boolean isAnnotation() {
+        return (access() & Opcodes.ACC_ANNOTATION) != 0;
+    }
+
     public boolean isEnum() {
         return core.superName != null && core.superName.equals("java/lang/Enum");
     }

@@ -35,6 +35,7 @@ public class MethodRenameTransformer extends Transformer {
     }
 
     private void mapMethods(Context context, JClass clazz) {
+        // ---- SHUFFLE IF NEEDED ----
         var methods = clazz.methods();
         if(this.shuffle.value()) {
             Collections.shuffle(methods);
@@ -42,35 +43,32 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : methods) {
+            // ---- EXCLUSIONS
             if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_METHOD.excluded(e) && e.hasMethodInTree(context, method)))
                 continue;
 
-            if(Exclusions.RENAME_METHOD.excluded(method)) {
+            if(Exclusions.RENAME_METHOD.excluded(method))
                 continue;
-            }
 
             var hierarchy = this.collectHierarchy(method);
-            if(this.shouldSkipHierarchy(hierarchy)) {
+            if(this.shouldSkipHierarchy(hierarchy))
                 continue;
-            }
 
-            if(Mappings.METHOD.containsOld(method.fullName())) {
+            if(Mappings.METHOD.containsOld(method.fullName()))
                 continue;
-            }
 
-            if(this.cantEditMethod(clazz, method)) {
+            if(this.cantEditMethod(clazz, method))
                 continue;
-            }
 
             var impactedClasses = this.collectImpactedClasses(context, hierarchy);
             var newName = this.findExistingName(hierarchy);
-            if(newName.isEmpty()) {
+            if(newName.isEmpty())
                 newName = this.nextMethodName(context, impactedClasses, hierarchy, method.desc());
-            }
 
             for(var member : impactedClasses) {
                 var oldId = MemberUtils.fullMethod(member.name(), method.name(), method.desc());
                 var newId = MemberUtils.fullMethod(member.name(), newName, method.desc());
+
                 Mappings.METHOD.register(oldId, new Mapping(newId, newName));
             }
 
@@ -80,28 +78,26 @@ public class MethodRenameTransformer extends Transformer {
 
     private Set<JMethod> collectHierarchy(JMethod method) {
         var hierarchy = new LinkedHashSet<JMethod>();
+
         hierarchy.add(method);
         hierarchy.addAll(method.tree());
+
         return hierarchy;
     }
 
     private boolean shouldSkipHierarchy(Set<JMethod> hierarchy) {
         for(var member : hierarchy) {
-            if(member.isLibrary()) {
+            if(member.isLibrary())
                 continue;
-            }
 
-            if(Exclusions.RENAME_METHOD.excluded(member)) {
+            if(Exclusions.RENAME_METHOD.excluded(member))
                 return true;
-            }
 
-            if(Exclusions.RENAME_METHOD.excluded(member.owner(), member)) {
+            if(Exclusions.RENAME_METHOD.excluded(member.owner(), member))
                 return true;
-            }
 
-            if(this.cantEditMethod(member.owner(), member)) {
+            if(this.cantEditMethod(member.owner(), member))
                 return true;
-            }
         }
 
         return false;
@@ -111,19 +107,16 @@ public class MethodRenameTransformer extends Transformer {
         var impactedClasses = new LinkedHashSet<JClass>();
         for(var member : hierarchy) {
             var owner = member.owner();
-            if(owner.isLibrary()) {
+            if(owner.isLibrary())
                 continue;
-            }
 
             impactedClasses.add(owner);
             for(var related : owner.tree()) {
-                if(related.isLibrary()) {
+                if(related.isLibrary())
                     continue;
-                }
 
-                if(!related.hasMethodInTree(context, member)) {
+                if(!related.hasMethodInTree(context, member))
                     continue;
-                }
 
                 impactedClasses.add(related);
             }
@@ -134,14 +127,12 @@ public class MethodRenameTransformer extends Transformer {
 
     private String findExistingName(Set<JMethod> hierarchy) {
         for(var member : hierarchy) {
-            if(member.isLibrary()) {
+            if(member.isLibrary())
                 continue;
-            }
 
             var id = member.fullName();
-            if(Mappings.METHOD.containsOld(id)) {
+            if(Mappings.METHOD.containsOld(id))
                 return Mappings.METHOD.retrieve(id).value();
-            }
         }
 
         return "";
@@ -151,9 +142,8 @@ public class MethodRenameTransformer extends Transformer {
         var counter = 0;
         while(true) {
             var nextName = this.prefix.value() + context.dictionary().newName(counter++);
-            if(!this.hasCollision(impactedClasses, hierarchy, nextName, desc)) {
+            if(!this.hasCollision(impactedClasses, hierarchy, nextName, desc))
                 return nextName;
-            }
         }
     }
 
@@ -161,22 +151,18 @@ public class MethodRenameTransformer extends Transformer {
         var simpleName = name/*MemberUtils.methodDesc(name, desc)*/;
         for(var clazz : impactedClasses) {
             var id = MemberUtils.fullMethod(clazz.name(), name, desc);
-            if(Mappings.METHOD.containsNew(id)) {
+            if(Mappings.METHOD.containsNew(id))
                 return true;
-            }
 
-            if(this.hasCollisionInClass(clazz, hierarchy, simpleName)) {
+            if(this.hasCollisionInClass(clazz, hierarchy, simpleName))
                 return true;
-            }
 
             for(var related : clazz.tree()) {
-                if(related.isLibrary()) {
+                if(related.isLibrary())
                     continue;
-                }
 
-                if(this.hasCollisionInClass(related, hierarchy, simpleName)) {
+                if(this.hasCollisionInClass(related, hierarchy, simpleName))
                     return true;
-                }
             }
         }
 
@@ -185,13 +171,11 @@ public class MethodRenameTransformer extends Transformer {
 
     private boolean hasCollisionInClass(JClass clazz, Set<JMethod> hierarchy, String simpleName) {
         for(var method : clazz.methods()) {
-            if(hierarchy.contains(method)) {
+            if(hierarchy.contains(method))
                 continue;
-            }
 
-            if(method.name().equals(simpleName)) {
+            if(method.name().equals(simpleName))
                 return true;
-            }
         }
 
         return false;
