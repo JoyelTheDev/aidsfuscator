@@ -51,8 +51,9 @@ public class StringEncryptTransformer extends Transformer {
 
             var strings = new ArrayList<String>();
             var fieldName = context.dictionary().newFieldName(clazz, "[Ljava/lang/String;");
-            var initializer = initializers.get(random.nextInt(initializers.size())).get();
-            var decryptor = decryptors.get(random.nextInt(decryptors.size())).get();
+
+            var initializer = initializers.get(random.nextInt(initializers.size())).get(); // random initializer
+            var decryptor = decryptors.get(random.nextInt(decryptors.size())).get(); // random decryptor
             decryptor.setName(context.dictionary().newMethodName(clazz, decryptor.getDescriptor()));
 
             for(var method : clazz.methods()) {

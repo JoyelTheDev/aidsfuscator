@@ -6,13 +6,8 @@ import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.decryptors.DefaultIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers.DefaultIntegerInitializer;
-import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;

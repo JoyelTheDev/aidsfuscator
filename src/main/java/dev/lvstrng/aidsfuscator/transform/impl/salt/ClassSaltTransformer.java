@@ -12,17 +12,15 @@ import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 import java.lang.reflect.Modifier;
 
-public class SimpleClassSaltTransformer extends Transformer {
+public class ClassSaltTransformer extends Transformer {
     private final Setting<Boolean> unifyAccess = setting("unifyAccess", true);
 
-    public SimpleClassSaltTransformer() {
+    public ClassSaltTransformer() {
         super("Class Salting", "classSalting");
     }
 
