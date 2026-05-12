@@ -1,24 +1,20 @@
-package dev.lvstrng.aidsfuscator.transform.impl.rename;
+package dev.test.transform;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class MethodRenameTransformer extends Transformer {
-    private final Setting<String> prefix = setting("prefix", "");
-    private final Setting<Boolean> shuffle = setting("shuffle", false);
-
-    public MethodRenameTransformer() {
+public class NewMethodRenameTransformer extends Transformer {
+    public NewMethodRenameTransformer() {
         super("Rename Methods", "renameMethods");
     }
 
@@ -32,17 +28,12 @@ public class MethodRenameTransformer extends Transformer {
     }
 
     private void mapMethods(Context context, JClass clazz) {
-        if(shuffle.value()) {
-            Collections.shuffle(clazz.methods());
-            Collections.shuffle(clazz.core().methods);
-        }
-
         for(var method : clazz.methods()) {
             if(clazz.isLibMethod(method.name(), method.desc()))
                 continue;
 
             var impactedClasses = impactedClasses(context, clazz, method);
-            if(skipHierarchy(method, impactedClasses))
+            if(skipHierarchy(clazz, method, impactedClasses))
                 continue;
 
             var name = findOrGenerateName(context, clazz, impactedClasses, method);
@@ -67,16 +58,27 @@ public class MethodRenameTransformer extends Transformer {
                 return Mappings.METHOD.retrieve(id).value();
         }
 
-        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc());
+        return context.dictionary().newMethodName(clazz, method.desc());
     }
 
     /**
      * Exclusion and invalid method check
+     * @param clazz method class
      * @param method method
      * @param impactedClasses all impacted classes
      * @return false if should continue, true if should skip
      */
-    private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
+    private boolean skipHierarchy(JClass clazz, JMethod method, Set<JClass> impactedClasses) {
+        // ---- DIRECT CHECKS ----
+        if(cantEditMethod(clazz, method, false, true))
+            return true;
+
+        if(Exclusions.RENAME_METHOD.excluded(clazz))
+            return true;
+
+        if(Exclusions.RENAME_METHOD.excluded(method))
+            return true;
+
         // ---- CLASS TREE CHECKS ----
         for(var member : impactedClasses) {
             if(Exclusions.RENAME_METHOD.excluded(member))

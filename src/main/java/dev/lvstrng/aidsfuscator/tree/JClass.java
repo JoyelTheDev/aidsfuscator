@@ -133,7 +133,7 @@ public class JClass implements ISaltable<ClassSalt> {
     }
 
     public boolean isLibMethod(String name, String desc) {
-        for(var parent : parents()) {
+        for(var parent : tree()) {
             if(!parent.isLibrary())
                 continue;
 
@@ -145,7 +145,7 @@ public class JClass implements ISaltable<ClassSalt> {
     }
 
     public boolean isLibField(String name, String desc) {
-        for(var parent : parents()) {
+        for(var parent : tree()) {
             if(!parent.isLibrary())
                 continue;
 

@@ -1,13 +1,16 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
+import dev.test.transform.NewMethodRenameTransformer;
+import org.objectweb.asm.util.Textifier;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("test.jar")
+                .in("eval.jar")
                 .libs("libs/")
                 .out("out.jar")
                 .initialize();
@@ -16,7 +19,7 @@ public class TestMain {
         //context.referenceManager().addFieldCandidate("*");
 
         context.transform(
-                new LineNumberTransformer()
+                new NewMethodRenameTransformer()
         ).exportJar();
     }
 }

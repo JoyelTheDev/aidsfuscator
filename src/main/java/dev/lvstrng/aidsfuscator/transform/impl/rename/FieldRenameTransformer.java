@@ -7,8 +7,12 @@ import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.JField;
+import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FieldRenameTransformer extends Transformer {
     private final Setting<String> prefix = setting("prefix", "");
@@ -21,9 +25,6 @@ public class FieldRenameTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
-            if(Exclusions.RENAME_FIELD.excluded(clazz))
-                continue;
-
             mapFields(context, clazz);
         }
 
@@ -31,58 +32,67 @@ public class FieldRenameTransformer extends Transformer {
     }
 
     private void mapFields(Context context, JClass clazz) {
-        // ---- SHUFFLING ----
-        var fields = clazz.fields();
         if(shuffle.value()) {
-            Collections.shuffle(fields);
+            Collections.shuffle(clazz.fields());
             Collections.shuffle(clazz.core().fields);
         }
 
-        // ---- REMAPPING ENTIRE TREE ----
-        for(var field : fields) {
-            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_FIELD.excluded(e, field) && e.hasFieldInTree(context, field)))
+        for(var field : clazz.fields()) {
+            if(clazz.isLibField(field.name(), field.desc()))
                 continue;
 
-            if(clazz.isRecord())
-                clazz.core().recordComponents.clear();
-
-            if(Exclusions.RENAME_FIELD.excluded(field))
+            var impactedClasses = impactedClasses(context, clazz, field);
+            if(skipHierarchy(field, impactedClasses))
                 continue;
 
-            if(clazz.tree().stream().anyMatch(e -> Exclusions.RENAME_FIELD.excluded(e, field)))
-                continue;
-
-            var selfOld = field.fullName();
-            if(Mappings.FIELD.containsOld(selfOld))
-                continue;
-
-            var newName = "";
-            for(var member : clazz.tree()) {
-                if(member.isLibrary())
+            var name = findOrGenerateName(context, clazz, impactedClasses, field);
+            for(var member : impactedClasses) {
+                var oldId = MemberUtils.fullField(member, field);
+                if(Mappings.FIELD.containsOld(oldId))
                     continue;
 
-                var id = String.format("%s.%s", member.name(), field.simpleName());
-                if(Mappings.FIELD.containsOld(id)) {
-                    newName = Mappings.FIELD.retrieve(id).value();
-                    break;
-                }
+                var newId = MemberUtils.fullField(member.name(), name, field.desc());
+                Mappings.FIELD.register(oldId, new Mapping(newId, name));
+
+                markChange();
             }
-
-            if(newName.isEmpty())
-                newName = context.dictionary().newFieldName(prefix.value(), clazz, field.desc());
-
-            for(var member : clazz.tree()) {
-                if(member.isLibrary())
-                    continue;
-
-                var oldId = String.format("%s.%s", member.name(), field.simpleName());
-                var newId = String.format("%s.%s %s", member.name(), newName, field.desc());
-                Mappings.FIELD.register(oldId, new Mapping(newId, newName));
-            }
-
-            var selfNew = String.format("%s.%s %s", clazz.name(), newName, field.desc());
-            Mappings.FIELD.register(selfOld, new Mapping(selfNew, newName));
-            markChange();
         }
+    }
+
+    private String findOrGenerateName(Context context, JClass clazz, Set<JClass> impactedClasses, JField field) {
+        for(var member : impactedClasses) {
+            var id = MemberUtils.fullField(member, field);
+
+            if(Mappings.FIELD.containsOld(id))
+                return Mappings.FIELD.retrieve(id).value();
+        }
+
+        return context.dictionary().newFieldName(prefix.value(), clazz, field.desc());
+    }
+
+    private boolean skipHierarchy(JField field, Set<JClass> impactedClass) {
+        for(var member : impactedClass) {
+            if(Exclusions.RENAME_FIELD.excluded(member))
+                return true;
+
+            if(Exclusions.RENAME_FIELD.excluded(member, field))
+                return true;
+        }
+
+        return false;
+    }
+
+    private Set<JClass> impactedClasses(Context context, JClass clazz, JField field) {
+        var classes = new HashSet<>(clazz.children());
+        classes.add(clazz);
+
+        for(var parent : clazz.parents()) {
+            if(!parent.hasFieldInTree(context, field))
+                continue;
+
+            classes.add(parent);
+        }
+
+        return classes;
     }
 }
