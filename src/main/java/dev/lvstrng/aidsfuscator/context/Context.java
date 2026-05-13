@@ -86,6 +86,7 @@ public class Context {
         this.dictionary         = new DefaultDictionary(this, dictionaryString);
 
         Logger.info("Loading libraries...");
+        this.libraryLoader.setJavaPath(javaPath);
         this.libraryLoader().loadLibraries(libPath);
 
         Logger.info("Reading input JAR...");

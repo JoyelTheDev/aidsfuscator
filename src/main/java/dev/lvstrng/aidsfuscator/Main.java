@@ -28,7 +28,8 @@ public class Main {
             \t`--exclusions=` (Optional)
             \t`--initOrder=`  (Optional)
             \t`--references=` (Optional)
-            """; // 	'--javaPath='   (Optional)
+            \t'--javaPath='   (Optional) (Specifies the Java Runtime class path to use to obfuscate the JAR file)
+            """;
 
     public static void main(String[] args) {
         UpdateChecker.checkAndPrintUpdates();

@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.context.library;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -18,15 +20,22 @@ import java.util.zip.ZipInputStream;
 public class LibraryLoader {
     private static final Predicate<File> filter = f -> f.getName().endsWith(".jar") || f.getName().endsWith(".jmod");
     private final Context context;
-    private final String javaPath;
+    private String javaPath;
 
     public LibraryLoader(Context context, String javaPath) {
         this.context = context;
-        this.javaPath = javaPath;
+    }
+
+    public void setJavaPath(String path) {
+        this.javaPath = path;
     }
 
     public void loadLibraries(String path) {
-        loadJavaClasspath();
+        if(javaPath == null) {
+            loadJavaClasspath();
+        } else {
+            loadCustomJavaClasspath();
+        }
 
         var depDir = new File(path);
         if (!depDir.isDirectory())
@@ -38,7 +47,47 @@ public class LibraryLoader {
         }
     }
 
+    private void loadCustomJavaClasspath() {
+        var javaHome = Path.of(javaPath);
+        if(!Files.exists(javaHome)) { // doesn't exist, fallback to RT classpath
+            Logger.warn("Couldn't find Java home (%s), falling back to runtime classpath", javaHome);
+            loadJavaClasspath();
+            return;
+        }
+
+        var jmods = javaHome.resolve("jmods");
+        if(Files.isDirectory(jmods)) { // j9+
+            Logger.info("Found Java 9+ classpath (%s), loading...", javaHome);
+
+            var count = new AtomicInteger(0);
+            try (var stream = Files.list(jmods)) {
+                stream.filter(p -> p.toString().endsWith(".jmod"))
+                        .forEach(e -> {
+                            parseJar(e.toFile());
+                            count.getAndIncrement();
+                        });
+            } catch (IOException _) {}
+
+            Logger.info("Loaded %s `.jmod` files from classpath", count.get());
+            return;
+        }
+
+        // <= j8
+        var rtJar = javaHome.resolve("jre").resolve("lib").resolve("rt.jar");
+        if (!Files.exists(rtJar))
+            rtJar = javaHome.resolve("lib").resolve("rt.jar");
+
+        Logger.info("Found Java 8 `rt.jar` (%s), loading...", rtJar);
+        if (Files.exists(rtJar)) {
+            parseJar(rtJar.toFile());
+        } else {
+            Logger.warn("Couldn't find Java 8 `rt.jar` (%s), falling back to runtime classpath", rtJar);
+            loadJavaClasspath();
+        }
+    }
+
     private void loadJavaClasspath() {
+        Logger.info("Loading runtime java classpath...");
         try {
             var fs = getJRTFS();
             var stream = Files.walk(fs.getPath("/modules"));
