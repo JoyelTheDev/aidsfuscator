@@ -12,6 +12,7 @@ import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class FieldRenameTransformer extends Transformer {
@@ -33,8 +34,10 @@ public class FieldRenameTransformer extends Transformer {
 
     private void mapFields(Context context, JClass clazz) {
         if(shuffle.value()) {
-            Collections.shuffle(clazz.fields());
-            Collections.shuffle(clazz.core().fields);
+            var seed = random.nextLong();
+
+            Collections.shuffle(clazz.core().fields, new Random(seed));
+            Collections.shuffle(clazz.fields(), new Random(seed));
         }
 
         for(var field : clazz.fields()) {

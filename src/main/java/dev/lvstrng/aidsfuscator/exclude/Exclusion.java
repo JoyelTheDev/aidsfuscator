@@ -57,6 +57,6 @@ public class Exclusion {
 
     @Override
     public String toString() {
-        return (inclusion ? "!" : "") +filter.string();
+        return (inclusion ? "!" : "") + filter.string();
     }
 }

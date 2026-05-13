@@ -101,6 +101,10 @@ public abstract class Transformer implements Opcodes {
     }
 
     protected boolean cantEditMethod(JClass node, JMethod method, boolean ignoreInit, boolean ignoreSpecial) {
+        var opt = node.findMethod(method.name(), method.desc());
+        if(opt.isPresent())
+            method = opt.get();
+
         if(method.name().equals("<clinit>")) return true;
         if(method.name().equals("<init>") && !ignoreInit) return true;
         if(method.name().contains("$") && !ignoreSpecial) return true;

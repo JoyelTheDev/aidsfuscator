@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
+import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
@@ -7,13 +8,12 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.ISalt;
+import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
-import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -39,133 +39,171 @@ public class MethodSaltTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         var graph = context.referenceGraph().build();
-
-        for(var clazz : context.classes()) {
-            if(Exclusions.METHOD_SALTING.excluded(clazz))
-                continue;
-
-            for(var method : clazz.methods()) {
-                if(Exclusions.METHOD_SALTING.excluded(method))
-                    continue;
-
-                if(clazz.tree().stream().anyMatch(e -> Exclusions.METHOD_SALTING.excluded(e) && e.hasMethodInTree(context, method)))
-                    continue;
-
-                if(clazz.tree().stream().anyMatch(e -> Exclusions.METHOD_SALTING.excluded(e, method) && e.hasMethodInTree(context, method)))
-                    continue;
-
-                if(cantEditMethod(clazz, method, true))
-                    continue;
-
-                // ---- CHECK FOR INVALID CALLS ----
-                var refs = graph.refs(method);
-                if(refs.stream().anyMatch(MethodCallNode::cantEdit))
-                    continue;
-
-                var foundInvalid = false;
-                for(var other : method.tree()) {
-                    var otherRefs = graph.refs(other);
-                    if(otherRefs.stream().noneMatch(MethodCallNode::cantEdit))
-                        continue;
-
-                    foundInvalid = true;
-                    break;
-                }
-
-                if(foundInvalid)
-                    continue;
-
-                // ---- REGISTER SALTS FOR METHODS ----
-                register(method);
-            }
-        }
-
-        // ---- ADD PARAMETER TO METHODS ----
         var saltedMethods = new HashSet<JMethod>();
-        for(var clazz : context.classes()) {
-            for(var method : clazz.methods()) {
-                if(!method.hasSalt())
-                    continue;
 
-                method.salt().updateVar(method.allocParameter(Type.INT_TYPE));
-                saltedMethods.add(method);
-                markChange();
-            }
+        // ---- REGISTER ALL METHODS ----
+        for(var clazz : context.classes()) {
+            registerClass(context, graph, clazz, saltedMethods);
         }
 
-        // ---- OBFUSCATE RAW SALTS ----
+        // ---- MODIFY METHOD ----
+        for(var method : saltedMethods) {
+            method.salt().updateVar(method.allocParameter(Type.INT_TYPE));
+            markChange();
+        }
+
+        var modified = new HashSet<AbstractInsnNode>();
         for(var method : saltedMethods) {
             var refs = graph.refs(method);
             var salt = method.salt();
 
             for(var ref : refs) {
+                var call = (MethodInsnNode) ref.insn();
+                if(!modified.add(call)) // if already visited, skip to avoid NoSuchMethodError
+                    continue;
+
                 var caller = ref.caller();
-                var insn = (MethodInsnNode) ref.insn();
+                var frames = caller.frames(context);
 
-                var list = new InsnBuilder();
-                if(caller.hasSalt()) {
-                    var callerSalt = caller.salt();
-
-                    if(callerSalt.value() != salt.value()) {
-                        saltTheSalt(context, salt, callerSalt, list);
-                    } else {
-                        list.add(callerSalt.load());
-                    }
-                } else {
-                    list._int(salt.value()).addProps(context, Property.UNPROTECTED_SALT);
-                }
-
-                caller.insns().insertBefore(insn, list.result());
-                insn.desc = insn.desc.replace(")", "I)");
+                salt(context, caller, salt, call, frames);
             }
         }
     }
 
-    private void saltTheSalt(Context context, ISalt salt, ISalt callerSalt, InsnBuilder list) {
-        if(advancedSalting.value()) {
-            var mask = random.nextInt();
-            var maskedSalt = callerSalt.value() & mask;
+    private void salt(Context context, JMethod caller, ISalt salt, MethodInsnNode call, Map<AbstractInsnNode, SimpleFrame> frames) {
+        var list = new InsnList();
 
-            list
-                    .add(callerSalt.load())
-                    ._int(mask).addProps(context, Property.IGNORE_INTEGER)
-                    .iand()
-                    ._int(maskedSalt ^ salt.value()).addProps(context, Property.IGNORE_INTEGER)
-                    .ixor();
+        if(!caller.canSalt(frames.get(call))) { // if unable to salt, use raw salt
+            list.add(context.properties().add(ASMUtils.pushInt(salt.value()), Property.UNPROTECTED_SALT));
         } else {
-            list
-                    .add(callerSalt.load())
-                    ._int(callerSalt.value() ^ salt.value()).addProps(context, Property.IGNORE_INTEGER)
-                    .ixor();
+            if(advancedSalting.value()) { // advanced salting
+                var mask = random.nextInt();
+                var masked = caller.salt().value() & mask;
+
+                list.add(caller.salt().load());
+                list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+                list.add(new InsnNode(IAND));
+                list.add(context.properties().add(ASMUtils.pushInt(masked ^ salt.value()), Property.IGNORE_INTEGER));
+                list.add(new InsnNode(IXOR));
+            } else { // regular salting
+                list.add(caller.salt().load());
+                list.add(context.properties().add(ASMUtils.pushInt(caller.salt().value() ^ salt.value()), Property.IGNORE_INTEGER));
+                list.add(new InsnNode(IXOR));
+            }
+        }
+
+        caller.insns().insertBefore(call, list);
+        call.desc = call.desc.replace(")", "I)");
+    }
+
+    private void registerClass(Context context, ReferenceGraph graph, JClass clazz, Set<JMethod> saltedMethods) {
+        var toCheck = new HashSet<JMethod>();
+
+        // ---- SET DANGER METHODS ----
+        for(var method : clazz.methods()) {
+            var impactedClasses = impactedClasses(context, clazz, method);
+
+            if(skipMethodAndTree(graph, method, impactedClasses)) {
+                toCheck.addAll(method.tree());
+                toCheck.add(method);
+            }
+        }
+
+        // ---- REGISTER METHODS ----
+        for(var method : clazz.methods()) {
+            if(toCheck.contains(method)) // if danger method, skip...
+                continue;
+
+            var duplicateOpt = toCheck.stream()
+                    .filter(e -> e != method)                    // filter this method
+                    .filter(e -> e.name().equals(method.name())) // has same name
+                    .filter(e -> e.desc().equals(method.desc().replace(")", "I)"))) // has desired descriptor, causes collision if remapped
+                    .findAny();
+
+            if(duplicateOpt.isPresent()) // found duplicate, continue
+                continue;
+
+            registerMethodTree(context, clazz, method, saltedMethods);
         }
     }
 
-    private void register(JMethod method) {
-        // find maybe existing salts
-        int salt = -1;
+    private void registerMethodTree(Context context, JClass clazz, JMethod method, Set<JMethod> saltedMethods) {
+        var impacted = impactedClasses(context, clazz, method);
+        var salt = findOrGenerateSalt(method, impacted);
+
         for(var member : method.tree()) {
-            if(!member.hasSalt())
+            if(!saltedMethods.add(member))
                 continue;
 
-            salt = member.salt().value();
-            break;
-        }
-
-        if(method.hasSalt())
-            salt = method.salt().value();
-
-        // if no salt found, generate a new one
-        if(salt == -1)
-            salt = random.nextInt();
-
-        // make salts
-        for(var member : method.tree()) {
-            member.makeSalt(salt, -1);
             if((member.access() & ACC_VARARGS) != 0)
                 member.core().access &= ~ACC_VARARGS;
+
+            member.makeSalt(salt, -1);
         }
-        method.makeSalt(salt, -1);
+
+        if(!saltedMethods.add(method))
+            return;
+
         if((method.access() & ACC_VARARGS) != 0)
             method.core().access &= ~ACC_VARARGS;
+
+        method.makeSalt(salt, -1);
+    }
+
+    private int findOrGenerateSalt(JMethod method, Set<JClass> impactedClasses) {
+        for(var clazz : impactedClasses) {
+            var foundOpt = clazz.findMethod(method.name(), method.desc());
+            if(foundOpt.isEmpty())
+                continue;
+
+            var found = foundOpt.get();
+            if(!found.hasSalt())
+                continue;
+
+            return found.salt().value();
+        }
+
+        return random.nextInt();
+    }
+
+    private boolean skipMethodAndTree(ReferenceGraph graph, JMethod method, Set<JClass> impactedClasses) {
+        for(var member : impactedClasses) {
+            var opt = member.findMethod(method.name(), method.desc());
+            if(opt.isPresent())
+                method = opt.get();
+
+            if(member.isLibMethod(method.name(), method.desc()))
+                return true;
+
+            if(Exclusions.METHOD_SALTING.excluded(member))
+                return true;
+
+            if(Exclusions.METHOD_SALTING.excluded(member, method))
+                return true;
+
+            if(cantEditMethod(member, method, true))
+                return true;
+
+            var refs = graph.refs(method);
+            if (refs.stream().anyMatch(MethodCallNode::cantEdit))
+                return true;
+        }
+
+        return false;
+    }
+
+    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
+        var classes = new HashSet<>(clazz.children());
+        classes.add(clazz);
+
+        for(var parent : clazz.tree()) {
+            if(!parent.hasMethodInTree(context, method))
+                continue;
+
+            classes.add(parent);
+            classes.addAll(parent.children());
+        }
+
+        return classes;
     }
 }

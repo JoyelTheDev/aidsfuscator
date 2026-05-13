@@ -12,6 +12,7 @@ import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class MethodRenameTransformer extends Transformer {
@@ -33,8 +34,10 @@ public class MethodRenameTransformer extends Transformer {
 
     private void mapMethods(Context context, JClass clazz) {
         if(shuffle.value()) {
-            Collections.shuffle(clazz.methods());
-            Collections.shuffle(clazz.core().methods);
+            var seed = random.nextLong();
+
+            Collections.shuffle(clazz.core().methods, new Random(seed));
+            Collections.shuffle(clazz.methods(), new Random(seed));
         }
 
         for(var method : clazz.methods()) {

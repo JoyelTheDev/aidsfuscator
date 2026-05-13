@@ -76,13 +76,13 @@ public class Main {
         if(!referencePath.isEmpty())
             new ReferenceLoader(context, referencePath).load();
 
+        if(!javaPath.isEmpty())
+            context.javaPath(javaPath);
+
         // ---- RUN OBFUSCATOR ----
         context.initialize();
         if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
             new ClassInitOrderLoader(context, initOrderPath).load();
-
-        if(!javaPath.isEmpty())
-            context.javaPath(javaPath);
 
         context.transform()
                 .exportJar();

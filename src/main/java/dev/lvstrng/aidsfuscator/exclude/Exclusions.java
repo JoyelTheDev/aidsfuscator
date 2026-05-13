@@ -68,7 +68,7 @@ public enum Exclusions {
     }
 
     public boolean excluded(JMethod method) {
-        return methodExclusions.stream().anyMatch(e -> e.matchesMethod(method));
+        return excluded(method.owner(), method);
     }
 
     public boolean excluded(JClass clazz, JMethod method) {
