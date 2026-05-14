@@ -1,5 +1,5 @@
 {
-  "in": "eval.jar",
+  "in": "crackme-new.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -7,31 +7,31 @@
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
     "trim": {
-      "enabled": true,
+      "enabled": false,
       "classes": true,
       "fields": true,
       "methods": true
     },
     "renameFields": {
-      "enabled": true,
+      "enabled": false,
       "prefix": "",
       "shuffle": true
     },
     "renameMethods": {
-      "enabled": true,
+      "enabled": false,
       "prefix": "",
       "shuffle": true
     },
     "renameClasses": {
-      "enabled": true,
+      "enabled": false,
       "prefix": "",
       "randomize": true
     },
     "localNames": {
-      "enabled": true
+      "enabled": false
     },
     "lineNumbers": {
-      "enabled": true,
+      "enabled": false,
       "remove": true
     },
     "methodSalting": {
@@ -39,14 +39,14 @@
       "advancedSalting": true
     },
     "classSalting": {
-      "enabled": true,
+      "enabled": false,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": true
+      "enabled": false
     },
     "integerEncrypt": {
-      "enabled": true
+      "enabled": false
     },
     "encryptStrings": {
       "enabled": true,
@@ -54,17 +54,17 @@
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": true,
+      "enabled": false,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": true
+      "enabled": false
     },
     "cleanDeadCode": {
-      "enabled": true
+      "enabled": false
     },
     "referenceObfuscate": {
-      "enabled": true
+      "enabled": false
     }
   }
 }
