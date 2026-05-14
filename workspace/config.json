@@ -7,31 +7,31 @@
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
     },
     "renameFields": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "shuffle": true
     },
     "renameMethods": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "shuffle": true
     },
     "renameClasses": {
-      "enabled": false,
+      "enabled": true,
       "prefix": "",
       "randomize": true
     },
     "localNames": {
-      "enabled": false
+      "enabled": true
     },
     "lineNumbers": {
-      "enabled": false,
+      "enabled": true,
       "remove": true
     },
     "methodSalting": {
@@ -39,14 +39,14 @@
       "advancedSalting": true
     },
     "classSalting": {
-      "enabled": false,
+      "enabled": true,
       "unifyAccess": true
     },
     "fixConstants": {
-      "enabled": false
+      "enabled": true
     },
     "integerEncrypt": {
-      "enabled": false
+      "enabled": true
     },
     "encryptStrings": {
       "enabled": true,
@@ -54,17 +54,17 @@
       "minLength": 2
     },
     "controlFlowFlatten": {
-      "enabled": false,
+      "enabled": true,
       "useSalt": true
     },
     "controlFlowShuffle": {
-      "enabled": false
+      "enabled": true
     },
     "cleanDeadCode": {
-      "enabled": false
+      "enabled": true
     },
     "referenceObfuscate": {
-      "enabled": false
+      "enabled": true
     }
   }
 }
