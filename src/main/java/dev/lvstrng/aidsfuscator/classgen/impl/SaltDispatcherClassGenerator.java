@@ -108,6 +108,7 @@ public class SaltDispatcherClassGenerator implements IClassGen, Opcodes {
 
         var traces = method.allocVar();
         var traceClassHash = method.allocVar();
+        var hash = method.allocVar(Type.INT_TYPE);
 
         // ---- CODE ----
         var regular = new LabelNode();
@@ -167,6 +168,22 @@ public class SaltDispatcherClassGenerator implements IClassGen, Opcodes {
                 .type(CHECKCAST, "java/lang/Integer")
                 .method(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I") // map.get(traceHash).intValue()
                 .ixor()
+                ._var(ISTORE, hash)
+
+                .label(new LabelNode())
+                .field(GETSTATIC, clazz.name(), initializedValues.name(), initializedValues.desc())
+                ._var(ALOAD, objLocal)
+                .type(CHECKCAST, "java/lang/Class")
+                .method(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;")
+                .method(INVOKESTATIC, clazz.name(), hasher.name(), hasher.desc())
+                .method(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;")
+                ._var(ILOAD, hash)
+                .method(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;")
+                .method(INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+                .pop()
+
+                .label(new LabelNode())
+                ._var(ILOAD, hash)
                 ._ireturn()
         ;
 

@@ -18,22 +18,17 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("crackme.jar")
+                .in("in.jar")
                 .libs("libs")
                 .out("out.jar")
                 .initialize();
 
         //context.referenceManager().addMethodCandidate("*");
-        //context.referenceManager().addFieldCandidate("*");
+        context.referenceManager().addFieldCandidate("*");
         context.referenceManager().addMethodCandidate("*");
 
         context.transform(
-                new ClassRenameTransformer(),
-                new FieldRenameTransformer(),
-                new MethodRenameTransformer(),
-
-                new ClassSaltTransformer(),
-                new ReferenceObfuscationTransformer()
+                new TestTransformer()
         ).exportJar();
     }
 }

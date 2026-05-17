@@ -1,7 +1,11 @@
 [
   [
     "Window",
-    "DataOfSquare"
+    "KeyboardListener"
+  ],
+  [
+    "Window",
+    "ThreadsController"
   ],
   [
     "Main",
@@ -13,14 +17,10 @@
   ],
   [
     "Window",
-    "ThreadsController"
-  ],
-  [
-    "Window",
-    "KeyboardListener"
-  ],
-  [
-    "Window",
     "Tuple"
+  ],
+  [
+    "Window",
+    "DataOfSquare"
   ]
 ]
