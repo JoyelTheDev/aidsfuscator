@@ -3,6 +3,7 @@ package dev.test.transform;
 import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.JClass;
@@ -24,68 +25,73 @@ public class MethodParameterObfuscationTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         var graph = context.referenceGraph().build();
-        var methods = new HashSet<JMethod>();
+        var obfuscatedMethods = new HashSet<JMethod>();
 
         for(var clazz : context.classes()) {
-            for(var method : clazz.methods()) {
-                if(cantEditMethod(clazz, method))
-                    continue;
-
-                var refs = graph.refs(method);
-                if(refs.stream().anyMatch(MethodCallNode::cantEdit))
-                    continue;
-
-                var foundInvalid = false;
-                for(var other : method.tree()) {
-                    var otherRefs = graph.refs(other);
-                    if(otherRefs.stream().noneMatch(MethodCallNode::cantEdit) && !cantEditMethod(other.owner(), other))
-                        continue;
-
-                    foundInvalid = true;
-                    break;
-                }
-
-                if(foundInvalid)
-                    continue;
-
-                register(method, methods);
-            }
+            registerClass(context, graph, clazz, obfuscatedMethods);
         }
 
-        for(var method : methods) {
+        for(var method : obfuscatedMethods) {
             var args = method.args();
+            if(method.isAbstract() || method.isNative() || method.insns().size() == 0) {
+                method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
+                continue;
+            }
+            unpackArgs(context, method, args);
 
-            changeRefs(context, method, graph, args);
-            changeBody(context, method, args);
+            var refs = graph.refs(method);
+            for(var ref : refs) {
+                var caller = ref.caller();
+                var insn = (MethodInsnNode) ref.insn();
+
+                var list = new InsnBuilder()
+                        ._int(args.length).addProps(context, Property.IGNORE_INTEGER)
+                        .anewarray("java/lang/Object");
+
+                for(int i = args.length - 1; i >= 0; i--) {
+                    var arg = args[i];
+
+                    if(arg.getSize() == 2) {
+                        list.dup_x2().dup_x2().pop();
+                    } else {
+                        list.dup_x1().swap();
+                    }
+
+                    ASMUtils.box(list.result(), arg);
+                    list.
+                            _int(i).addProps(context, Property.IGNORE_INTEGER)
+                            .swap()
+                            .aastore();
+                }
+
+                caller.insns().insertBefore(insn, list.result());
+                insn.desc = method.desc();
+            }
+
+            markChange();
         }
     }
 
-    private void changeBody(Context context, JMethod method, Type[] args) {
-        markChange();
-
-        method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
-        if(method.isAbstract() || method.insns().size() == 0)
-            return;
-
-        int arrayIndex = method.isVirtual() ? 1 : 0;
-        var currentVar = arrayIndex + 1;
-        var builder = new InsnBuilder();
-
-        builder._var(ALOAD, arrayIndex);
+    private void unpackArgs(Context context, JMethod method, Type[] args) {
+        // ---- UNPACK ----
+        var argIndex = method.isVirtual() ? 1 : 0;
+        var varIndex = argIndex + 1;
+        var list = new InsnList();
+        list.add(new VarInsnNode(ALOAD, argIndex));
         for(int i = 0; i < args.length; i++) {
             var arg = args[i];
 
-            builder
-                    .dup()
-                    ._int(i).addProps(context, Property.IGNORE_INTEGER)
-                    .aaload();
-            ASMUtils.unbox(builder.result(), arg);
-            builder._var(arg.getOpcode(ISTORE), currentVar);
+            list.add(new InsnNode(DUP));
+            list.add(context.properties().add(ASMUtils.pushInt(i), Property.IGNORE_INTEGER));
+            list.add(new InsnNode(AALOAD));
+            ASMUtils.unbox(list, arg);
+            list.add(new VarInsnNode(arg.getOpcode(ISTORE), varIndex));
 
-            currentVar += arg.getSize();
+            varIndex += arg.getSize();
         }
-        builder.pop();
+        list.add(new InsnNode(POP));
 
+        // ---- OFFSET ALL VARS ----
         for(var insn : method.insns()) {
             switch (insn) {
                 case VarInsnNode v -> {
@@ -99,51 +105,100 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             }
         }
 
-        method.insns().insert(builder.result());
+        // ---- FINISH ----
+        method.insns().insert(list);
         method.allocVar();
-        method.core().access &= ~ACC_VARARGS;
+
         if(method.hasSalt())
             method.salt().updateVar(method.salt().local() + 1);
+        method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
     }
 
-    private void changeRefs(Context context, JMethod method, ReferenceGraph graph, Type[] args) {
-        var refs = graph.refs(method);
+    private void registerClass(Context context, ReferenceGraph graph, JClass clazz, Set<JMethod> obfuscatedMethods) {
+        var toCheck = new HashSet<JMethod>();
 
-        for(var ref : refs) {
-            var insn = (MethodInsnNode) ref.insn();
+        // ---- SET DANGER METHODS ----
+        for(var method : clazz.methods()) {
+            var impactedClasses = impactedClasses(context, clazz, method);
+            if(!skipMethodAndTree(graph, method, impactedClasses))
+                continue;
 
-            var list = new InsnBuilder()
-                    ._int(args.length).addProps(context, Property.IGNORE_INTEGER)
-                    .anewarray("java/lang/Object");
+            toCheck.add(method);
+            toCheck.addAll(method.tree());
+        }
 
-            for(int i = args.length - 1; i >= 0; i--) {
-                var arg = args[i];
+        // ---- REGISTER ----
+        for(var method : clazz.methods()) {
+            if(toCheck.contains(method))
+                continue;
 
-                if(arg.getSize() == 2) {
-                    list.dup_x2().dup_x2().pop();
-                } else list.dup_x1().swap();
+            var duplicateOpt = toCheck.stream()
+                    .filter(e -> e != method)                    // filter this method
+                    .filter(e -> e.name().equals(method.name())) // has same name
+                    .filter(e -> e.desc().equals("([Ljava/lang/Object;)" + method.returnType().getDescriptor())) // has desired descriptor, causes collision if remapped
+                    .findAny();
 
-                ASMUtils.box(list.result(), arg);
-                list.
-                        _int(i).addProps(context, Property.IGNORE_INTEGER)
-                        .swap()
-                        .aastore();
-            }
+            if(duplicateOpt.isPresent()) // found duplicate, continue
+                continue;
 
-            ref.caller().insns().insertBefore(insn, list.result());
-            insn.desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
+            registerMethodTree(method, obfuscatedMethods);
         }
     }
 
-    private void register(JMethod method, Set<JMethod> methods) {
+    private void registerMethodTree(JMethod method, Set<JMethod> obfuscatedMethods) {
         for(var member : method.tree()) {
-            methods.add(member);
+            if(!obfuscatedMethods.add(member))
+                continue;
+
             if((member.access() & ACC_VARARGS) != 0)
                 member.core().access &= ~ACC_VARARGS;
         }
 
-        methods.add(method);
+        if(!obfuscatedMethods.add(method))
+            return;
+
         if((method.access() & ACC_VARARGS) != 0)
             method.core().access &= ~ACC_VARARGS;
+    }
+
+    private boolean skipMethodAndTree(ReferenceGraph graph, JMethod method, Set<JClass> impactedClasses) {
+        for(var member : impactedClasses) {
+            var opt = member.findMethod(method.name(), method.desc());
+            if(opt.isPresent())
+                method = opt.get();
+
+            if(member.isLibMethod(method.name(), method.desc()))
+                return true;
+
+            if(Exclusions.PARAMETER_OBFUSCATE.excluded(member))
+                return true;
+
+            if(Exclusions.PARAMETER_OBFUSCATE.excluded(member, method))
+                return true;
+
+            if(cantEditMethod(member, method))
+                return true;
+
+            var refs = graph.refs(method);
+            if (refs.stream().anyMatch(MethodCallNode::cantEdit))
+                return true;
+        }
+
+        return false;
+    }
+
+    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
+        var classes = new HashSet<>(clazz.children());
+        classes.add(clazz);
+
+        for(var parent : clazz.tree()) {
+            if(!parent.hasMethodInTree(context, method))
+                continue;
+
+            classes.add(parent);
+            classes.addAll(parent.children());
+        }
+
+        return classes;
     }
 }

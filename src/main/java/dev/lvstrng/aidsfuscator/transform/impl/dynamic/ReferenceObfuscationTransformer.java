@@ -186,6 +186,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
         }
 
         gen.generateClinit(context, refClass, references);
+        context.saltDispatcher().setIndyField(refClass);
     }
 
     /**

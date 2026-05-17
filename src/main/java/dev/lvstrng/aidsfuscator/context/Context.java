@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.context;
 
+import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
 import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
@@ -52,6 +53,7 @@ public class Context {
     private final GlobalPropertyContainer propertyContainer;
     private final ClassInitOrderHandler initOrder;
     private final ReferenceManager referenceManager;
+    private final SaltDispatcherClassGenerator saltDispatcherGen;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
@@ -72,6 +74,7 @@ public class Context {
         this.propertyContainer  = new GlobalPropertyContainer();
         this.initOrder          = new ClassInitOrderHandler(this);
         this.referenceManager   = new ReferenceManager(this);
+        this.saltDispatcherGen  = new SaltDispatcherClassGenerator();
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -105,6 +108,9 @@ public class Context {
         // ---- LOAD JAR CLASSES ----
         try (var zip = new ZipFile(file)) {
             for(var entry : zip.stream().toList()) {
+                if(entry.isDirectory())
+                    continue;
+
                 var name = entry.getName();
                 var is = zip.getInputStream(entry);
                 var bytes = is.readAllBytes();
@@ -234,6 +240,10 @@ public class Context {
 
     public ReferenceManager referenceManager() {
         return referenceManager;
+    }
+
+    public SaltDispatcherClassGenerator saltDispatcher() {
+        return saltDispatcherGen;
     }
 
     public int writerFlags() {

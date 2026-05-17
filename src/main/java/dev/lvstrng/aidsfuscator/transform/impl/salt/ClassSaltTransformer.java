@@ -1,6 +1,6 @@
 package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
-import dev.lvstrng.aidsfuscator.classgen.impl.SimpleClassSaltClassGenerator;
+import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
@@ -26,7 +26,6 @@ public class ClassSaltTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
-        // ---- ADD SALT FIELDS ----
         for(var clazz : context.classes()) {
             if((clazz.access() & ACC_MODULE) != 0)
                 continue;
@@ -73,10 +72,7 @@ public class ClassSaltTransformer extends Transformer {
             markChange();
         }
 
-        // ---- ADD SALT DISPATCHER ----
-        var gen = new SimpleClassSaltClassGenerator();
-        var clazz = gen.create(context);
-        context.addArtificial(clazz);
+        context.addArtificial(context.saltDispatcher().create(context));
     }
 
     private void obfuscateUnprotectedSalts(Context context, JMethod method, int saltLocal, int saltValue) {

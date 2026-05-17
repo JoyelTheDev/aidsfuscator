@@ -18,29 +18,24 @@ public class TestTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
-        for(var clazz : context.classes()) {
-            for(var method : clazz.methods()) {
-                var impacted = impactedClasses(context, clazz, method);
-                System.out.println(method.simpleName());
+        /*for(var clazz : context.classes()) {
+            var clinit = clazz.findOrCreateClinit();
 
-                for(var c : impacted)
-                    System.out.println("\t" + c.name());
-            }
-        }
-    }
+            var list = new InsnList();
+            list.add(new FieldInsnNode(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"));
+            list.add(new LdcInsnNode(clazz.name()));
+            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V"));
 
-    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
-        var classes = new HashSet<>(clazz.children());
-        classes.add(clazz);
+            clinit.insns().insert(list);
+        }*/
 
-        for(var parent : clazz.tree()) {
-            if(!parent.hasMethodInTree(context, method))
-                continue;
+        var clazz = context.forName("crackme/utils/logging/Logger");
+        var cl = clazz.findOrCreateClinit();
 
-            classes.add(parent);
-            classes.addAll(parent.children());
-        }
+        var list = new InsnList();
+        list.add(new InsnNode(ACONST_NULL));
+        list.add(new InsnNode(ATHROW));
 
-        return classes;
+        cl.insns().insert(list);
     }
 }
