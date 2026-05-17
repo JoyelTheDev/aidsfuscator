@@ -164,7 +164,14 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int idxXor = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
+                                var mask = random.nextInt();
+                                var masked = method.salt().value() & mask;
+
                                 list.add(method.salt().load());
+                                list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+                                list.add(new InsnNode(IAND));
+                                list.add(context.properties().add(ASMUtils.pushInt(masked ^ (decKey << 16)), Property.IGNORE_INTEGER));
+                                list.add(new InsnNode(IXOR));
                             } else {
                                 list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
                             }
