@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -9,6 +10,8 @@ import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.tree.JField;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +21,7 @@ import java.util.Set;
 public class FieldRenameTransformer extends Transformer {
     private final Setting<String> prefix = setting("prefix", "");
     private final Setting<Boolean> shuffle = setting("shuffle", false);
+    private final Setting<Boolean> preserveRecordNames = setting("preserveRecordNames", true);
 
     public FieldRenameTransformer() {
         super("Rename Fields", "renameFields");
@@ -30,6 +34,62 @@ public class FieldRenameTransformer extends Transformer {
         }
 
         remap(context);
+        if(preserveRecordNames.value())
+            transformRecordMethods(context);
+    }
+
+    /**
+     * Updates invokedynamic instructions in records from ObjectMethods.bootstrap to have the new remapped field names. Issue link: (<a href="https://github.com/LvStrnggg/aidsfuscator/issues/25">...</a>)
+     * @param context obfuscator context
+     * @author lvstrng
+     */
+    private void transformRecordMethods(Context context) {
+        if(!context.hasClass("java/lang/runtime/ObjectMethods")) {
+            Logger.warn("Couldn't find java.lang.runtime.ObjectMethods class in obfuscator context, skipping preserveRecordNames");
+            return;
+        }
+
+        var objectMethodsClass = context.forName("java/lang/runtime/ObjectMethods");
+        var bootstrapMethod = objectMethodsClass.findMethod(
+                "bootstrap",
+                "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;"
+        ).orElse(null);
+
+        if(bootstrapMethod == null) {
+            Logger.warn("Failed to find `bootstrap` method in `java.lang.runtime.ObjectMethods` class, report this bug to the github page.");
+            return;
+        }
+
+        // look for bootstrap method refs
+        var graph = context.referenceGraph().build();
+        var bootstrapRefs = graph.refs(bootstrapMethod);
+
+        for(var ref : bootstrapRefs) {
+            if(!(ref.insn() instanceof InvokeDynamicInsnNode indy))
+                continue;
+
+            var callerClass = ref.callerClass();
+            if(!callerClass.isRecord() || indy.bsmArgs.length < 2)
+                continue;
+
+            // string with old names, kys
+            var namesArg = indy.bsmArgs[1];
+            if(!(namesArg instanceof String))
+                continue;
+
+            var newNames = new StringBuilder();
+            for(int i = 2; i < indy.bsmArgs.length; i++) {
+                var arg = indy.bsmArgs[i];
+                if(!(arg instanceof Handle handle))
+                    continue;
+
+                newNames.append(handle.getName()).append(";");
+            }
+
+            // delete last ; cuz idk, it will work with it anyway but still
+            newNames.deleteCharAt(newNames.length() - 1);
+            indy.bsmArgs[1] = newNames.toString();
+        }
     }
 
     private void mapFields(Context context, JClass clazz) {

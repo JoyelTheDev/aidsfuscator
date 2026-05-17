@@ -280,6 +280,22 @@ public class Context {
     // ---- CLASSES ----
     // -----------------
 
+    public boolean hasClass(String internal) {
+        return hasJarClass(internal) || hasLibClass(internal) || hasArtificial(internal);
+    }
+
+    public boolean hasLibClass(String internal) {
+        return libraries.containsKey(internal);
+    }
+
+    public boolean hasJarClass(String internal) {
+        return classes.containsKey(internal) || excluded.containsKey(internal);
+    }
+
+    public boolean hasArtificial(String internal) {
+        return artificials.containsKey(internal);
+    }
+
     public JClass createClass(String superName, int access) {
         var _node = new ClassNode();
         _node.name = dictionary.newClassName();

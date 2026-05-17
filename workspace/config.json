@@ -15,7 +15,8 @@
     "renameFields": {
       "enabled": false,
       "prefix": "",
-      "shuffle": true
+      "shuffle": true,
+      "preserveRecordNames": true
     },
     "renameMethods": {
       "enabled": false,

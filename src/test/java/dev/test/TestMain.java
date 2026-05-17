@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.test.transform.MethodParameterObfuscationTransformer;
 import dev.test.transform.NewMethodRenameTransformer;
+import dev.test.transform.RecordIndyTest;
 import dev.test.transform.TestTransformer;
 import org.objectweb.asm.util.Textifier;
 
@@ -18,17 +19,17 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("records.jar")
                 .libs("libs")
                 .out("out.jar")
                 .initialize();
 
         //context.referenceManager().addMethodCandidate("*");
-        context.referenceManager().addFieldCandidate("*");
-        context.referenceManager().addMethodCandidate("*");
+        //context.referenceManager().addFieldCandidate("*");
+        //context.referenceManager().addMethodCandidate("*");
 
         context.transform(
-                new TestTransformer()
+                new RecordIndyTest()
         ).exportJar();
     }
 }
