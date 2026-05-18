@@ -19,7 +19,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("records.jar")
+                .in("in.jar")
                 .libs("libs")
                 .out("out.jar")
                 .initialize();
@@ -29,7 +29,7 @@ public class TestMain {
         //context.referenceManager().addMethodCandidate("*");
 
         context.transform(
-                new RecordIndyTest()
+                new TestTransformer()
         ).exportJar();
     }
 }

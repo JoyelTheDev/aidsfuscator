@@ -54,6 +54,11 @@ public class ControlFlowShufflingTransformer extends Transformer {
                     if(block.deadEnd() || block.ends())
                         continue;
 
+                    var dfltIdx = blocks.indexOf(block.defaultBlock());
+                    var currIdx = blocks.indexOf(block);
+                    if((dfltIdx - currIdx) == 1) // if block is next one, skip adding a GOTO
+                        continue;
+
                     rebuilt.add(new JumpInsnNode(GOTO, block.defaultBlock().label()));
                 }
 
