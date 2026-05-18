@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.utils;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.*;
 

@@ -1,8 +1,8 @@
 package dev.lvstrng.aidsfuscator.salt.impl;
 
 import dev.lvstrng.aidsfuscator.salt.ISalt;
-import dev.lvstrng.aidsfuscator.tree.JClass;
-import dev.lvstrng.aidsfuscator.tree.JField;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;

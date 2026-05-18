@@ -1,9 +1,10 @@
-package dev.lvstrng.aidsfuscator.tree;
+package dev.lvstrng.aidsfuscator.tree.impl;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
+import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
@@ -19,7 +20,7 @@ import java.util.*;
 /**
  * A ClassNode wrapper for easier use.
  */
-public class JClass implements ISaltable<ClassSalt> {
+public class JClass implements ISaltable<ClassSalt>, IHierarchical<JClass> {
     private ClassNode core;
     private final PropertyContainer properties;
 
@@ -348,18 +349,14 @@ public class JClass implements ISaltable<ClassSalt> {
         return false;
     }
 
+    @Override
     public Set<JClass> parents() {
         return parents;
     }
 
+    @Override
     public Set<JClass> children() {
         return children;
-    }
-
-    public Set<JClass> tree() {
-        var list = new HashSet<>(parents);
-        list.addAll(children);
-        return list;
     }
 
     public List<JMethod> methods() {

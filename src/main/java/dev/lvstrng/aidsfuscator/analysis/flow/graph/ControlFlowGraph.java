@@ -1,13 +1,11 @@
 package dev.lvstrng.aidsfuscator.analysis.flow.graph;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
-import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.Frame;
 
 import java.util.ArrayList;
 import java.util.HashMap;

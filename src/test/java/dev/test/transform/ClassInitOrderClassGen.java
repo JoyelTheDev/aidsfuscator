@@ -1,9 +1,9 @@
 package dev.test.transform;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JClass;
-import dev.lvstrng.aidsfuscator.tree.JField;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JField;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;

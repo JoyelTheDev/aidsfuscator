@@ -2,8 +2,8 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JClass;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;

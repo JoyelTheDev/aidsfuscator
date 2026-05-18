@@ -3,7 +3,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.IIntegerInitializer;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;

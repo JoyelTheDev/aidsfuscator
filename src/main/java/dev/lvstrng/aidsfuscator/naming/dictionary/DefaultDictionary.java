@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.naming.dictionary;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 
 /**
  * Dictionary that does aggressive renaming. {@code revert} methods do not have implementations (shouldn't have one either way).

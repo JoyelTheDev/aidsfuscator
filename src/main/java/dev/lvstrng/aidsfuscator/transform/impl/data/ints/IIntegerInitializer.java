@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import org.objectweb.asm.Opcodes;
 
 import java.security.SecureRandom;

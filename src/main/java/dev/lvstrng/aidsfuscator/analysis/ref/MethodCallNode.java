@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.analysis.ref;
 
-import dev.lvstrng.aidsfuscator.tree.JClass;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;

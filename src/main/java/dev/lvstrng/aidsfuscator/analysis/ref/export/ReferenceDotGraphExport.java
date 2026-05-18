@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.analysis.ref.export;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.tree;
+package dev.lvstrng.aidsfuscator.tree.impl;
 
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
@@ -11,10 +11,10 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
+import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * A MethodNode wrapper for easier use.
  */
-public class JMethod implements ISaltable<MethodSalt> {
+public class JMethod implements ISaltable<MethodSalt>, IHierarchical<JMethod> {
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
@@ -205,18 +205,14 @@ public class JMethod implements ISaltable<MethodSalt> {
         return owner;
     }
 
+    @Override
     public Set<JMethod> parents() {
         return parents;
     }
 
+    @Override
     public Set<JMethod> children() {
         return children;
-    }
-
-    public Set<JMethod> tree() {
-        var list = new HashSet<>(parents);
-        list.addAll(children);
-        return list;
     }
 
     public boolean isVirtual() {

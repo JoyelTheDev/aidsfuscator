@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.naming.dictionary;
 
 
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 
 public interface IDictionary {
     String newClassName(String prefix);

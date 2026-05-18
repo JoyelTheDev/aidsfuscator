@@ -17,7 +17,7 @@ import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 import dev.lvstrng.aidsfuscator.utils.Utils;
 import org.objectweb.asm.ClassWriter;

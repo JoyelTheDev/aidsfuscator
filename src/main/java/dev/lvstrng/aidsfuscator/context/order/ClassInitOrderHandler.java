@@ -3,7 +3,7 @@ package dev.lvstrng.aidsfuscator.context.order;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.Pair;
 
 import java.util.HashSet;

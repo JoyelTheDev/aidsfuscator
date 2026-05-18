@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.analysis.interpreter;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.TypeUtils;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;

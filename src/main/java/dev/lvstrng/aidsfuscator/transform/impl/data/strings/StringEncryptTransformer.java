@@ -7,15 +7,10 @@ import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.PolymorphicStringDecryptor;
-import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.AESStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.DefaultStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.XorStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.settings.Setting;
-import dev.lvstrng.aidsfuscator.tree.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import dev.lvstrng.aidsfuscator.utils.CryptUtils;
-import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;

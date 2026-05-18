@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.context.library;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.tree.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 
 import java.io.ByteArrayInputStream;

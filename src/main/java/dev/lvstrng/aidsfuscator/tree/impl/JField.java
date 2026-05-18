@@ -1,18 +1,17 @@
-package dev.lvstrng.aidsfuscator.tree;
+package dev.lvstrng.aidsfuscator.tree.impl;
 
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.tree.FieldNode;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * A FieldNode wrapper for easier use.
  */
-public class JField {
+public class JField implements IHierarchical<JField> {
     private JClass owner;
     private FieldNode core;
     private final PropertyContainer properties;
@@ -77,18 +76,14 @@ public class JField {
         return owner;
     }
 
+    @Override
     public Set<JField> parents() {
         return parents;
     }
 
+    @Override
     public Set<JField> children() {
         return children;
-    }
-
-    public Set<JField> tree() {
-        var list = new HashSet<>(parents);
-        list.addAll(children);
-        return list;
     }
 
     public boolean isVirtual() {

@@ -1,14 +1,12 @@
 package dev.lvstrng.aidsfuscator.context.hierarchy;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
-import dev.lvstrng.aidsfuscator.tree.JClass;
-import dev.lvstrng.aidsfuscator.tree.JField;
-import dev.lvstrng.aidsfuscator.tree.JMethod;
+import dev.lvstrng.aidsfuscator.tree.impl.JClass;
+import dev.lvstrng.aidsfuscator.tree.impl.JField;
+import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -251,19 +249,11 @@ public class SimpleHierarchy implements IHierarchy {
     }
 
     private void clearHierarchy(List<JClass> classes) {
-        for(var clazz : classes) {
-            clazz.parents().clear();
-            clazz.children().clear();
+        classes.forEach(clazz -> {
+            clazz.clear();
 
-            for(var method : clazz.methods()) {
-                method.parents().clear();
-                method.children().clear();
-            }
-
-            for(var field : clazz.fields()) {
-                field.parents().clear();
-                field.children().clear();
-            }
-        }
+            clazz.methods().forEach(JMethod::clear);
+            clazz.fields().forEach(JField::clear);
+        });
     }
 }
