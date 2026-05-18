@@ -33,7 +33,7 @@ public class JMethod implements ISaltable<MethodSalt> {
     private boolean library;
     private final String originalName, originalDesc;
 
-    private List<JMethod> parents, children;
+    private Set<JMethod> parents, children;
     private AbstractInsnNode safeInsn;
 
     public JMethod(MethodNode core) {
@@ -193,8 +193,8 @@ public class JMethod implements ISaltable<MethodSalt> {
     public void setCore(MethodNode core) {
         this.core = core;
 
-        this.parents = new ArrayList<>();
-        this.children = new ArrayList<>();
+        this.parents = new HashSet<>();
+        this.children = new HashSet<>();
     }
 
     public void setOwner(JClass owner) {
@@ -205,16 +205,16 @@ public class JMethod implements ISaltable<MethodSalt> {
         return owner;
     }
 
-    public List<JMethod> parents() {
+    public Set<JMethod> parents() {
         return parents;
     }
 
-    public List<JMethod> children() {
+    public Set<JMethod> children() {
         return children;
     }
 
-    public List<JMethod> tree() {
-        var list = new ArrayList<>(parents);
+    public Set<JMethod> tree() {
+        var list = new HashSet<>(parents);
         list.addAll(children);
         return list;
     }

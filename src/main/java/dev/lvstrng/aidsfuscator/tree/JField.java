@@ -5,7 +5,9 @@ import org.objectweb.asm.tree.FieldNode;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A FieldNode wrapper for easier use.
@@ -18,7 +20,7 @@ public class JField {
     private final String originalName, originalDesc;
     private boolean library;
 
-    private List<JField> parents, children;
+    private Set<JField> parents, children;
 
     public JField(FieldNode core) {
         this.properties = new PropertyContainer();
@@ -26,6 +28,18 @@ public class JField {
         this.originalName = core.name;
         this.originalDesc = core.desc;
         this.setCore(core);
+    }
+
+    public boolean isPublic() {
+        return Modifier.isPublic(access());
+    }
+
+    public boolean isPrivate() {
+        return Modifier.isPrivate(access());
+    }
+
+    public boolean isProtected() {
+        return Modifier.isProtected(access());
     }
 
     public String originalName() {
@@ -51,8 +65,8 @@ public class JField {
     public void setCore(FieldNode core) {
         this.core = core;
 
-        this.parents = new ArrayList<>();
-        this.children = new ArrayList<>();
+        this.parents = new HashSet<>();
+        this.children = new HashSet<>();
     }
 
     public void setOwner(JClass owner) {
@@ -63,16 +77,16 @@ public class JField {
         return owner;
     }
 
-    public List<JField> parents() {
+    public Set<JField> parents() {
         return parents;
     }
 
-    public List<JField> children() {
+    public Set<JField> children() {
         return children;
     }
 
-    public List<JField> tree() {
-        var list = new ArrayList<>(parents);
+    public Set<JField> tree() {
+        var list = new HashSet<>(parents);
         list.addAll(children);
         return list;
     }

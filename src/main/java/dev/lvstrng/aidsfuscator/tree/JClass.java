@@ -14,9 +14,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A ClassNode wrapper for easier use.
@@ -28,7 +26,7 @@ public class JClass implements ISaltable<ClassSalt> {
     private final String originalName;
     private boolean library;
 
-    private List<JClass> parents, children;
+    private Set<JClass> parents, children;
     private final List<JField> fields;
     private final List<JMethod> methods;
 
@@ -249,8 +247,8 @@ public class JClass implements ISaltable<ClassSalt> {
     public void setCore(ClassNode core) {
         this.core = core;
 
-        this.parents = new ArrayList<>();
-        this.children = new ArrayList<>();
+        this.parents = new HashSet<>();
+        this.children = new HashSet<>();
     }
 
     public void accept(ClassVisitor visitor, ClassNode remapped) {
@@ -350,16 +348,16 @@ public class JClass implements ISaltable<ClassSalt> {
         return false;
     }
 
-    public List<JClass> parents() {
+    public Set<JClass> parents() {
         return parents;
     }
 
-    public List<JClass> children() {
+    public Set<JClass> children() {
         return children;
     }
 
-    public List<JClass> tree() {
-        var list = new ArrayList<>(parents);
+    public Set<JClass> tree() {
+        var list = new HashSet<>(parents);
         list.addAll(children);
         return list;
     }

@@ -15,13 +15,13 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Builds a hierarchy based on the used classes in the JAR file.
+ * Builds a strict hierarchy based on the used classes in the JAR file.
  * @author lvstrng
  */
 public class SimpleHierarchy implements IHierarchy {
     private final Context context;
     private final Predicate<JMethod> blacklistedMethod = (e -> e.name().equals("<init>") || !e.isVirtual() || e.isPrivate()); // these methods do not have hierarchy at all
-    private final Predicate<JField> blacklistedField = (e -> !e.isVirtual()); // static fields do not have hierarchy
+    private final Predicate<JField> blacklistedField = (e -> !e.isVirtual() || e.isPrivate()); // static fields do not have hierarchy
 
     public SimpleHierarchy(Context context) {
         this.context = context;
@@ -29,125 +29,108 @@ public class SimpleHierarchy implements IHierarchy {
 
     @Override
     public void build() {
-        var classes = allNonLibraryClasses();
-        clearHierarchy(classes);
+        var classes = context.jarClasses();
+        this.clearHierarchy(classes);
 
-        for(var clazz : classes) {
-            build(clazz);
-        }
-
-        for(var clazz : classes) {
-            for(var method : clazz.methods()) {
-                build(method);
-            }
-
-            for(var field : clazz.fields()) {
-                build(field);
-            }
-        }
+        classes.forEach(this::build);
+        classes.forEach(clazz -> {
+            clazz.methods().forEach(this::build);
+            clazz.fields().forEach(this::build);
+        });
     }
 
     @Override
     public void build(JClass clazz) {
         var parents = getTree(clazz).stream()
-                .map(this::resolveClass)
-                .filter(e -> e != null && e != clazz)
+                .map(context::forName)
+                .filter(e -> e != clazz)
                 .toList();
 
+        clazz.parents().addAll(parents);
         for(var parent : parents) {
-            if(!clazz.parents().contains(parent)) {
-                clazz.parents().add(parent);
-            }
-
-            if(!parent.children().contains(clazz)) {
-                parent.children().add(clazz);
-            }
+            parent.children().add(clazz);
         }
     }
 
     @Override
     public void build(JMethod method) {
-        var clazz = method.owner();
+        var owner = method.owner();
         if(blacklistedMethod.test(method))
             return;
 
-        // ---- PARENT METHOD HIERARCHY ----
-        for(var parent : clazz.parents()) {
+        // parent methods
+        for(var parent : owner.parents()) {
             var opt = parent.findMethod(method.name(), method.desc());
             if(opt.isEmpty())
                 continue;
 
             var parentMethod = opt.get();
+            if(parentMethod.isVirtual() != method.isVirtual())
+                continue;
+
             if(blacklistedMethod.test(parentMethod))
                 continue;
 
-            if(!method.parents().contains(parentMethod)) {
-                method.parents().add(parentMethod);
-            }
-            if(!parentMethod.children().contains(method)) {
-                parentMethod.children().add(method);
-            }
+            method.parents().add(parentMethod);
+            parentMethod.children().add(method);
         }
 
-        // ---- CHILD METHOD HIERARCHY ----
-        for(var child : clazz.children()) {
+        // child methods
+        for(var child : owner.children()) {
             var opt = child.findMethod(method.name(), method.desc());
             if(opt.isEmpty())
                 continue;
 
             var childMethod = opt.get();
+            if(childMethod.isVirtual() != method.isVirtual())
+                continue;
+
             if(blacklistedMethod.test(childMethod))
                 continue;
 
-            if(!method.children().contains(childMethod)) {
-                method.children().add(childMethod);
-            }
-            if(!childMethod.parents().contains(method)) {
-                childMethod.parents().add(method);
-            }
+            method.children().add(childMethod);
+            childMethod.parents().add(method);
         }
     }
 
     @Override
     public void build(JField field) {
-        var clazz = field.owner();
+        var owner = field.owner();
         if(blacklistedField.test(field))
             return;
 
-        // ---- PARENT FIELD HIERARCHY ----
-        for(var parent : clazz.parents()) {
+        // parent fields
+        for(var parent : owner.parents()) {
             var opt = parent.findField(field.name(), field.desc());
             if(opt.isEmpty())
                 continue;
 
             var parentField = opt.get();
+            if(parentField.isVirtual() != field.isVirtual())
+                continue;
+
             if(blacklistedField.test(parentField))
                 continue;
 
-            if(!field.parents().contains(parentField)) {
-                field.parents().add(parentField);
-            }
-            if(!parentField.children().contains(field)) {
-                parentField.children().add(field);
-            }
+            field.parents().add(parentField);
+            parentField.children().add(field);
         }
 
-        // ---- CHILD FIELD HIERARCHY ----
-        for(var child : clazz.children()) {
+        // child fields
+        for(var child : owner.children()) {
             var opt = child.findField(field.name(), field.desc());
             if(opt.isEmpty())
                 continue;
 
             var childField = opt.get();
+            if(childField.isVirtual() != field.isVirtual())
+                continue;
+
             if(blacklistedField.test(childField))
                 continue;
 
-            if(!field.children().contains(childField)) {
-                field.children().add(childField);
-            }
-            if(!childField.parents().contains(field)) {
-                childField.parents().add(field);
-            }
+            field.children().add(childField);
+            childField.parents().add(field);
         }
     }
 
@@ -184,8 +167,8 @@ public class SimpleHierarchy implements IHierarchy {
             return commonArray(type1, type2);
         }
 
-        var node = resolveClass(type1);
-        var other = resolveClass(type2);
+        var node = context.forName(type1);
+        var other = context.forName(type2);
         if(node == null || other == null)
             return object;
 
@@ -254,7 +237,7 @@ public class SimpleHierarchy implements IHierarchy {
         if(clazz.superName() == null)
             return;
 
-        var superClazz = resolveClass(clazz.superName());
+        var superClazz = context.forName(clazz.superName());
         if(superClazz == null)
             return;
 
@@ -263,8 +246,7 @@ public class SimpleHierarchy implements IHierarchy {
 
     private List<String> getTree(JClass clazz) {
         var tree = new ArrayList<String>();
-        traceSafe(clazz, tree);
-
+        trace(context, clazz, tree);
         return tree;
     }
 
@@ -282,51 +264,6 @@ public class SimpleHierarchy implements IHierarchy {
                 field.parents().clear();
                 field.children().clear();
             }
-        }
-    }
-
-    private List<JClass> allNonLibraryClasses() {
-        var all = new ArrayList<JClass>();
-        all.addAll(context.jarClasses());
-        all.addAll(context.artificials().values());
-
-        var dedup = new HashSet<String>();
-        var out = new ArrayList<JClass>();
-        for(var clazz : all) {
-            if(clazz.isLibrary())
-                continue;
-
-            if(!dedup.add(clazz.name()))
-                continue;
-
-            out.add(clazz);
-        }
-
-        return out;
-    }
-
-    private JClass resolveClass(String name) {
-        try {
-            return context.forName(name);
-        } catch (MissingMemberException _) {
-            return null;
-        }
-    }
-
-    private void traceSafe(JClass clazz, List<String> used) {
-        if(clazz == null)
-            return;
-
-        if(used.contains(clazz.name()))
-            return;
-
-        used.add(clazz.name());
-        if(clazz.superName() != null && !clazz.isInterface()) {
-            traceSafe(resolveClass(clazz.superName()), used);
-        }
-
-        for(var itf : clazz.interfaces()) {
-            traceSafe(resolveClass(itf), used);
         }
     }
 }
