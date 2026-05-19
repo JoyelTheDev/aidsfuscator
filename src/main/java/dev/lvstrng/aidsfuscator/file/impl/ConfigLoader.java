@@ -35,9 +35,13 @@ public class ConfigLoader implements Loader {
                 .setDictionary(configObject.get("dictionary").getAsString())
                 .setWatermark(configObject.get("watermark").getAsString());
 
+        if(configObject.has("aggressiveOverload"))
+            context.setAggressiveOverload(configObject.get("aggressiveOverload").getAsBoolean());
+
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();
-      // ---- TRANSFORMERS ----
+
+        // ---- TRANSFORMERS ----
         var transformers = configObject.get("transformers").getAsJsonObject();
         for(var transformer : TransformerOrder.transformers()) {
             var e = transformers.get(transformer.key());

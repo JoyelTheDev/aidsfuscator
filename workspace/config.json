@@ -1,10 +1,11 @@
 {
-  "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
+  "in": "in.jar",
   "out": "out-out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
+  "aggressiveOverload": false,
   "transformers": {
     "trim": {
       "enabled": true,

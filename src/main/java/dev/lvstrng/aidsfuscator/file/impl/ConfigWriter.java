@@ -35,6 +35,7 @@ public class ConfigWriter implements Writer {
         configObject.add("dictionary", new JsonPrimitive(context.dictionaryString()));
         configObject.add("computeFrames", new JsonPrimitive(context.doesComputeFrames()));
         configObject.add("watermark", new JsonPrimitive(context.watermark()));
+        configObject.add("aggressiveOverload", new JsonPrimitive(context.aggressiveOverload()));
 
         for(var transformer : TransformerOrder.transformers()) {
             var transformerObject = new JsonObject();

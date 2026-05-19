@@ -43,7 +43,7 @@ public class Context {
     private final Map<String, JClass> classes, artificials, libraries, excluded;
     private int writerFlags;
     private int version;
-    private boolean computeFrames;
+    private boolean computeFrames, aggressiveOverload;
     private String dictionaryString;
     private String watermark;
 
@@ -87,7 +87,11 @@ public class Context {
             Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
             Logger.warn("------------------------------------------------");
         }
-        this.dictionary         = new AggressiveDictionary(this, dictionaryString);
+        if(aggressiveOverload) {
+            this.dictionary = new AggressiveDictionary(this, dictionaryString);
+        } else {
+            this.dictionary     = new SimpleDictionary(this, dictionaryString);
+        }
 
         Logger.info("Loading libraries...");
         this.libraryLoader.setJavaPath(javaPath);
@@ -377,6 +381,10 @@ public class Context {
         return watermark;
     }
 
+    public boolean aggressiveOverload() {
+        return aggressiveOverload;
+    }
+
     // -----------------
     // ---- BUILDER ----
     // -----------------
@@ -397,6 +405,11 @@ public class Context {
 
     public Context libs(String libPath) {
         this.libPath = libPath;
+        return this;
+    }
+
+    public Context setAggressiveOverload(boolean aggressiveOverload) {
+        this.aggressiveOverload = aggressiveOverload;
         return this;
     }
 
