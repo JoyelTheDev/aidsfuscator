@@ -86,41 +86,37 @@ public class AggressiveDictionary implements IDictionary {
     }
 
     private boolean isFieldMapped(JClass owner, String name, String desc) {
-        var simpleName = String.format("%s %s", name, desc);
-
         for(var member : owner.tree()) {
-            var id = String.format("%s.%s", member, simpleName);
-            if(Mappings.FIELD.containsNew(id))
+            var mappedName = "%s.%s %s".formatted(member.name(), name, desc);
+            if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().equals(mappedName)))
                 return true;
 
-            if(member.fields().stream().anyMatch(e -> e.simpleName().equals(simpleName)))
+            if(member.fields().stream().anyMatch(e -> e.name().equals(name)))
                 return true;
         }
 
-        var id = String.format("%s.%s", owner, simpleName);
-        if(Mappings.FIELD.containsNew(id))
+        var mappedName = "%s.%s %s".formatted(owner.name(), name, desc);
+        if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
             return true;
 
-        return owner.fields().stream().anyMatch(e -> e.simpleName().equals(simpleName));
+        return owner.fields().stream().anyMatch(e -> e.name().equals(name));
     }
 
     private boolean isMethodMapped(JClass owner, String name, String desc) {
-        var simpleName = String.format("%s%s", name, desc);
-
         for(var member : owner.tree()) {
-            var id = String.format("%s.%s", member, simpleName);
-            if(Mappings.METHOD.containsNew(id))
+            var mappedName = "%s.%s%s".formatted(member.name(), name, desc);
+            if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().equals(mappedName)))
                 return true;
 
-            if(member.methods().stream().anyMatch(e -> e.simpleName().equals(simpleName)))
+            if(member.methods().stream().anyMatch(e -> e.name().equals(name)))
                 return true;
         }
 
-        var id = String.format("%s.%s", owner, simpleName);
-        if(Mappings.METHOD.containsNew(id))
+        var mappedName = "%s.%s%s".formatted(owner.name(), name, desc);
+        if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
             return true;
 
-        return owner.methods().stream().anyMatch(e -> e.simpleName().equals(simpleName));
+        return owner.methods().stream().anyMatch(e -> e.name().equals(name));
     }
 
     @Override
