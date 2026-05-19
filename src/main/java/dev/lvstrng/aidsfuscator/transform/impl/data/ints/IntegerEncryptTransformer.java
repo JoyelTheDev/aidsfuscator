@@ -67,8 +67,11 @@ public class IntegerEncryptTransformer extends Transformer {
                 }
             }
 
-            if(numbers.isEmpty())
+            if(numbers.isEmpty()) {
+                context.dictionary().revertMethod();
+                context.dictionary().revertField();
                 continue;
+            }
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
             clazz.createField(access, fieldName, "[I");

@@ -12,8 +12,9 @@ import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.naming.dictionary.DefaultDictionary;
+import dev.lvstrng.aidsfuscator.naming.dictionary.AggressiveDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
+import dev.lvstrng.aidsfuscator.naming.dictionary.SimpleDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -86,7 +87,7 @@ public class Context {
             Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
             Logger.warn("------------------------------------------------");
         }
-        this.dictionary         = new DefaultDictionary(this, dictionaryString);
+        this.dictionary         = new AggressiveDictionary(this, dictionaryString);
 
         Logger.info("Loading libraries...");
         this.libraryLoader.setJavaPath(javaPath);

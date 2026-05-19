@@ -80,8 +80,11 @@ public class StringEncryptTransformer extends Transformer {
                 }
             }
 
-            if(strings.isEmpty())
+            if(strings.isEmpty()) {
+                context.dictionary().revertField();
+                context.dictionary().revertMethod();
                 continue;
+            }
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
             clazz.createField(access, fieldName, "[Ljava/lang/String;");

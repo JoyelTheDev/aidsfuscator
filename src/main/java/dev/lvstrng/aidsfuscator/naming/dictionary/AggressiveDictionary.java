@@ -8,12 +8,12 @@ import dev.lvstrng.aidsfuscator.tree.impl.JClass;
  * Dictionary that does aggressive renaming. {@code revert} methods do not have implementations (shouldn't have one either way).
  * @author lvstrng
  */
-public class DefaultDictionary implements IDictionary {
+public class AggressiveDictionary implements IDictionary {
     private final Context context;
     private final String dictionary;
     private int classCounter = 0;
 
-    public DefaultDictionary(Context context, String dictionary) {
+    public AggressiveDictionary(Context context, String dictionary) {
         this.context = context;
         this.dictionary = dictionary;
     }
@@ -82,7 +82,7 @@ public class DefaultDictionary implements IDictionary {
     }
 
     private boolean isClassMapped(String name) {
-        return context.classMap().containsKey(name) || Mappings.CLASS.containsNew(name);
+        return context.hasJarClass(name) || Mappings.CLASS.containsNew(name);
     }
 
     private boolean isFieldMapped(JClass owner, String name, String desc) {
