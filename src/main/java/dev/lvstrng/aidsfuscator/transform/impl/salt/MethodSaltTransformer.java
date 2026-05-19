@@ -133,18 +133,14 @@ public class MethodSaltTransformer extends Transformer {
             if(!saltedMethods.add(member))
                 continue;
 
-            if((member.access() & ACC_VARARGS) != 0)
-                member.core().access &= ~ACC_VARARGS;
-
+            member.removeAccessFlags(ACC_VARARGS);
             member.makeSalt(salt, -1);
         }
 
         if(!saltedMethods.add(method))
             return;
 
-        if((method.access() & ACC_VARARGS) != 0)
-            method.core().access &= ~ACC_VARARGS;
-
+        method.removeAccessFlags(ACC_VARARGS);
         method.makeSalt(salt, -1);
     }
 

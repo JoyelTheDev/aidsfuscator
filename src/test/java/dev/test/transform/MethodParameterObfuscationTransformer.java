@@ -149,15 +149,13 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             if(!obfuscatedMethods.add(member))
                 continue;
 
-            if((member.access() & ACC_VARARGS) != 0)
-                member.core().access &= ~ACC_VARARGS;
+            member.removeAccessFlags(ACC_VARARGS);
         }
 
         if(!obfuscatedMethods.add(method))
             return;
 
-        if((method.access() & ACC_VARARGS) != 0)
-            method.core().access &= ~ACC_VARARGS;
+        method.removeAccessFlags(ACC_VARARGS);
     }
 
     private boolean skipMethodAndTree(ReferenceGraph graph, JMethod method, Set<JClass> impactedClasses) {

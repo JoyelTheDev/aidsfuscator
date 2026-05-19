@@ -36,11 +36,9 @@ public class ClassSaltTransformer extends Transformer {
                 if(!unifyAccess.value())
                     continue;
 
-                if(Modifier.isPrivate(clazz.access()))
-                    clazz.core().access &= ~(ACC_PRIVATE);
-                if(Modifier.isProtected(clazz.access()))
-                    clazz.core().access &= ~(ACC_PROTECTED);
-                clazz.core().access |= ACC_PUBLIC;
+                clazz.removeAccessFlags(ACC_PRIVATE);
+                clazz.removeAccessFlags(ACC_PROTECTED);
+                clazz.addAccessFlags(ACC_PUBLIC);
             }
 
             var val = random.nextInt();
