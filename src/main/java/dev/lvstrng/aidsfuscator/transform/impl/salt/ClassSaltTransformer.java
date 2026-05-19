@@ -80,11 +80,16 @@ public class ClassSaltTransformer extends Transformer {
             if(frames.get(insn).getLocal(saltLocal).isUninitialized())
                 continue;
 
-            var n = ASMUtils.getInt(insn);
             var list = new InsnList();
 
+            var n = ASMUtils.getInt(insn);
+            var mask = random.nextInt();
+            var masked = saltValue & mask;
+
             list.add(method.salt().load());
-            list.add(context.properties().add(ASMUtils.pushInt(n ^ saltValue), Property.IGNORE_INTEGER));
+            list.add(ASMUtils.pushInt(mask));
+            list.add(new InsnNode(IAND));
+            list.add(ASMUtils.pushInt(masked ^ n));
             list.add(new InsnNode(IXOR));
 
             method.insns().insertBefore(insn, list);

@@ -28,8 +28,6 @@ import java.util.*;
  * @author lvstrng
  */
 public class MethodSaltTransformer extends Transformer {
-    private final Setting<Boolean> advancedSalting = setting("advancedSalting", true); // adds a random number to AND gate the caller salt with another number, so salt values can not be traced backwards if callers are known
-
     public MethodSaltTransformer() {
         super("Method Salting", "methodSalting");
     }
@@ -74,20 +72,14 @@ public class MethodSaltTransformer extends Transformer {
         if(!caller.canSalt(frames.get(call))) { // if unable to salt, use raw salt
             list.add(context.properties().add(ASMUtils.pushInt(salt.value()), Property.UNPROTECTED_SALT));
         } else {
-            if(advancedSalting.value()) { // advanced salting
-                var mask = random.nextInt();
-                var masked = caller.salt().value() & mask;
+            var mask = random.nextInt();
+            var masked = caller.salt().value() & mask;
 
-                list.add(caller.salt().load());
-                list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
-                list.add(new InsnNode(IAND));
-                list.add(context.properties().add(ASMUtils.pushInt(masked ^ salt.value()), Property.IGNORE_INTEGER));
-                list.add(new InsnNode(IXOR));
-            } else { // regular salting
-                list.add(caller.salt().load());
-                list.add(context.properties().add(ASMUtils.pushInt(caller.salt().value() ^ salt.value()), Property.IGNORE_INTEGER));
-                list.add(new InsnNode(IXOR));
-            }
+            list.add(caller.salt().load());
+            list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+            list.add(new InsnNode(IAND));
+            list.add(context.properties().add(ASMUtils.pushInt(masked ^ salt.value()), Property.IGNORE_INTEGER));
+            list.add(new InsnNode(IXOR));
         }
 
         caller.insns().insertBefore(call, list);

@@ -1,11 +1,11 @@
 {
   "in": "in.jar",
-  "out": "out-out.jar",
+  "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
-  "aggressiveOverload": false,
+  "aggressiveOverload": true,
   "transformers": {
     "trim": {
       "enabled": true,
@@ -16,18 +16,18 @@
     "renameFields": {
       "enabled": true,
       "prefix": "",
-      "shuffle": true,
+      "shuffle": false,
       "preserveRecordNames": true
     },
     "renameMethods": {
       "enabled": true,
       "prefix": "",
-      "shuffle": true
+      "shuffle": false
     },
     "renameClasses": {
       "enabled": true,
       "prefix": "",
-      "randomize": true
+      "randomize": false
     },
     "localNames": {
       "enabled": false
@@ -37,8 +37,7 @@
       "remove": true
     },
     "methodSalting": {
-      "enabled": true,
-      "advancedSalting": true
+      "enabled": true
     },
     "classSalting": {
       "enabled": true,
@@ -51,7 +50,7 @@
       "enabled": false
     },
     "encryptStrings": {
-      "enabled": false,
+      "enabled": true,
       "translateConcat": true,
       "minLength": 2
     },
