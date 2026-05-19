@@ -6,7 +6,7 @@ import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.TransformerOrder;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 
 public class ConfigLoader implements Loader {
     private final String configPath;

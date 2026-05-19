@@ -5,7 +5,7 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 
 import java.util.ArrayList;
 import java.util.Collections;

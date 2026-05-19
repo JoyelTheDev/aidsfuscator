@@ -2,14 +2,12 @@ package dev.lvstrng.aidsfuscator.transform;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.asm.RemapperImpl;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.lang.reflect.Modifier;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;

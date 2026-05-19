@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.settings;
+package dev.lvstrng.aidsfuscator.transform;
 
 public class Setting<T> {
     private final String key;

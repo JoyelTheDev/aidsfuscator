@@ -9,7 +9,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultSt
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.PolymorphicStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.DefaultStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.XorStringInitializer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import org.objectweb.asm.tree.*;
 

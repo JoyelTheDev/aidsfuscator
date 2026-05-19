@@ -3,7 +3,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.strip;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import org.objectweb.asm.tree.LineNumberNode;
 
 public class LineNumberTransformer extends Transformer {

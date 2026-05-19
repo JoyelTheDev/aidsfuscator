@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.ISalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;

@@ -5,7 +5,7 @@ import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.settings.Setting;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -13,8 +13,6 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-
-import java.lang.reflect.Modifier;
 
 public class ClassSaltTransformer extends Transformer {
     private final Setting<Boolean> unifyAccess = setting("unifyAccess", true);
