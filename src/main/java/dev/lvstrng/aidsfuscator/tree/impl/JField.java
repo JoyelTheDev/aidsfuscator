@@ -1,17 +1,17 @@
 package dev.lvstrng.aidsfuscator.tree.impl;
 
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
+import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.tree.FieldNode;
 
-import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * A FieldNode wrapper for easier use.
  */
-public class JField implements IHierarchical<JField> {
+public class JField implements IAccessFlags, IHierarchical<JField> {
     private JClass owner;
     private FieldNode core;
     private final PropertyContainer properties;
@@ -27,18 +27,6 @@ public class JField implements IHierarchical<JField> {
         this.originalName = core.name;
         this.originalDesc = core.desc;
         this.setCore(core);
-    }
-
-    public boolean isPublic() {
-        return Modifier.isPublic(access());
-    }
-
-    public boolean isPrivate() {
-        return Modifier.isPrivate(access());
-    }
-
-    public boolean isProtected() {
-        return Modifier.isProtected(access());
     }
 
     public String originalName() {
@@ -86,20 +74,18 @@ public class JField implements IHierarchical<JField> {
         return children;
     }
 
-    public boolean isVirtual() {
-        return !Modifier.isStatic(access());
-    }
-
-    public boolean isFinal() {
-        return Modifier.isFinal(access());
-    }
-
     public FieldNode core() {
         return core;
     }
 
+    @Override
     public int access() {
         return core.access;
+    }
+
+    @Override
+    public void setAccess(int flags) {
+        core.access = flags;
     }
 
     public String name() {

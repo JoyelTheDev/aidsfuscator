@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
+import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -24,7 +25,7 @@ import java.util.*;
 /**
  * A MethodNode wrapper for easier use.
  */
-public class JMethod implements ISaltable<MethodSalt>, IHierarchical<JMethod> {
+public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod> {
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
@@ -44,26 +45,6 @@ public class JMethod implements ISaltable<MethodSalt>, IHierarchical<JMethod> {
         this.originalDesc = core.desc;
 
         this.setCore(core);
-    }
-
-    public boolean isPublic() {
-        return Modifier.isPublic(access());
-    }
-
-    public boolean isPrivate() {
-        return Modifier.isPrivate(access());
-    }
-
-    public boolean isProtected() {
-        return Modifier.isProtected(access());
-    }
-
-    public boolean isBridge() {
-        return (access() & Opcodes.ACC_BRIDGE) != 0;
-    }
-
-    public boolean isSynthetic() {
-        return (access() & Opcodes.ACC_BRIDGE) != 0;
     }
 
     public void insertSafe(InsnList list) {
@@ -215,24 +196,18 @@ public class JMethod implements ISaltable<MethodSalt>, IHierarchical<JMethod> {
         return children;
     }
 
-    public boolean isVirtual() {
-        return !Modifier.isStatic(access());
-    }
-
-    public boolean isNative() {
-        return Modifier.isNative(access());
-    }
-
-    public boolean isAbstract() {
-        return Modifier.isAbstract(access());
-    }
-
     public MethodNode core() {
         return core;
     }
 
+    @Override
     public int access() {
         return core.access;
+    }
+
+    @Override
+    public void setAccess(int flags) {
+        core.access = flags;
     }
 
     public String name() {

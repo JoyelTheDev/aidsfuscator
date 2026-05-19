@@ -1,5 +1,5 @@
 {
-  "in": "in.jar",
+  "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -7,7 +7,7 @@
   "watermark": "https://github.com/LvStrnggg/aidsfuscator",
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
@@ -36,11 +36,11 @@
       "remove": true
     },
     "methodSalting": {
-      "enabled": false,
+      "enabled": true,
       "advancedSalting": true
     },
     "classSalting": {
-      "enabled": false,
+      "enabled": true,
       "unifyAccess": true
     },
     "fixConstants": {

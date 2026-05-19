@@ -4,6 +4,7 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
+import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
@@ -14,13 +15,12 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
  * A ClassNode wrapper for easier use.
  */
-public class JClass implements ISaltable<ClassSalt>, IHierarchical<JClass> {
+public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical<JClass> {
     private ClassNode core;
     private final PropertyContainer properties;
 
@@ -101,22 +101,11 @@ public class JClass implements ISaltable<ClassSalt>, IHierarchical<JClass> {
         return library;
     }
 
-    public boolean isVirtual() {
-        return !Modifier.isStatic(access());
-    }
-
-    public boolean isInterface() {
-        return Modifier.isInterface(access());
-    }
-
-    public boolean isAnnotation() {
-        return (access() & Opcodes.ACC_ANNOTATION) != 0;
-    }
-
     public boolean isEnum() {
         return core.superName != null && core.superName.equals("java/lang/Enum");
     }
 
+    @Override
     public boolean isRecord() {
         return core.superName != null && core.superName.equals("java/lang/Record");
     }
@@ -375,8 +364,14 @@ public class JClass implements ISaltable<ClassSalt>, IHierarchical<JClass> {
         return core;
     }
 
+    @Override
     public int access() {
         return core.access;
+    }
+
+    @Override
+    public void setAccess(int flags) {
+        core.access = flags;
     }
 
     public String name() {
