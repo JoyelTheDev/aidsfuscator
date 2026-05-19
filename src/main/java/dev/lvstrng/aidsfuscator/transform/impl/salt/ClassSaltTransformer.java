@@ -45,6 +45,7 @@ public class ClassSaltTransformer extends Transformer {
             var name = context.dictionary().newFieldName(clazz, "I");
 
             var field = clazz.createField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I");
+            field.properties().add(Property.SALT_ARTIFACT);
             clazz.setSalt(new ClassSalt(clazz, field, val));
 
             for(var method : clazz.methods()) {
