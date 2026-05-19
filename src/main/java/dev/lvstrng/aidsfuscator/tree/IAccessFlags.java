@@ -93,6 +93,10 @@ public interface IAccessFlags {
         return isAccess(Opcodes.ACC_VARARGS);
     }
 
+    default boolean isModule() {
+        return isAccess(Opcodes.ACC_MODULE);
+    }
+
     default boolean isAccess(int acc) {
         return (access() & acc) != 0;
     }

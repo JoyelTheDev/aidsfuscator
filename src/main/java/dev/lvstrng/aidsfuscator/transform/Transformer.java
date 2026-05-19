@@ -115,8 +115,8 @@ public abstract class Transformer implements Opcodes {
             if(method.name().equals("valueOf") && method.desc().equals("(Ljava/lang/String;)L" + node.name() + ";")) return true;
         }
 
-        if((node.access() & Opcodes.ACC_ANNOTATION) != 0) return true;
-        if(Modifier.isNative(method.access())) return true;
+        if(node.isAnnotation()) return true;
+        if(method.isNative()) return true;
         if(!method.name().equals("<init>")) {
             if (node.isLibMethod(method.name(), method.desc())) return true;
         }

@@ -74,7 +74,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     public int allocParameter(Type type) {
         int argSize = Arrays.stream(args()).mapToInt(Type::getSize).sum();
-        int spot = Modifier.isStatic(access()) ? argSize : argSize + 1;
+        int spot = isStatic() ? argSize : argSize + 1;
 
         if (localVariables() != null) {
             for (var lv : localVariables()) {

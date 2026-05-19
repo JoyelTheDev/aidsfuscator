@@ -26,13 +26,13 @@ public class ClassSaltTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
-            if((clazz.access() & ACC_MODULE) != 0)
+            if(clazz.isModule())
                 continue;
 
             if(Exclusions.CLASS_SALTING.excluded(clazz))
                 continue;
 
-            if(!Modifier.isPublic(clazz.access())) {
+            if(!clazz.isPublic()) {
                 if(!unifyAccess.value())
                     continue;
 
