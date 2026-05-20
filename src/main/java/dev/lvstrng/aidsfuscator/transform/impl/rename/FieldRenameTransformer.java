@@ -83,11 +83,12 @@ public class FieldRenameTransformer extends Transformer {
                 if(!(arg instanceof Handle handle))
                     continue;
 
-                newNames.append(handle.getName()).append(";");
+                newNames.append(handle.getName());
+                if (i < indy.bsmArgs.length - 1) {
+                    newNames.append(";");
+                }
             }
 
-            // delete last ; cuz idk, it will work with it anyway but still
-            newNames.deleteCharAt(newNames.length() - 1);
             indy.bsmArgs[1] = newNames.toString();
         }
     }
