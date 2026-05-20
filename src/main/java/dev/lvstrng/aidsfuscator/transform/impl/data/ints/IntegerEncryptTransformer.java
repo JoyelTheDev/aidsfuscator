@@ -54,9 +54,6 @@ public class IntegerEncryptTransformer extends Transformer {
                     if(!ASMUtils.isIntPush(insn))
                         continue;
 
-                    if(ASMUtils.isIconst(insn))
-                        continue;
-
                     if(context.properties().get(insn).has(Property.IGNORE_INTEGER))
                         continue;
 
