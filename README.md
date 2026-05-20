@@ -123,25 +123,25 @@ You can add multiple of these class pairs and you can chain them, but you have t
 Reference Obfuscation Inclusions is a file that specifies reference obfuscation candidates. It uses the same matching system as in exclusions. Examples:
 #### Methods
 - Any method called `test` in any class with any parameters with any return type
-<br>
-`*.test(*)*`
-</br>
+  <br>
+  `*.test(*)*`
+  </br>
 - Any method called `test` in any class with NO parameters with `void` return type
-<br>
-`*.test()V`
-</br>
+  <br>
+  `*.test()V`
+  </br>
 - Any method called `test` in class `pkg.TestClass` with first parameter `long` with `java.lang.String` return type
-<br>
-`pkg/TestClass.test(J*)Ljava/lang/String;`
-</br>
+  <br>
+  `pkg/TestClass.test(J*)Ljava/lang/String;`
+  </br>
 - Any method called `test` in any class that ends with `subpkg.TestClass` with last parameter `boolean` with `int` return type
-<br>
-`*/subpkg/TestClass.test(*Z)I`
-</br>
+  <br>
+  `*/subpkg/TestClass.test(*Z)I`
+  </br>
 - Any method called `test` in any class that's under a package called `pkg` with any parameters and return value (shortened)
-<br>
-`*/pkg/*.test(*`
-</br>
+  <br>
+  `*/pkg/*.test(*`
+  </br>
 
 #### Fields
 - Any field called `test` in any class with any return type
