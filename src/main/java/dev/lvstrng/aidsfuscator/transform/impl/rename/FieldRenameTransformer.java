@@ -34,7 +34,7 @@ public class FieldRenameTransformer extends Transformer {
         }
 
         remap(context);
-        if(preserveRecordNames.value())
+        if(!preserveRecordNames.value())
             transformRecordMethods(context);
     }
 
