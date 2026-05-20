@@ -1,5 +1,5 @@
 {
-  "in": "out/artifacts/aidsfuscator_jar/aidsfuscator.jar",
+  "in": "eval.jar",
   "out": "out-out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
