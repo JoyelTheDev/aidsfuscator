@@ -1,7 +1,5 @@
 package dev.lvstrng.aidsfuscator.analysis.interpreter;
 
-import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.utils.TypeUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.analysis.Value;

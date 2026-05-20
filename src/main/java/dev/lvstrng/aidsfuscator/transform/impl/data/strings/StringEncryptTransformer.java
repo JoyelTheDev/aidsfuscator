@@ -4,14 +4,14 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.PolymorphicStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.DefaultStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.XorStringInitializer;
-import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.LdcInsnNode;
 
 import java.util.ArrayList;
 import java.util.List;

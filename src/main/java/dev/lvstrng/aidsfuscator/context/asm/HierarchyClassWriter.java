@@ -2,8 +2,6 @@ package dev.lvstrng.aidsfuscator.context.asm;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.analysis.Frame;
 
 /**
  * Writes classes correctly using {@link dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy#commonSuperClass(String, String)} without touching reflection like OW2 ASM intended.

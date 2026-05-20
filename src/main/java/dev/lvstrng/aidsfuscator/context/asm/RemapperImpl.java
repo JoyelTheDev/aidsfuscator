@@ -3,7 +3,6 @@ package dev.lvstrng.aidsfuscator.context.asm;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Remapper;
 
 public class RemapperImpl extends Remapper {

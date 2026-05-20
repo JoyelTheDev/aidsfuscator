@@ -1,15 +1,11 @@
 package dev.test.transform;
 
-import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.utils.NamedOpcodes;
-import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.analysis.Frame;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class FrameTest extends Transformer {

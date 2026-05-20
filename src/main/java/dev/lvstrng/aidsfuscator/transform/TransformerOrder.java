@@ -7,14 +7,14 @@ import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTrans
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 
 import java.util.Comparator;
 import java.util.List;

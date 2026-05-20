@@ -2,11 +2,11 @@ package dev.lvstrng.aidsfuscator.file.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.transform.TransformerOrder;
 import dev.lvstrng.aidsfuscator.transform.Setting;
+import dev.lvstrng.aidsfuscator.transform.TransformerOrder;
 
 public class ConfigLoader implements Loader {
     private final String configPath;

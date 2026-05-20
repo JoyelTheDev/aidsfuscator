@@ -7,12 +7,13 @@ import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.CryptUtils;
-import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ReferenceObfuscationTransformer extends Transformer {
     private final List<String> references = new ArrayList<>();

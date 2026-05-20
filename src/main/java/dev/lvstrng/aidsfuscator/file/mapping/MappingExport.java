@@ -3,10 +3,8 @@ package dev.lvstrng.aidsfuscator.file.mapping;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.file.Writer;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 

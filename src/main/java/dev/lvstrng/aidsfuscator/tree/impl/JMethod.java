@@ -13,13 +13,11 @@ import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**

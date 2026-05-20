@@ -4,7 +4,6 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.StringFilter;
 import dev.lvstrng.aidsfuscator.reference.IReferenceCandidate;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
-import org.objectweb.asm.tree.MethodInsnNode;
 
 public class MethodReferenceCandidate implements IReferenceCandidate {
     private final Context context;

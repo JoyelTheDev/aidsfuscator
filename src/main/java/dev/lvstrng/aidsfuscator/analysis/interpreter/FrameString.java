@@ -2,8 +2,6 @@ package dev.lvstrng.aidsfuscator.analysis.interpreter;
 
 import org.objectweb.asm.tree.analysis.Frame;
 
-import java.awt.*;
-
 public class FrameString {
     public static String generate(Frame<SimpleValue> frame) {
         var sb = new StringBuilder("L{");

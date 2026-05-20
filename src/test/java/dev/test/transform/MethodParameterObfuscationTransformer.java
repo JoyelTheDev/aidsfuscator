@@ -13,7 +13,8 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MethodParameterObfuscationTransformer extends Transformer {

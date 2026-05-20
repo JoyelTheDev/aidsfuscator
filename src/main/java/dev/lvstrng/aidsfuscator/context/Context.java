@@ -1,14 +1,14 @@
 package dev.lvstrng.aidsfuscator.context;
 
-import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
-import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
+import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
 import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
+import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;

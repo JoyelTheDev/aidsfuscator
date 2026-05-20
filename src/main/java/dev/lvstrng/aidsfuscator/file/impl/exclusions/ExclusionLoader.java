@@ -2,9 +2,9 @@ package dev.lvstrng.aidsfuscator.file.impl.exclusions;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class ExclusionLoader implements Loader {
