@@ -132,16 +132,11 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         return false;
     }
 
-    public boolean isLibField(String name, String desc) {
-        for(var parent : tree()) {
-            if(!parent.isLibrary())
-                continue;
+    public boolean isLibField(JField field) {
+        if(field.owner().isLibrary())
+            return true;
 
-            if(parent.fields.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
-                return true;
-        }
-
-        return false;
+        return field.tree().stream().anyMatch(e -> e.owner().isLibrary());
     }
 
     public boolean hasFieldInTree(String name, String desc) {

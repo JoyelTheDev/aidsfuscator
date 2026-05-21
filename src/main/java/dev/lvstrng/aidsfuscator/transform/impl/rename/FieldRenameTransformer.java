@@ -102,7 +102,7 @@ public class FieldRenameTransformer extends Transformer {
         }
 
         for(var field : clazz.fields()) {
-            if(clazz.isLibField(field.name(), field.desc()))
+            if(clazz.isLibField(field))
                 continue;
 
             var impactedClasses = impactedClasses(context, clazz, field);
