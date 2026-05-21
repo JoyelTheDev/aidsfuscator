@@ -159,7 +159,7 @@ public class MethodSaltTransformer extends Transformer {
             if(opt.isPresent())
                 method = opt.get();
 
-            if(member.isLibMethod(method.name(), method.desc()))
+            if(member.isLibMethod(method))
                 return true;
 
             if(Exclusions.METHOD_SALTING.excluded(member))

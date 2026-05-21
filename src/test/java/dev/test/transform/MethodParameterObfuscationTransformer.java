@@ -165,7 +165,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             if(opt.isPresent())
                 method = opt.get();
 
-            if(member.isLibMethod(method.name(), method.desc()))
+            if(member.isLibMethod(method))
                 return true;
 
             if(Exclusions.PARAMETER_OBFUSCATE.excluded(member))

@@ -28,7 +28,7 @@ public class NewMethodRenameTransformer extends Transformer {
 
     private void mapMethods(Context context, JClass clazz) {
         for(var method : clazz.methods()) {
-            if(clazz.isLibMethod(method.name(), method.desc()))
+            if(clazz.isLibMethod(method))
                 continue;
 
             var impactedClasses = impactedClasses(context, clazz, method);

@@ -41,7 +41,7 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            if(clazz.isLibMethod(method.name(), method.desc()))
+            if(clazz.isLibMethod(method))
                 continue;
 
             var impactedClasses = impactedClasses(context, clazz, method);

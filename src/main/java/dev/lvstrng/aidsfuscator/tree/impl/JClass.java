@@ -120,16 +120,11 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         return clazz.parents.contains(this);
     }
 
-    public boolean isLibMethod(String name, String desc) {
-        for(var parent : tree()) {
-            if(!parent.isLibrary())
-                continue;
+    public boolean isLibMethod(JMethod method) {
+        if(method.owner().isLibrary())
+            return true;
 
-            if(parent.methods.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
-                return true;
-        }
-
-        return false;
+        return method.tree().stream().anyMatch(e -> e.owner().isLibrary());
     }
 
     public boolean isLibField(JField field) {
