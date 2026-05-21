@@ -125,7 +125,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                                 if(fieldRef == null)
                                     continue;
 
-                                if(owner.isLibrary(fieldRef) || owner.isInterface())
+                                if(owner.isLibField(fieldRef) || owner.isInterface())
                                     continue;
 
                                 fieldRef.removeAccessFlags(ACC_FINAL);

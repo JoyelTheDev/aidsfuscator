@@ -16,10 +16,12 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A ClassNode wrapper for easier use.
  */
+@SuppressWarnings("all")
 public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical<JClass> {
     private ClassNode core;
     private final PropertyContainer properties;
@@ -121,31 +123,36 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean isLibMethod(JMethod method) {
-        if(method.owner().isLibrary())
-            return true;
+        for(var parent : tree()) {
+            if(!parent.isLibrary())
+                continue;
 
-        return method.tree().stream().anyMatch(e -> e.owner().isLibrary());
-    }
+            var found = parent.methods.stream()
+                    .filter(e -> !e.isStatic())
+                    .filter(e -> !e.isPrivate())
+                    .filter(e -> !e.name().startsWith("<"))
+                    .filter(e -> e.name().equals(method.name()))
+                    .anyMatch(e -> e.desc().equals(method.desc()));
 
-    public boolean isLibField(JField field) {
-        if(field.owner().isLibrary())
-            return true;
-
-        return field.tree().stream().anyMatch(e -> e.owner().isLibrary());
-    }
-
-    public boolean hasFieldInTree(String name, String desc) {
-        for(var member : tree()) {
-            if(member.fields.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+            if(found)
                 return true;
         }
 
         return false;
     }
 
-    public boolean hasMethodInTree(String name, String desc) {
-        for(var member : tree()) {
-            if(member.methods.stream().anyMatch(e -> e.name().equals(name) && e.desc().equals(desc)))
+    public boolean isLibField(JField field) {
+        for(var parent : tree()) {
+            if(!parent.isLibrary())
+                continue;
+
+            var found = parent.fields.stream()
+                    .filter(e -> !e.isStatic())
+                    .filter(e -> !e.isPrivate())
+                    .filter(e -> e.name().equals(field.name()))
+                    .anyMatch(e -> e.desc().equals(field.desc()));
+
+            if(found)
                 return true;
         }
 
@@ -187,8 +194,9 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            method = parent.findMethod(name, desc).orElse(null);
-            if(method != null) break;
+            method = parent.findMethod(name, desc, e -> e.isVirtual() && !e.isPrivate() && !e.name().startsWith("<")).orElse(null);
+            if(method == null) continue;
+            return method;
         }
 
         return method;
@@ -203,22 +211,34 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            field = parent.findField(name, desc).orElse(null);
-            if(field != null) break;
+            field = parent.findField(name, desc, e -> e.isVirtual() && !e.isPrivate()).orElse(null);
+            if(field == null) continue;
+
+            return field;
         }
 
         return field;
     }
 
     public Optional<JMethod> findMethod(String name, String desc) {
+        return findMethod(name, desc, _ -> true);
+    }
+
+    public Optional<JField> findField(String name, String desc) {
+        return findField(name, desc, _ -> true);
+    }
+
+    public Optional<JMethod> findMethod(String name, String desc, Predicate<JMethod> predicate) {
         return methods.stream()
+                .filter(predicate)
                 .filter(e -> e.name().equals(name))
                 .filter(e -> e.desc().equals(desc))
                 .findAny();
     }
 
-    public Optional<JField> findField(String name, String desc) {
+    public Optional<JField> findField(String name, String desc, Predicate<JField> predicate) {
         return fields.stream()
+                .filter(predicate)
                 .filter(e -> e.name().equals(name))
                 .filter(e -> e.desc().equals(desc))
                 .findAny();
@@ -294,38 +314,6 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             field.setLibrary();
         field.setOwner(this);
         return field;
-    }
-
-    public boolean isLibrary(JMethod method) {
-        if(method.isLibrary())
-            return true;
-
-        for(var member : tree()) {
-            var f = member.findMethod(method.name(), method.desc());
-            if(f.isEmpty())
-                continue;
-
-            if(f.get().isLibrary())
-                return true;
-        }
-
-        return false;
-    }
-
-    public boolean isLibrary(JField field) {
-        if(field.isLibrary())
-            return true;
-
-        for(var member : tree()) {
-            var f = member.findMethod(field.name(), field.desc());
-            if(f.isEmpty())
-                continue;
-
-            if(f.get().isLibrary())
-                return true;
-        }
-
-        return false;
     }
 
     @Override
