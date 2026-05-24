@@ -123,7 +123,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean isLibMethod(JMethod method) {
-        if(isLibrary())
+        if(method.owner().isLibrary())
             return true;
 
         if(method.isNonHierarchical())
@@ -146,17 +146,17 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean isLibField(JField field) {
-        if(isLibrary())
+        if(field.owner().isLibrary())
             return true;
 
         if(field.isNonHierarchical())
             return false;
 
-        for(var member : tree()) {
-            if(!member.isLibrary())
+        for(var parent : tree()) {
+            if(!parent.isLibrary())
                 continue;
 
-            var found = member.fields.stream()
+            var found = parent.fields.stream()
                     .filter(e -> !e.isNonHierarchical())
                     .filter(e -> e.name().equals(field.name()))
                     .filter(e -> e.desc().equals(field.desc())).findAny();

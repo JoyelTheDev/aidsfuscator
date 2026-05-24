@@ -92,7 +92,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
-                                var mask = random.nextInt();
+                                var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
                                 list.add(method.salt().load());
@@ -164,7 +164,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int idxXor = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
-                                var mask = random.nextInt();
+                                var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
                                 list.add(method.salt().load());

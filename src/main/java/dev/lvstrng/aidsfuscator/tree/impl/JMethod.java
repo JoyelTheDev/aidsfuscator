@@ -18,16 +18,19 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
  * A MethodNode wrapper for easier use.
  */
 public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod> {
+    private static final SecureRandom random = new SecureRandom();
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
     private MethodSalt salt;
+    private int seed;
 
     private boolean library;
     private final String originalName, originalDesc;
@@ -41,6 +44,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
         this.originalName = core.name;
         this.originalDesc = core.desc;
+        this.seed = random.nextInt();
 
         this.setCore(core);
     }
@@ -141,6 +145,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     @Override
     public MethodSalt salt() {
         return salt;
+    }
+
+    public int seed() {
+        return seed;
     }
 
     @Override

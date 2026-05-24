@@ -73,7 +73,7 @@ public class MethodSaltTransformer extends Transformer {
         if(!caller.canSalt(frames.get(call))) { // if unable to salt, use raw salt
             list.add(context.properties().add(ASMUtils.pushInt(salt.value()), Property.UNPROTECTED_SALT));
         } else {
-            var mask = random.nextInt();
+            var mask = caller.seed();
             var masked = caller.salt().value() & mask;
 
             list.add(caller.salt().load());
