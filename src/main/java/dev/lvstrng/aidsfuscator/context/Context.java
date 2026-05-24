@@ -87,6 +87,7 @@ public class Context {
             Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
             Logger.warn("------------------------------------------------");
         }
+
         if(aggressiveOverload) {
             this.dictionary = new AggressiveDictionary(this, dictionaryString);
         } else {

@@ -19,9 +19,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class FieldRenameTransformer extends Transformer {
-    private final Setting<String> prefix = setting("prefix", "");
-    private final Setting<Boolean> shuffle = setting("shuffle", false);
-    private final Setting<Boolean> preserveRecordNames = setting("preserveRecordNames", true);
+    private final Setting<Boolean>  preserveRecordNames = setting("preserveRecordNames", true);
+    private final Setting<String>   prefix = setting("prefix", "");
+    private final Setting<Boolean>  shuffle = setting("shuffle", false);
 
     public FieldRenameTransformer() {
         super("Rename Fields", "renameFields");
@@ -102,9 +102,6 @@ public class FieldRenameTransformer extends Transformer {
         }
 
         for(var field : clazz.fields()) {
-            if(clazz.isLibField(field))
-                continue;
-
             var impactedClasses = impactedClasses(context, clazz, field);
             if(skipHierarchy(field, impactedClasses))
                 continue;
@@ -140,6 +137,9 @@ public class FieldRenameTransformer extends Transformer {
                 return true;
 
             if(Exclusions.RENAME_FIELD.excluded(member, field))
+                return true;
+
+            if(member.isLibField(field))
                 return true;
         }
 

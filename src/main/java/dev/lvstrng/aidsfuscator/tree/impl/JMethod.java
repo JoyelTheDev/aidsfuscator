@@ -184,6 +184,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
         return owner;
     }
 
+    public boolean isSpecial() {
+        return name().startsWith("<");
+    }
+
     @Override
     public Set<JMethod> parents() {
         return parents;
@@ -192,6 +196,11 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     @Override
     public Set<JMethod> children() {
         return children;
+    }
+
+    @Override
+    public boolean isNonHierarchical() {
+        return isPrivate() || isStatic() || isSpecial();
     }
 
     public MethodNode core() {

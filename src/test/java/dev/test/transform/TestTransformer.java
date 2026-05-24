@@ -12,27 +12,13 @@ public class TestTransformer extends Transformer {
     @Override
     public void transform(Context context) {
         for(var clazz : context.classes()) {
-            if(clazz.name().endsWith("Main"))
-                continue;
+            for(var method : clazz.methods()) {
+                System.out.println(method.fullOriginalName() + "(%s)".formatted(clazz.isLibMethod(method)));
 
-            var clinit = clazz.findOrCreateClinit();
-
-            var list = new InsnList();
-            list.add(new FieldInsnNode(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"));
-            list.add(new LdcInsnNode(clazz.name() + ", "));
-            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V"));
-
-            list.add(new FieldInsnNode(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"));
-            list.add(new TypeInsnNode(NEW, "java/lang/Throwable"));
-            list.add(new InsnNode(DUP));
-            list.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/Throwable", "<init>", "()V"));
-            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/Throwable", "getStackTrace", "()[Ljava/lang/StackTraceElement;"));
-            list.add(new InsnNode(ICONST_1));
-            list.add(new InsnNode(AALOAD));
-            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getClassName", "()Ljava/lang/String;"));
-            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V"));
-
-            clinit.insns().insert(list);
+                for(var parent : method.parents()) {
+                    System.out.println("\t- " + parent.fullOriginalName());
+                }
+            }
         }
     }
 }

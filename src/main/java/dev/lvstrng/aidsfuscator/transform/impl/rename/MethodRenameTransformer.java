@@ -41,9 +41,6 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            if(clazz.isLibMethod(method))
-                continue;
-
             var impactedClasses = impactedClasses(context, clazz, method);
             if(skipHierarchy(method, impactedClasses))
                 continue;
@@ -89,6 +86,9 @@ public class MethodRenameTransformer extends Transformer {
                 return true;
 
             if(cantEditMethod(member, method, false, true))
+                return true;
+
+            if(member.isLibMethod(method))
                 return true;
         }
 

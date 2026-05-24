@@ -125,6 +125,11 @@ public class JField implements IAccessFlags, IHierarchical<JField> {
     }
 
     @Override
+    public boolean isNonHierarchical() {
+        return isPrivate() || isStatic();
+    }
+
+    @Override
     public String toString() {
         return fullName();
     }

@@ -1,13 +1,14 @@
 package dev.test;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.test.transform.TestTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
                 .initialize();
@@ -17,7 +18,7 @@ public class TestMain {
         //context.referenceManager().addMethodCandidate("*");
 
         context.transform(
-                new TestTransformer()
+                new MethodSaltTransformer()
         ).exportJar();
     }
 }

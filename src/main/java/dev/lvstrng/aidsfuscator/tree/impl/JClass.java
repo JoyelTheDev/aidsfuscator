@@ -123,14 +123,18 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean isLibMethod(JMethod method) {
-        for(var parent : tree()) {
-            if(!parent.isLibrary())
+        if(isLibrary())
+            return true;
+
+        if(method.isNonHierarchical())
+            return false;
+
+        for(var member : tree()) {
+            if(!member.isLibrary())
                 continue;
 
-            var found = parent.methods.stream()
-                    .filter(e -> !e.isStatic())
-                    .filter(e -> !e.isPrivate())
-                    .filter(e -> !e.name().startsWith("<"))
+            var found = member.methods.stream()
+                    .filter(e -> !e.isNonHierarchical())
                     .filter(e -> e.name().equals(method.name()))
                     .anyMatch(e -> e.desc().equals(method.desc()));
 
@@ -142,17 +146,22 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean isLibField(JField field) {
-        for(var parent : tree()) {
-            if(!parent.isLibrary())
+        if(isLibrary())
+            return true;
+
+        if(field.isNonHierarchical())
+            return false;
+
+        for(var member : tree()) {
+            if(!member.isLibrary())
                 continue;
 
-            var found = parent.fields.stream()
-                    .filter(e -> !e.isStatic())
-                    .filter(e -> !e.isPrivate())
+            var found = member.fields.stream()
+                    .filter(e -> !e.isNonHierarchical())
                     .filter(e -> e.name().equals(field.name()))
-                    .anyMatch(e -> e.desc().equals(field.desc()));
+                    .filter(e -> e.desc().equals(field.desc())).findAny();
 
-            if(found)
+            if(found.isPresent())
                 return true;
         }
 
