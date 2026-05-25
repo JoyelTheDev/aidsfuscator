@@ -132,14 +132,18 @@ public class FieldRenameTransformer extends Transformer {
     }
 
     private boolean skipHierarchy(JField field, Set<JClass> impactedClass) {
+        if(field.owner().isLibField(field))
+            return true;
+
         for(var member : impactedClass) {
+            var opt = member.findField(field.name(), field.desc());
+            if(opt.isPresent())
+                field = opt.get();
+
             if(Exclusions.RENAME_FIELD.excluded(member))
                 return true;
 
             if(Exclusions.RENAME_FIELD.excluded(member, field))
-                return true;
-
-            if(member.isLibField(field))
                 return true;
         }
 

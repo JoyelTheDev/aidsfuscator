@@ -77,8 +77,15 @@ public class MethodRenameTransformer extends Transformer {
      * @return false if should continue, true if should skip
      */
     private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
+        if(method.owner().isLibMethod(method))
+            return true;
+
         // ---- CLASS TREE CHECKS ----
         for(var member : impactedClasses) {
+            var opt = member.findMethod(method.name(), method.desc());
+            if(opt.isPresent())
+                method = opt.get();
+
             if(Exclusions.RENAME_METHOD.excluded(member))
                 return true;
 
@@ -86,9 +93,6 @@ public class MethodRenameTransformer extends Transformer {
                 return true;
 
             if(cantEditMethod(member, method, false, true))
-                return true;
-
-            if(member.isLibMethod(method))
                 return true;
         }
 

@@ -154,13 +154,13 @@ public class MethodSaltTransformer extends Transformer {
     }
 
     private boolean skipMethodAndTree(ReferenceGraph graph, JMethod method, Set<JClass> impactedClasses) {
+        if(method.owner().isLibMethod(method))
+            return true;
+
         for(var member : impactedClasses) {
             var opt = member.findMethod(method.name(), method.desc());
-            if (opt.isPresent())
+            if(opt.isPresent())
                 method = opt.get();
-
-            if(member.isLibMethod(method))
-                return true;
 
             if(Exclusions.METHOD_SALTING.excluded(member))
                 return true;
