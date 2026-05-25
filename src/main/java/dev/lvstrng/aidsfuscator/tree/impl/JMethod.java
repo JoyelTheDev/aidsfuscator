@@ -312,4 +312,15 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
             list.addAll(core.invisibleAnnotations);
         return list;
     }
+
+    @Override
+    public void removeAnnotation(String annotation) {
+        annotation = "L%s;".formatted(annotation);
+        var finalAnnotation = annotation;
+
+        if(core.visibleAnnotations != null)
+            core.visibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+        if(core.invisibleAnnotations != null)
+            core.invisibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+    }
 }

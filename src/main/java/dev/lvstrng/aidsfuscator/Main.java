@@ -3,11 +3,8 @@ package dev.lvstrng.aidsfuscator;
 import dev.lvstrng.aidsfuscator.file.impl.ConfigLoader;
 import dev.lvstrng.aidsfuscator.file.impl.ConfigWriter;
 import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionLoader;
-import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionWriter;
 import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
-import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderWriter;
 import dev.lvstrng.aidsfuscator.file.impl.references.ReferenceLoader;
-import dev.lvstrng.aidsfuscator.file.impl.references.ReferenceWriter;
 import dev.lvstrng.aidsfuscator.file.mapping.MappingExport;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
@@ -85,7 +82,7 @@ public class Main {
         if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
             new ClassInitOrderLoader(context, initOrderPath).load();
 
-        context.transform()
+        context.run()
                 .exportJar();
 
         // ---- SAVE CONFIGS ----

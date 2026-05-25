@@ -16,8 +16,6 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.test.transform.MethodParameterObfuscationTransformer;
-import dev.test.transform.TestTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
@@ -33,7 +31,7 @@ public class TestMain {
         //context.referenceManager().addFieldCandidate("*");
         //context.referenceManager().addMethodCandidate("*");
 
-        context.transform(
+        context.run(
                 new TrimTransformer(),
 
                 new FieldRenameTransformer(),

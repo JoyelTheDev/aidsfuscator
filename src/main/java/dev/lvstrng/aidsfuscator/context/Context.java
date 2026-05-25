@@ -9,6 +9,8 @@ import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
 import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
+import dev.lvstrng.aidsfuscator.context.pipeline.IPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.obfuscation.ObfuscationPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
@@ -19,6 +21,7 @@ import dev.lvstrng.aidsfuscator.naming.dictionary.SimpleDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
+import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 import dev.lvstrng.aidsfuscator.utils.Utils;
@@ -30,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -60,6 +64,10 @@ public class Context {
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
+    private static final List<Supplier<IPass>> pipeline = List.of(
+            ObfuscationPass::new,
+            PostProcessorPass::new
+    );
 
     private Context() {
         this.dictionaryString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -154,33 +162,19 @@ public class Context {
         } catch (IOException _) {}
     }
 
-    public Context transform(Transformer... transformers) {
+    public Context run(Transformer... transformers) {
         this.transformers.addAll(Arrays.asList(transformers));
-
-        for(var transformer : transformers) {
-            Logger.info("Running '%s'", transformer.name());
-            transformer.transform(this);
-            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
-            Logger.info("");
-        }
-
-        return this;
+        return run();
     }
 
-    public Context transform() {
-        for(var transformer : transformers) {
-            Logger.info("Running '%s'", transformer.name());
-            transformer.transform(this);
-            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
-            Logger.info("");
-        }
+    public Context run() {
+        pipeline.forEach(e -> e.get().run(this));
         return this;
     }
 
     @SuppressWarnings("all")
     public Context exportJar() {
         Logger.info("Exporting JAR...");
-
         var outputFile = new File(output);
         try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
             var classes = new ArrayList<>(jarClasses());

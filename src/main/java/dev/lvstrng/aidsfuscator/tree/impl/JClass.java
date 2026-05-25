@@ -104,6 +104,17 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
                 MemberUtils.hasAnnotation(core.invisibleAnnotations, annotation);
     }
 
+    @Override
+    public void removeAnnotation(String annotation) {
+        annotation = "L%s;".formatted(annotation);
+        var finalAnnotation = annotation;
+
+        if(core.visibleAnnotations != null)
+            core.visibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+        if(core.invisibleAnnotations != null)
+            core.invisibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+    }
+
     public void setLibrary() {
         this.library = true;
     }

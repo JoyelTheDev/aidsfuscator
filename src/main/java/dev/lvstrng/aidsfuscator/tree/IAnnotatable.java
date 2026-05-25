@@ -11,4 +11,6 @@ public interface IAnnotatable {
     default boolean isAnnotatedBy(String annotation) {
         return MemberUtils.hasAnnotation(annotations(), annotation);
     }
+
+    void removeAnnotation(String annotation);
 }
