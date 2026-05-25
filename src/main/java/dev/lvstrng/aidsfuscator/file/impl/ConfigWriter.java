@@ -1,8 +1,6 @@
 package dev.lvstrng.aidsfuscator.file.impl;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.file.Writer;
 import dev.lvstrng.aidsfuscator.log.Logger;
@@ -36,6 +34,7 @@ public class ConfigWriter implements Writer {
         configObject.add("computeFrames", new JsonPrimitive(context.doesComputeFrames()));
         configObject.add("watermark", new JsonPrimitive(context.watermark()));
         configObject.add("aggressiveOverload", new JsonPrimitive(context.aggressiveOverload()));
+        configObject.add("exclusionPresets", presetArray());
 
         for(var transformer : TransformerOrder.transformers()) {
             var transformerObject = new JsonObject();
@@ -62,5 +61,13 @@ public class ConfigWriter implements Writer {
 
         Files.writeString(configFile.toPath(), str);
         Logger.success("Saved config successfully!");
+    }
+
+    private JsonElement presetArray() {
+        var presetArray = new JsonArray();
+        for(var preset : context.presetLoader().getKeys()) {
+            presetArray.add(preset);
+        }
+        return presetArray;
     }
 }

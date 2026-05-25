@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.file.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.file.Loader;
@@ -40,6 +41,12 @@ public class ConfigLoader implements Loader {
 
         if(configObject.get("computeFrames").getAsBoolean())
             context.computeFrames();
+
+        if(configObject.has("exclusionPresets")) {
+            context.presetLoader().withKeys(
+                    configObject.get("exclusionPresets").getAsJsonArray().asList().stream().map(JsonElement::getAsString).toList()
+            );
+        }
 
         // ---- TRANSFORMERS ----
         var transformers = configObject.get("transformers").getAsJsonObject();

@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
+import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.dictionary.AggressiveDictionary;
@@ -55,6 +56,7 @@ public class Context {
     private final ClassInitOrderHandler initOrder;
     private final ReferenceManager referenceManager;
     private final SaltDispatcherClassGenerator saltDispatcherGen;
+    private final ExclusionPresetLoader presetLoader;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
@@ -68,6 +70,7 @@ public class Context {
         this.excluded = new HashMap<>();
         this.transformers = new ArrayList<>();
 
+        this.presetLoader       = new ExclusionPresetLoader();
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
         this.libraryLoader      = new LibraryLoader(this, javaPath);
@@ -93,6 +96,8 @@ public class Context {
         } else {
             this.dictionary     = new SimpleDictionary(this, dictionaryString);
         }
+
+        this.presetLoader.loadAll();
 
         Logger.info("Loading libraries...");
         this.libraryLoader.setJavaPath(javaPath);
@@ -250,6 +255,10 @@ public class Context {
 
     public SaltDispatcherClassGenerator saltDispatcher() {
         return saltDispatcherGen;
+    }
+
+    public ExclusionPresetLoader presetLoader() {
+        return presetLoader;
     }
 
     public int writerFlags() {
