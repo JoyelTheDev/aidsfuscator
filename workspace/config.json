@@ -6,9 +6,6 @@
   "computeFrames": true,
   "watermark": "",
   "aggressiveOverload": true,
-  "exclusionPresets": [
-    "api"
-  ],
   "transformers": {
     "trim": {
       "enabled": true,
