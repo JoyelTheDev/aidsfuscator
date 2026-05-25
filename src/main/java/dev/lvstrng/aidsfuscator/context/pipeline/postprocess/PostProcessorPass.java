@@ -2,8 +2,8 @@ package dev.lvstrng.aidsfuscator.context.pipeline.postprocess;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.pipeline.IPass;
-import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.AidsfuscatorAnnotationProcessor;
+import dev.lvstrng.aidsfuscator.log.Logger;
 
 import java.util.List;
 import java.util.function.Supplier;

@@ -11,6 +11,7 @@ import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.context.pipeline.IPass;
 import dev.lvstrng.aidsfuscator.context.pipeline.obfuscation.ObfuscationPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
@@ -21,7 +22,6 @@ import dev.lvstrng.aidsfuscator.naming.dictionary.SimpleDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ClassUtils;
 import dev.lvstrng.aidsfuscator.utils.Utils;
@@ -176,6 +176,7 @@ public class Context {
     public Context exportJar() {
         Logger.info("Exporting JAR...");
         var outputFile = new File(output);
+
         try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
             var classes = new ArrayList<>(jarClasses());
             classes.addAll(artificials().values());
