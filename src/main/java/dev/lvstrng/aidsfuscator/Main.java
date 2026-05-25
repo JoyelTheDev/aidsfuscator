@@ -91,15 +91,6 @@ public class Main {
         // ---- SAVE CONFIGS ----
         try {
             new ConfigWriter(context, configPath).write();
-            if(!exclusionPath.isEmpty())
-                new ExclusionWriter(exclusionPath).write();
-
-            if(!initOrderPath.isEmpty())
-                new ClassInitOrderWriter(context, initOrderPath).write();
-
-            if(!referencePath.isEmpty())
-                new ReferenceWriter(context, referencePath).write();
-
             new MappingExport(context).write();
         } catch (IOException e) {
             Logger.error("An exception was thrown when saving configs:");
