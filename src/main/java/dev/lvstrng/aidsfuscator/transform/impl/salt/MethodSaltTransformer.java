@@ -4,7 +4,7 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.ISalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;

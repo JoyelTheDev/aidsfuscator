@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.file.Writer;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
@@ -57,6 +57,15 @@ public class ExclusionWriter implements Writer {
                 }
 
                 excludeObject.add("method", arr);
+            }
+
+            if(!exclusion.annotationExclusions().isEmpty()) {
+                var arr = new JsonArray(exclusion.annotationExclusions().size());
+                for(var excl : exclusion.annotationExclusions()) {
+                    arr.add(new JsonPrimitive(excl.toString()));
+                }
+
+                excludeObject.add("annotation", arr);
             }
 
             configObject.add(exclusion.key(), excludeObject);

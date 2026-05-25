@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.transform.Setting;

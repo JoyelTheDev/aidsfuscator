@@ -5,15 +5,13 @@ import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
+import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -22,7 +20,7 @@ import java.util.function.Predicate;
  * A ClassNode wrapper for easier use.
  */
 @SuppressWarnings("all")
-public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical<JClass> {
+public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical<JClass>, IAnnotatable {
     private ClassNode core;
     private final PropertyContainer properties;
 
@@ -88,6 +86,17 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
 
     public String originalName() {
         return originalName;
+    }
+
+    @Override
+    public List<AnnotationNode> annotations() {
+        var list = new ArrayList<AnnotationNode>();
+        if(core.visibleAnnotations != null)
+            list.addAll(core.visibleAnnotations);
+
+        if(core.invisibleAnnotations != null)
+            list.addAll(core.invisibleAnnotations);
+        return list;
     }
 
     public boolean isAnnotatedBy(String annotation) {

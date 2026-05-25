@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.dynamic;
 
 import dev.lvstrng.aidsfuscator.classgen.impl.ReferenceObfuscationClassGenerator;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;

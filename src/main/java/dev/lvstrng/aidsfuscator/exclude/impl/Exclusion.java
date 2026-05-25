@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.exclude;
+package dev.lvstrng.aidsfuscator.exclude.impl;
 
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
@@ -19,9 +19,12 @@ public class Exclusion {
         this.filter = new StringFilter(pattern);
     }
 
+    public boolean test(String str) {
+        return inclusion != filter.test(str);
+    }
+
     public boolean matchesClass(JClass clazz) {
-        var match = filter.test(clazz.originalName());
-        return inclusion != match;
+        return test(clazz.originalName());
     }
 
     public boolean matchesMethod(JMethod method) {
@@ -33,13 +36,11 @@ public class Exclusion {
     }
 
     public boolean matchesMethod(JClass clazz, JMethod method) {
-        var match = filter.test(clazz.originalName() + "." + method.simpleOriginalName());
-        return inclusion != match;
+        return test(clazz.originalName() + "." + method.simpleOriginalName());
     }
 
     public boolean matchesField(JClass clazz, JField field) {
-        var match = filter.test(clazz.originalName() + "." + field.simpleOriginalName());
-        return inclusion != match;
+        return test(clazz.originalName() + "." + field.simpleOriginalName());
     }
 
     @Override

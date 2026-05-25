@@ -12,6 +12,7 @@ import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
+import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -24,7 +25,7 @@ import java.util.*;
 /**
  * A MethodNode wrapper for easier use.
  */
-public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod> {
+public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod>, IAnnotatable {
     private static final SecureRandom random = new SecureRandom();
     private JClass owner;
     private MethodNode core;
@@ -299,5 +300,16 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     @Override
     public String toString() {
         return fullName();
+    }
+
+    @Override
+    public List<AnnotationNode> annotations() {
+        var list = new ArrayList<AnnotationNode>();
+        if(core.visibleAnnotations != null)
+            list.addAll(core.visibleAnnotations);
+
+        if(core.invisibleAnnotations != null)
+            list.addAll(core.invisibleAnnotations);
+        return list;
     }
 }
