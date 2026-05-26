@@ -13,6 +13,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -48,6 +49,10 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
 
         core.methods.forEach(this::add);
         core.fields.forEach(this::add);
+    }
+
+    public boolean isMixin() {
+        return isAnnotatedBy("org/spongepowered/asm/mixin/Mixin");
     }
 
     public void setFirstInitializerClass(JClass clazz) {

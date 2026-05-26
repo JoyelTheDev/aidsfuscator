@@ -12,6 +12,7 @@ import java.util.Collections;
 
 public class ClassRenameTransformer extends Transformer {
     private final Setting<String> prefix = setting("prefix", "");
+    private final Setting<String> mixinPrefix = setting("mixinPrefix", "mixins/");
     private final Setting<Boolean> renameSourceFile = setting("renameSourceFile", true);
     private final Setting<Boolean> randomize = setting("randomize", false);
 
@@ -31,8 +32,11 @@ public class ClassRenameTransformer extends Transformer {
             if(Exclusions.RENAME_CLASS.excluded(clazz))
                 continue;
 
-            var classPrefix = prefix.value().replace('.', '/');
-            var newClassName = context.dictionary().newClassName(classPrefix);
+            var classPrefix = prefix.value();
+            if(clazz.isMixin())
+                classPrefix = mixinPrefix.value();
+
+            var newClassName = context.dictionary().newClassName(classPrefix.replace('.', '/'));
             Mappings.CLASS.register(clazz.name(), new Mapping(newClassName, newClassName));
 
             if(renameSourceFile.value())
