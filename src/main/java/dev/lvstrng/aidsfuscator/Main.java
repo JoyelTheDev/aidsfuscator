@@ -2,15 +2,7 @@ package dev.lvstrng.aidsfuscator;
 
 import dev.lvstrng.aidsfuscator.cli.ArgumentParser;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.file.impl.ConfigLoader;
-import dev.lvstrng.aidsfuscator.file.impl.ConfigWriter;
-import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionLoader;
-import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
-import dev.lvstrng.aidsfuscator.file.impl.references.ReferenceLoader;
-import dev.lvstrng.aidsfuscator.file.mapping.MappingExport;
 import dev.lvstrng.aidsfuscator.log.Logger;
-
-import java.io.IOException;
 
 public class Main {
 

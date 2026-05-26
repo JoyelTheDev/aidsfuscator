@@ -1,7 +1,6 @@
 package dev.lvstrng.aidsfuscator.cli.impl;
 
 import dev.lvstrng.aidsfuscator.cli.ArgumentHandler;
-import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
 
 public class InitOrderArgumentHandler extends ArgumentHandler {
     public InitOrderArgumentHandler() {

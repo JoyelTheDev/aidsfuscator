@@ -44,16 +44,17 @@ public class Context {
     private String dictionaryString;
     private String watermark;
 
-    private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
-    private final IHierarchy hierarchy;
-    private final ReferenceGraph referenceGraph;
-    private final GlobalPropertyContainer propertyContainer;
-    private final ClassInitOrderHandler initOrder;
-    private final ReferenceManager referenceManager;
-    private final SaltDispatcherClassGenerator saltDispatcherGen;
     private final ExclusionPresetLoader presetLoader;
     private final ClassInitOrderLoader initOrderLoader;
+    private final ReferenceGraph referenceGraph;
+    private final GlobalPropertyContainer propertyContainer;
+    private final ReferenceManager referenceManager;
+    private final SaltDispatcherClassGenerator saltDispatcherGen;
+    private final ResourceHandler resourceHandler;
+    private final ClassInitOrderHandler initOrder;
+
+    private final IHierarchy hierarchy;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
