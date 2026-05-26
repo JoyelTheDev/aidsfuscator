@@ -10,6 +10,6 @@ public class InitOrderArgumentHandler extends ArgumentHandler {
 
     @Override
     public void run(String value) {
-        new ClassInitOrderLoader(context, value).load();
+        context.initOrderLoader().setPath(value);
     }
 }

@@ -2,7 +2,6 @@ package dev.lvstrng.aidsfuscator.context;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
-import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
@@ -15,30 +14,21 @@ import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
 import dev.lvstrng.aidsfuscator.context.pipeline.preprocess.PreProcessorPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
-import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.naming.dictionary.AggressiveDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
-import dev.lvstrng.aidsfuscator.naming.dictionary.SimpleDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
-import dev.lvstrng.aidsfuscator.utils.ClassUtils;
-import dev.lvstrng.aidsfuscator.utils.Utils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * The obfuscator context "the core". This class is responsible for reading input JAR, transforming read classes, exporting output, handling global exclusions,
@@ -63,6 +53,7 @@ public class Context {
     private final ReferenceManager referenceManager;
     private final SaltDispatcherClassGenerator saltDispatcherGen;
     private final ExclusionPresetLoader presetLoader;
+    private final ClassInitOrderLoader initOrderLoader;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
@@ -90,6 +81,7 @@ public class Context {
         this.initOrder          = new ClassInitOrderHandler(this);
         this.referenceManager   = new ReferenceManager(this);
         this.saltDispatcherGen  = new SaltDispatcherClassGenerator();
+        this.initOrderLoader    = new ClassInitOrderLoader(this, "");
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -154,6 +146,10 @@ public class Context {
 
     public ExclusionPresetLoader presetLoader() {
         return presetLoader;
+    }
+
+    public ClassInitOrderLoader initOrderLoader() {
+        return initOrderLoader;
     }
 
     public int writerFlags() {

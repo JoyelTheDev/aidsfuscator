@@ -25,5 +25,8 @@ public class ObfuscatorInitializeProcessor implements IProcessor {
         context.libraryLoader().setJavaPath(context.javaPath());
         context.libraryLoader().loadLibraries(context.libs());
         context.hierarchy().build();
+
+        if(context.initOrderLoader().path() != null && !context.initOrderLoader().path().isEmpty())
+            context.initOrderLoader().load();
     }
 }
