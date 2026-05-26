@@ -12,6 +12,7 @@ import java.util.Collections;
 
 public class ClassRenameTransformer extends Transformer {
     private final Setting<String> prefix = setting("prefix", "");
+    private final Setting<Boolean> renameSourceFile = setting("renameSourceFile", true);
     private final Setting<Boolean> randomize = setting("randomize", false);
 
     public ClassRenameTransformer() {
@@ -30,9 +31,12 @@ public class ClassRenameTransformer extends Transformer {
             if(Exclusions.RENAME_CLASS.excluded(clazz))
                 continue;
 
-            var newClassName = context.dictionary().newClassName(prefix.value().replace('.', '/'));
+            var classPrefix = prefix.value().replace('.', '/');
+            var newClassName = context.dictionary().newClassName(classPrefix);
             Mappings.CLASS.register(clazz.name(), new Mapping(newClassName, newClassName));
-            clazz.setSourceFile(newClassName + ".java");
+
+            if(renameSourceFile.value())
+                clazz.setSourceFile(newClassName + ".java");
             markChange();
         }
 
