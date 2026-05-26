@@ -24,8 +24,7 @@ public class TestMain {
                 .in("in.jar")
                 .libs("libs")
                 .out("out.jar")
-                .setAggressiveOverload(true)
-                .initialize();
+                .setAggressiveOverload(true);
 
         //context.referenceManager().addMethodCandidate("*");
         //context.referenceManager().addFieldCandidate("*");
@@ -51,6 +50,6 @@ public class TestMain {
                 new ControlFlowShufflingTransformer(),
                 new DeadCodeCleanTransformer(),
                 new ReferenceObfuscationTransformer()
-        ).exportJar();
+        );
     }
 }

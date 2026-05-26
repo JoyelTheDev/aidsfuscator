@@ -16,6 +16,7 @@ import dev.lvstrng.aidsfuscator.context.pipeline.preprocess.PreProcessorPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
+import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.dictionary.AggressiveDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
@@ -83,7 +84,7 @@ public class Context {
         this.presetLoader       = new ExclusionPresetLoader();
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.libraryLoader      = new LibraryLoader(this, javaPath);
+        this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
         this.initOrder          = new ClassInitOrderHandler(this);

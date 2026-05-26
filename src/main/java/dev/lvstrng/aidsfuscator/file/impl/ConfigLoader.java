@@ -13,9 +13,9 @@ public class ConfigLoader implements Loader {
     private final String configPath;
     private final Context context;
 
-    public ConfigLoader(String configPath) {
+    public ConfigLoader(Context context, String configPath) {
         this.configPath = configPath;
-        this.context = Context.newInstance();
+        this.context = context;
     }
 
     @SuppressWarnings("unchecked")

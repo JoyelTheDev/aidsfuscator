@@ -25,7 +25,7 @@ public class LibraryLoader {
     private final Context context;
     private String javaPath;
 
-    public LibraryLoader(Context context, String javaPath) {
+    public LibraryLoader(Context context) {
         this.context = context;
     }
 

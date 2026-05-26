@@ -1,5 +1,7 @@
 package dev.lvstrng.aidsfuscator;
 
+import dev.lvstrng.aidsfuscator.cli.ArgumentParser;
+import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.file.impl.ConfigLoader;
 import dev.lvstrng.aidsfuscator.file.impl.ConfigWriter;
 import dev.lvstrng.aidsfuscator.file.impl.exclusions.ExclusionLoader;
@@ -11,11 +13,6 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import java.io.IOException;
 
 public class Main {
-    private static final String configPrefix = "--config=";
-    private static final String exclusionPrefix = "--exclusions=";
-    private static final String initOrderPrefix = "--initOrder=";
-    private static final String referencePrefix = "--references=";
-    private static final String javaPathPrefix = "--javaPath=";
 
     private static final String BAD_ARGS = """
             Usage tutorial.
@@ -35,60 +32,8 @@ public class Main {
             return;
         }
 
-        // ---- PARSE ARGS ----
-        var configPath = "";
-        var exclusionPath = "";
-        var initOrderPath = "";
-        var referencePath = "";
-        var javaPath = "";
-        for(var arg : args) {
-            if(arg.startsWith(configPrefix))
-                configPath = arg.substring(configPrefix.length());
-
-            if(arg.startsWith(exclusionPrefix))
-                exclusionPath = arg.substring(exclusionPrefix.length());
-
-            if(arg.startsWith(initOrderPrefix))
-                initOrderPath = arg.substring(initOrderPrefix.length());
-
-            if(arg.startsWith(referencePrefix))
-                referencePath = arg.substring(referencePrefix.length());
-
-            if(arg.startsWith(javaPathPrefix))
-                javaPath = arg.substring(javaPathPrefix.length());
-        }
-
-        if(configPath.isEmpty()) {
-            Logger.error(BAD_ARGS);
-            return;
-        }
-
-        // ---- LOAD CONFIGS ----
-        var loader = new ConfigLoader(configPath);
-        var context = loader.result();
-        loader.load();
-
-        if(!exclusionPath.isEmpty())
-            new ExclusionLoader(exclusionPath).load();
-
-        if(!referencePath.isEmpty())
-            new ReferenceLoader(context, referencePath).load();
-
-        if(!javaPath.isEmpty())
-            context.javaPath(javaPath);
-
-        // ---- RUN OBFUSCATOR ----
-        if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
-            new ClassInitOrderLoader(context, initOrderPath).load();
+        var context = Context.newInstance();
+        new ArgumentParser(context).parse(args);
         context.run();
-
-        // ---- SAVE CONFIGS ----
-        try {
-            new ConfigWriter(context, configPath).write();
-            new MappingExport(context).write();
-        } catch (IOException e) {
-            Logger.error("An exception was thrown when saving configs:");
-            e.printStackTrace();
-        }
     }
 }
