@@ -107,11 +107,9 @@ public class Context {
 
         this.presetLoader.loadAll();
 
-        Logger.info("Loading libraries...");
         this.libraryLoader.setJavaPath(javaPath);
         this.libraryLoader().loadLibraries(libPath);
 
-        Logger.info("Reading input JAR...");
         this.readJar();
 
         Logger.info("Building hierarchy...");
@@ -120,6 +118,7 @@ public class Context {
     }
 
     private void readJar() {
+        Logger.info("Reading input JAR...");
         var file = new File(input);
         if(!file.exists())
             throw new IllegalArgumentException("Input file `" + input + "` does not exist");

@@ -34,11 +34,10 @@ public class LibraryLoader {
     }
 
     public void loadLibraries(String path) {
-        if(javaPath == null) {
+        Logger.info("Loading libraries...");
+        if(javaPath == null)
             loadJavaClasspath();
-        } else {
-            loadCustomJavaClasspath();
-        }
+        else loadCustomJavaClasspath();
 
         var depDir = new File(path);
         if (!depDir.isDirectory())
