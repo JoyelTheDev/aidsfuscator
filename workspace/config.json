@@ -7,7 +7,8 @@
   "watermark": "",
   "aggressiveOverload": true,
   "exclusionPresets": [
-    "api"
+    "api",
+    "mc-fabric"
   ],
   "transformers": {
     "trim": {

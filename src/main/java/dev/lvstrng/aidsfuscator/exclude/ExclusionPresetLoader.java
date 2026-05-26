@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.exclude;
 
 import dev.lvstrng.aidsfuscator.exclude.preset.AnnotationExclusionPreset;
+import dev.lvstrng.aidsfuscator.exclude.preset.MinecraftFabricExclusionPreset;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 import java.util.ArrayList;
@@ -10,7 +11,8 @@ import java.util.function.Supplier;
 
 public class ExclusionPresetLoader {
     private static final Map<String, Supplier<IExclusionPreset>> presets = Map.of(
-            "api", AnnotationExclusionPreset::new
+            "api", AnnotationExclusionPreset::new,
+            "mc-fabric", MinecraftFabricExclusionPreset::new
     );
 
     private final List<String> keys;
