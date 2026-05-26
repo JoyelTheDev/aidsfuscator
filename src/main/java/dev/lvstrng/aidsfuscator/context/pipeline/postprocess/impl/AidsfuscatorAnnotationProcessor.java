@@ -1,9 +1,9 @@
 package dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessor;
+import dev.lvstrng.aidsfuscator.context.pipeline.IProcessor;
 
-public class AidsfuscatorAnnotationProcessor implements PostProcessor {
+public class AidsfuscatorAnnotationProcessor implements IProcessor {
     @Override
     public void run(Context context) {
         for(var clazz : context.classes()) {

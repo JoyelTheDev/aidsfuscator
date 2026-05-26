@@ -12,6 +12,7 @@ import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
 import dev.lvstrng.aidsfuscator.context.pipeline.IPass;
 import dev.lvstrng.aidsfuscator.context.pipeline.obfuscation.ObfuscationPass;
 import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.preprocess.PreProcessorPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
 import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
@@ -65,6 +66,7 @@ public class Context {
 
     private final List<Transformer> transformers;
     private static final List<Supplier<IPass>> pipeline = List.of(
+            PreProcessorPass::new,
             ObfuscationPass::new,
             PostProcessorPass::new
     );
@@ -91,76 +93,6 @@ public class Context {
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
 
-    // ---- INITIALIZE OBFUSCATOR ----
-    public Context initialize() {
-        if (!computeFrames) {
-            Logger.warn("------------------------------------------------");
-            Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
-            Logger.warn("------------------------------------------------");
-        }
-
-        if(aggressiveOverload) {
-            this.dictionary = new AggressiveDictionary(this, dictionaryString);
-        } else {
-            this.dictionary     = new SimpleDictionary(this, dictionaryString);
-        }
-
-        this.presetLoader.loadAll();
-
-        this.libraryLoader.setJavaPath(javaPath);
-        this.libraryLoader().loadLibraries(libPath);
-
-        this.readJar();
-
-        Logger.info("Building hierarchy...");
-        this.hierarchy.build(); // build hierarchy
-        return this;
-    }
-
-    private void readJar() {
-        Logger.info("Reading input JAR...");
-        var file = new File(input);
-        if(!file.exists())
-            throw new IllegalArgumentException("Input file `" + input + "` does not exist");
-
-        // ---- LOAD JAR CLASSES ----
-        try (var zip = new ZipFile(file)) {
-            for(var entry : zip.stream().toList()) {
-                if(entry.isDirectory())
-                    continue;
-
-                var name = entry.getName();
-                var is = zip.getInputStream(entry);
-                var bytes = is.readAllBytes();
-
-                // if class, add new class
-                if(name.endsWith(".class")) {
-                    var clazz = new JClass(ClassUtils.readClass(bytes));
-                    version = Math.max(clazz.version(), version);
-
-                    // if excluded, add to excluded class list
-                    if(Exclusions.GLOBAL.excluded(clazz)) {
-                        clazz.setLibrary();
-                        addExcluded(clazz);
-                        continue;
-                    }
-
-                    add(clazz);
-                    continue;
-                }
-
-                // jars in a jar are "fat jars"
-                if(name.endsWith(".jar")) {
-                    libraryLoader.parseJar(bytes);
-                    continue;
-                }
-
-                // add resource
-                resourceHandler.add(name, bytes);
-            }
-        } catch (IOException _) {}
-    }
-
     public Context run(Transformer... transformers) {
         this.transformers.addAll(Arrays.asList(transformers));
         return run();
@@ -168,42 +100,6 @@ public class Context {
 
     public Context run() {
         pipeline.forEach(e -> e.get().run(this));
-        return this;
-    }
-
-    @SuppressWarnings("all")
-    public Context exportJar() {
-        Logger.info("Exporting JAR...");
-        var outputFile = new File(output);
-
-        try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
-            var classes = new ArrayList<>(jarClasses());
-            classes.addAll(artificials().values());
-
-            for(var clazz : classes) {
-                var writer = new HierarchyClassWriter(this);
-                try {
-                    clazz.core().accept(writer);
-                } catch (Exception e) {
-                    Logger.error("Error writing class %s", clazz.name());
-                    e.printStackTrace();
-                }
-
-                jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
-                jos.write(writer.toByteArray());
-                jos.closeEntry();
-            }
-
-            resourceHandler().handle(jos);
-        } catch (IOException e) {
-            Logger.error("Error writing output JAR: %s", e);
-        }
-
-        Logger.success("Exported JAR successfully!");
-        Logger.success("%s (%skb) -> %s (%skb)",
-                input, Utils.bytesToKB(new File(input).length()),
-                output, Utils.bytesToKB(outputFile.length())
-        );
         return this;
     }
 
@@ -217,6 +113,10 @@ public class Context {
 
     public IDictionary dictionary() {
         return dictionary;
+    }
+
+    public void setDictionary(IDictionary dictionary) {
+        this.dictionary = dictionary;
     }
 
     public ResourceHandler resourceHandler() {
@@ -377,12 +277,20 @@ public class Context {
         return version;
     }
 
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     public String dictionaryString() {
         return dictionaryString;
     }
 
     public String watermark() {
         return watermark;
+    }
+
+    public String javaPath() {
+        return javaPath;
     }
 
     public boolean aggressiveOverload() {

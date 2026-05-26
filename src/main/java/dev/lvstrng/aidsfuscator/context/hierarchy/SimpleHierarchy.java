@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.context.hierarchy;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -27,6 +28,8 @@ public class SimpleHierarchy implements IHierarchy {
 
     @Override
     public void build() {
+        Logger.info("Building hierarchy...");
+
         var classes = context.jarClasses();
         this.clearHierarchy(classes);
 

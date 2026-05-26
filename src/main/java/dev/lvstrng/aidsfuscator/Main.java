@@ -78,12 +78,9 @@ public class Main {
             context.javaPath(javaPath);
 
         // ---- RUN OBFUSCATOR ----
-        context.initialize();
         if(!initOrderPath.isEmpty()) // init order uses Context#forName, so load that after initializing context
             new ClassInitOrderLoader(context, initOrderPath).load();
-
-        context.run()
-                .exportJar();
+        context.run();
 
         // ---- SAVE CONFIGS ----
         try {
