@@ -20,6 +20,7 @@ public class ArtifactImportProcessor implements IProcessor {
             throw new IllegalArgumentException("Input file `" + context.in() + "` does not exist");
 
         // ---- LOAD JAR CLASSES ----
+        context.presetLoader().loadAll();
         try (var zip = new ZipFile(file)) {
             for(var entry : zip.stream().toList()) {
                 if(entry.isDirectory())
