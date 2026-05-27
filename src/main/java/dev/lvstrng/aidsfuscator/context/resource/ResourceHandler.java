@@ -21,7 +21,8 @@ public class ResourceHandler {
 
     private final Map<String, Supplier<HandledResource>> handledResources = Map.of(
             "MANIFEST.MF", ManifestHandler::new,
-            "fabric.mod.json", FabricModJsonHandler::new
+            "fabric.mod.json", FabricModJsonHandler::new,
+            "mixins.json", FabricModJsonHandler::new
     );
 
     public ResourceHandler(Context context) {
