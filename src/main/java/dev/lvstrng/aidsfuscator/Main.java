@@ -5,7 +5,6 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class Main {
-
     private static final String BAD_ARGS = """
             Usage tutorial.
             You ran aidsfuscator with no arguments (or bad arguments). Aidsfuscator is a CLI tool, run the obfuscator using any of these args:

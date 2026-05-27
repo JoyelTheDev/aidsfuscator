@@ -54,7 +54,7 @@ public class FabricMixinJsonHandler implements HandledResource {
             int lastIndex = newName.lastIndexOf('.');
             if(lastIndex != -1 && mixinPackage == null) {
                 modJson.asMap().remove("package");
-                modJson.asMap().put("package", new JsonPrimitive(mixinPackage = newName.substring(0, lastIndex - 1)));
+                modJson.asMap().put("package", new JsonPrimitive(mixinPackage = newName.substring(0, lastIndex)));
             }
 
             newName = newName.substring(lastIndex + 1);
