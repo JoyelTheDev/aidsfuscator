@@ -82,7 +82,7 @@ public enum Exclusions {
 
     public boolean excludedAnnotation(IAnnotatable annotatable) {
         return annotatable.annotations().stream().anyMatch(ann ->
-                annotationExclusions.stream().anyMatch(ex -> ex.test(Type.getType(ann.desc).getInternalName()))
+                annotationExclusions.stream().anyMatch(ex -> ex.matchesAnnotation(Type.getType(ann.desc).getInternalName()))
         );
     }
 

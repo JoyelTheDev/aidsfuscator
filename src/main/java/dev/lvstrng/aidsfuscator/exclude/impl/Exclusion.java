@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.exclude.impl;
 
+import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -21,6 +22,13 @@ public class Exclusion {
 
     public boolean test(String str) {
         return inclusion != filter.test(str);
+    }
+
+    public boolean matchesAnnotation(String ann) {
+        if(Mappings.CLASS.containsOld(ann))
+            return test(Mappings.CLASS.retrieve(ann).value());
+
+        return test(ann);
     }
 
     public boolean matchesClass(JClass clazz) {
