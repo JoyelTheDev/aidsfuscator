@@ -1,7 +1,7 @@
 {
-  "in": "in.jar",
+  "in": "clumps.jar",
   "out": "out.jar",
-  "libs": "libs/",
+  "libs": "mclibs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
   "watermark": "",
