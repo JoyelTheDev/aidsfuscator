@@ -13,6 +13,8 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 public class FabricMixinJsonHandler implements HandledResource {
+    private String mixinPackage;
+
     @Override
     public void handle(Context context, JarOutputStream jos, String name, byte[] bytes) throws IOException {
         var gson = new Gson();
@@ -48,7 +50,15 @@ public class FabricMixinJsonHandler implements HandledResource {
             if(!Mappings.CLASS.containsOld(mixin))
                 continue;
 
-            mixinArr.set(i, new JsonPrimitive(Mappings.CLASS.retrieve(mixin).value().replace('/', '.')));
+            var newName = Mappings.CLASS.retrieve(mixin).value().replace('/', '.');
+            int lastIndex = newName.lastIndexOf('.');
+            if(lastIndex != -1 && mixinPackage == null) {
+                modJson.asMap().remove("package");
+                modJson.asMap().put("package", new JsonPrimitive(mixinPackage = newName.substring(0, lastIndex - 1)));
+            }
+
+            newName = newName.substring(lastIndex + 1);
+            mixinArr.set(i, new JsonPrimitive(newName));
         }
     }
 }
