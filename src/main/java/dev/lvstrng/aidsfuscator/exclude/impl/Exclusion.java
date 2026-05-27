@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.exclude.impl;
 
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
@@ -25,8 +26,8 @@ public class Exclusion {
     }
 
     public boolean matchesAnnotation(String ann) {
-        if(Mappings.CLASS.containsOld(ann))
-            return test(Mappings.CLASS.retrieve(ann).value());
+        if(Mappings.CLASS.containsNew(ann))
+            return test(Mappings.CLASS.retrieveOld(ann));
 
         return test(ann);
     }
