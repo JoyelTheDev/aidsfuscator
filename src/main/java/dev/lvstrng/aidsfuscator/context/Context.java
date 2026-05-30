@@ -2,36 +2,33 @@ package dev.lvstrng.aidsfuscator.context;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.classgen.impl.SaltDispatcherClassGenerator;
-import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
 import dev.lvstrng.aidsfuscator.context.hierarchy.SimpleHierarchy;
 import dev.lvstrng.aidsfuscator.context.library.LibraryLoader;
 import dev.lvstrng.aidsfuscator.context.order.ClassInitOrderHandler;
+import dev.lvstrng.aidsfuscator.context.pipeline.IPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.obfuscation.ObfuscationPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.PostProcessorPass;
+import dev.lvstrng.aidsfuscator.context.pipeline.preprocess.PreProcessorPass;
 import dev.lvstrng.aidsfuscator.context.resource.ResourceHandler;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.ExclusionPresetLoader;
+import dev.lvstrng.aidsfuscator.file.impl.initOrder.ClassInitOrderLoader;
 import dev.lvstrng.aidsfuscator.log.Logger;
-import dev.lvstrng.aidsfuscator.naming.dictionary.AggressiveDictionary;
 import dev.lvstrng.aidsfuscator.naming.dictionary.IDictionary;
-import dev.lvstrng.aidsfuscator.naming.dictionary.SimpleDictionary;
 import dev.lvstrng.aidsfuscator.property.GlobalPropertyContainer;
 import dev.lvstrng.aidsfuscator.reference.ReferenceManager;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
-import dev.lvstrng.aidsfuscator.utils.ClassUtils;
-import dev.lvstrng.aidsfuscator.utils.Utils;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.jar.JarOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.function.Supplier;
 
 /**
  * The obfuscator context "the core". This class is responsible for reading input JAR, transforming read classes, exporting output, handling global exclusions,
@@ -47,17 +44,25 @@ public class Context {
     private String dictionaryString;
     private String watermark;
 
-    private final ResourceHandler resourceHandler;
     private final LibraryLoader libraryLoader;
-    private final IHierarchy hierarchy;
+    private final ExclusionPresetLoader presetLoader;
+    private final ClassInitOrderLoader initOrderLoader;
     private final ReferenceGraph referenceGraph;
     private final GlobalPropertyContainer propertyContainer;
-    private final ClassInitOrderHandler initOrder;
     private final ReferenceManager referenceManager;
     private final SaltDispatcherClassGenerator saltDispatcherGen;
+    private final ResourceHandler resourceHandler;
+    private final ClassInitOrderHandler initOrder;
+
+    private final IHierarchy hierarchy;
     private IDictionary dictionary;
 
     private final List<Transformer> transformers;
+    private static final List<Supplier<IPass>> pipeline = List.of(
+            PreProcessorPass::new,
+            ObfuscationPass::new,
+            PostProcessorPass::new
+    );
 
     private Context() {
         this.dictionaryString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -68,142 +73,27 @@ public class Context {
         this.excluded = new HashMap<>();
         this.transformers = new ArrayList<>();
 
+        this.presetLoader       = new ExclusionPresetLoader();
         this.resourceHandler    = new ResourceHandler(this);
         this.hierarchy          = new SimpleHierarchy(this);
-        this.libraryLoader      = new LibraryLoader(this, javaPath);
+        this.libraryLoader      = new LibraryLoader(this);
         this.referenceGraph     = new ReferenceGraph(this);
         this.propertyContainer  = new GlobalPropertyContainer();
         this.initOrder          = new ClassInitOrderHandler(this);
         this.referenceManager   = new ReferenceManager(this);
         this.saltDispatcherGen  = new SaltDispatcherClassGenerator();
+        this.initOrderLoader    = new ClassInitOrderLoader(this, "");
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
 
-    // ---- INITIALIZE OBFUSCATOR ----
-    public Context initialize() {
-        if (!computeFrames) {
-            Logger.warn("------------------------------------------------");
-            Logger.warn("You've disabled frame computation, you will not receive any support. Enable it in config with computeFrames");
-            Logger.warn("------------------------------------------------");
-        }
-        if(aggressiveOverload) {
-            this.dictionary = new AggressiveDictionary(this, dictionaryString);
-        } else {
-            this.dictionary     = new SimpleDictionary(this, dictionaryString);
-        }
-
-        Logger.info("Loading libraries...");
-        this.libraryLoader.setJavaPath(javaPath);
-        this.libraryLoader().loadLibraries(libPath);
-
-        Logger.info("Reading input JAR...");
-        this.readJar();
-
-        Logger.info("Building hierarchy...");
-        this.hierarchy.build(); // build hierarchy
-        return this;
-    }
-
-    private void readJar() {
-        var file = new File(input);
-        if(!file.exists())
-            throw new IllegalArgumentException("Input file `" + input + "` does not exist");
-
-        // ---- LOAD JAR CLASSES ----
-        try (var zip = new ZipFile(file)) {
-            for(var entry : zip.stream().toList()) {
-                if(entry.isDirectory())
-                    continue;
-
-                var name = entry.getName();
-                var is = zip.getInputStream(entry);
-                var bytes = is.readAllBytes();
-
-                // if class, add new class
-                if(name.endsWith(".class")) {
-                    var clazz = new JClass(ClassUtils.readClass(bytes));
-                    version = Math.max(clazz.version(), version);
-
-                    // if excluded, add to excluded class list
-                    if(Exclusions.GLOBAL.excluded(clazz)) {
-                        clazz.setLibrary();
-                        addExcluded(clazz);
-                        continue;
-                    }
-
-                    add(clazz);
-                    continue;
-                }
-
-                // jars in a jar are "fat jars"
-                if(name.endsWith(".jar")) {
-                    libraryLoader.parseJar(bytes);
-                    continue;
-                }
-
-                // add resource
-                resourceHandler.add(name, bytes);
-            }
-        } catch (IOException _) {}
-    }
-
-    public Context transform(Transformer... transformers) {
+    public Context run(Transformer... transformers) {
         this.transformers.addAll(Arrays.asList(transformers));
-
-        for(var transformer : transformers) {
-            Logger.info("Running '%s'", transformer.name());
-            transformer.transform(this);
-            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
-            Logger.info("");
-        }
-
-        return this;
+        return run();
     }
 
-    public Context transform() {
-        for(var transformer : transformers) {
-            Logger.info("Running '%s'", transformer.name());
-            transformer.transform(this);
-            Logger.success("Completed running '%s' with %s changes", transformer.name(), transformer.changes());
-            Logger.info("");
-        }
-        return this;
-    }
-
-    @SuppressWarnings("all")
-    public Context exportJar() {
-        Logger.info("Exporting JAR...");
-
-        var outputFile = new File(output);
-        try (var jos = new JarOutputStream(new FileOutputStream(outputFile))) {
-            var classes = new ArrayList<>(jarClasses());
-            classes.addAll(artificials().values());
-
-            for(var clazz : classes) {
-                var writer = new HierarchyClassWriter(this);
-                try {
-                    clazz.core().accept(writer);
-                } catch (Exception e) {
-                    Logger.error("Error writing class %s", clazz.name());
-                    e.printStackTrace();
-                }
-
-                jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
-                jos.write(writer.toByteArray());
-                jos.closeEntry();
-            }
-
-            resourceHandler().handle(jos);
-        } catch (IOException e) {
-            Logger.error("Error writing output JAR: %s", e);
-        }
-
-        Logger.success("Exported JAR successfully!");
-        Logger.success("%s (%skb) -> %s (%skb)",
-                input, Utils.bytesToKB(new File(input).length()),
-                output, Utils.bytesToKB(outputFile.length())
-        );
+    public Context run() {
+        pipeline.forEach(e -> e.get().run(this));
         return this;
     }
 
@@ -217,6 +107,10 @@ public class Context {
 
     public IDictionary dictionary() {
         return dictionary;
+    }
+
+    public void setDictionary(IDictionary dictionary) {
+        this.dictionary = dictionary;
     }
 
     public ResourceHandler resourceHandler() {
@@ -249,6 +143,14 @@ public class Context {
 
     public SaltDispatcherClassGenerator saltDispatcher() {
         return saltDispatcherGen;
+    }
+
+    public ExclusionPresetLoader presetLoader() {
+        return presetLoader;
+    }
+
+    public ClassInitOrderLoader initOrderLoader() {
+        return initOrderLoader;
     }
 
     public int writerFlags() {
@@ -373,12 +275,20 @@ public class Context {
         return version;
     }
 
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     public String dictionaryString() {
         return dictionaryString;
     }
 
     public String watermark() {
         return watermark;
+    }
+
+    public String javaPath() {
+        return javaPath;
     }
 
     public boolean aggressiveOverload() {

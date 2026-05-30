@@ -30,6 +30,7 @@ public class MethodSalt implements ISalt {
         this.local = local;
     }
 
+    @Override
     public AbstractInsnNode load() {
         return new VarInsnNode(Opcodes.ILOAD, local);
     }

@@ -1,5 +1,7 @@
-package dev.lvstrng.aidsfuscator.exclude;
+package dev.lvstrng.aidsfuscator.exclude.impl;
 
+import dev.lvstrng.aidsfuscator.log.Logger;
+import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -19,9 +21,19 @@ public class Exclusion {
         this.filter = new StringFilter(pattern);
     }
 
+    public boolean test(String str) {
+        return inclusion != filter.test(str);
+    }
+
+    public boolean matchesAnnotation(String ann) {
+        if(Mappings.CLASS.containsNew(ann))
+            return test(Mappings.CLASS.retrieveOld(ann));
+
+        return test(ann);
+    }
+
     public boolean matchesClass(JClass clazz) {
-        var match = filter.test(clazz.originalName());
-        return inclusion != match;
+        return test(clazz.originalName());
     }
 
     public boolean matchesMethod(JMethod method) {
@@ -33,13 +45,11 @@ public class Exclusion {
     }
 
     public boolean matchesMethod(JClass clazz, JMethod method) {
-        var match = filter.test(clazz.originalName() + "." + method.simpleOriginalName());
-        return inclusion != match;
+        return test(clazz.originalName() + "." + method.simpleOriginalName());
     }
 
     public boolean matchesField(JClass clazz, JField field) {
-        var match = filter.test(clazz.originalName() + "." + field.simpleOriginalName());
-        return inclusion != match;
+        return test(clazz.originalName() + "." + field.simpleOriginalName());
     }
 
     @Override

@@ -4,7 +4,7 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.ISalt;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -73,7 +73,7 @@ public class MethodSaltTransformer extends Transformer {
         if(!caller.canSalt(frames.get(call))) { // if unable to salt, use raw salt
             list.add(context.properties().add(ASMUtils.pushInt(salt.value()), Property.UNPROTECTED_SALT));
         } else {
-            var mask = random.nextInt();
+            var mask = caller.seed();
             var masked = caller.salt().value() & mask;
 
             list.add(caller.salt().load());
@@ -154,13 +154,13 @@ public class MethodSaltTransformer extends Transformer {
     }
 
     private boolean skipMethodAndTree(ReferenceGraph graph, JMethod method, Set<JClass> impactedClasses) {
+        if(method.owner().isLibMethod(method))
+            return true;
+
         for(var member : impactedClasses) {
             var opt = member.findMethod(method.name(), method.desc());
             if(opt.isPresent())
                 method = opt.get();
-
-            if(member.isLibMethod(method.name(), method.desc()))
-                return true;
 
             if(Exclusions.METHOD_SALTING.excluded(member))
                 return true;

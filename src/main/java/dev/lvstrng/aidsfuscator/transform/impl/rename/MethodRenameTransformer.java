@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Setting;
@@ -41,9 +41,6 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            if(clazz.isLibMethod(method.name(), method.desc()))
-                continue;
-
             var impactedClasses = impactedClasses(context, clazz, method);
             if(skipHierarchy(method, impactedClasses))
                 continue;
@@ -80,8 +77,15 @@ public class MethodRenameTransformer extends Transformer {
      * @return false if should continue, true if should skip
      */
     private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
+        if(method.owner().isLibMethod(method))
+            return true;
+
         // ---- CLASS TREE CHECKS ----
         for(var member : impactedClasses) {
+            var opt = member.findMethod(method.name(), method.desc());
+            if(opt.isPresent())
+                method = opt.get();
+
             if(Exclusions.RENAME_METHOD.excluded(member))
                 return true;
 

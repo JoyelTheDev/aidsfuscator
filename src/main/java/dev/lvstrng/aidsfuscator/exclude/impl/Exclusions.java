@@ -1,8 +1,10 @@
-package dev.lvstrng.aidsfuscator.exclude;
+package dev.lvstrng.aidsfuscator.exclude.impl;
 
+import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
+import org.objectweb.asm.Type;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,7 +38,7 @@ public enum Exclusions {
     private final boolean excludesClass, excludesField, excludesMethod;
     private final String key;
 
-    private final Set<Exclusion> classExclusions, fieldExclusions, methodExclusions;
+    private final Set<Exclusion> classExclusions, fieldExclusions, methodExclusions, annotationExclusions;
 
     Exclusions(String key, boolean excludesClass, boolean excludesField, boolean excludesMethod) {
         this.key = key;
@@ -48,6 +50,7 @@ public enum Exclusions {
         this.classExclusions = new HashSet<>();
         this.fieldExclusions = new HashSet<>();
         this.methodExclusions = new HashSet<>();
+        this.annotationExclusions = new HashSet<>();
     }
 
     public static Exclusions fromKey(String key) {
@@ -55,18 +58,18 @@ public enum Exclusions {
     }
 
     public boolean excluded(JClass clazz) {
-        var match = classExclusions.stream().anyMatch(e -> e.matchesClass(clazz));
+        var match = classExclusions.stream().anyMatch(e -> e.matchesClass(clazz)) || excludedAnnotation(clazz);
 
         if(this == GLOBAL) return match;
         else return match || GLOBAL.excluded(clazz);
     }
 
     public boolean excluded(JField field) {
-        return fieldExclusions.stream().anyMatch(e -> e.matchesField(field));
+        return excluded(field.owner(), field);
     }
 
     public boolean excluded(JClass clazz, JField field) {
-        return fieldExclusions.stream().anyMatch(e -> e.matchesField(clazz, field));
+        return fieldExclusions.stream().anyMatch(e -> e.matchesField(clazz, field)) || excludedAnnotation(field);
     }
 
     public boolean excluded(JMethod method) {
@@ -74,7 +77,13 @@ public enum Exclusions {
     }
 
     public boolean excluded(JClass clazz, JMethod method) {
-        return methodExclusions.stream().anyMatch(e -> e.matchesMethod(clazz, method));
+        return methodExclusions.stream().anyMatch(e -> e.matchesMethod(clazz, method)) || excludedAnnotation(method);
+    }
+
+    public boolean excludedAnnotation(IAnnotatable annotatable) {
+        return annotatable.annotations().stream().anyMatch(ann ->
+            annotationExclusions.stream().anyMatch(ex -> ex.matchesAnnotation(Type.getType(ann.desc).getInternalName()))
+        );
     }
 
     public String key() {
@@ -105,6 +114,10 @@ public enum Exclusions {
         classExclusions.add(new Exclusion(pattern));
     }
 
+    public void addAnnotation(String pattern) {
+        annotationExclusions.add(new Exclusion(pattern));
+    }
+
     public Set<Exclusion> classExclusions() {
         return classExclusions;
     }
@@ -115,5 +128,9 @@ public enum Exclusions {
 
     public Set<Exclusion> methodExclusions() {
         return methodExclusions;
+    }
+
+    public Set<Exclusion> annotationExclusions() {
+        return annotationExclusions;
     }
 }

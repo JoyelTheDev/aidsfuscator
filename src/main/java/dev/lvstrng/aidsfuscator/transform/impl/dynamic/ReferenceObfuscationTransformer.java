@@ -2,7 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.dynamic;
 
 import dev.lvstrng.aidsfuscator.classgen.impl.ReferenceObfuscationClassGenerator;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -92,7 +92,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
-                                var mask = random.nextInt();
+                                var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
                                 list.add(method.salt().load());
@@ -125,7 +125,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                                 if(fieldRef == null)
                                     continue;
 
-                                if(owner.isLibrary(fieldRef) || owner.isInterface())
+                                if(owner.isLibField(fieldRef) || owner.isInterface())
                                     continue;
 
                                 fieldRef.removeAccessFlags(ACC_FINAL);
@@ -164,7 +164,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                             int idxXor = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER));
                             if(method.canSalt(frame)) {
-                                var mask = random.nextInt();
+                                var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
                                 list.add(method.salt().load());

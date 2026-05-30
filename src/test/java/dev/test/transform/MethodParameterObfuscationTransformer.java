@@ -3,7 +3,7 @@ package dev.test.transform;
 import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
@@ -165,7 +165,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
             if(opt.isPresent())
                 method = opt.get();
 
-            if(member.isLibMethod(method.name(), method.desc()))
+            if(member.isLibMethod(method))
                 return true;
 
             if(Exclusions.PARAMETER_OBFUSCATE.excluded(member))

@@ -1,1 +1,26 @@
-[]
+[
+	[
+		"Window",
+		"KeyboardListener"
+	],
+	[
+		"Window",
+		"ThreadsController"
+	],
+	[
+		"Main",
+		"Window"
+	],
+	[
+		"DataOfSquare",
+		"SquarePanel"
+	],
+	[
+		"Window",
+		"Tuple"
+	],
+	[
+		"Window",
+		"DataOfSquare"
+	]
+]

@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
@@ -19,9 +19,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class FieldRenameTransformer extends Transformer {
-    private final Setting<String> prefix = setting("prefix", "");
-    private final Setting<Boolean> shuffle = setting("shuffle", false);
-    private final Setting<Boolean> preserveRecordNames = setting("preserveRecordNames", true);
+    private final Setting<Boolean>  preserveRecordNames = setting("preserveRecordNames", true);
+    private final Setting<String>   prefix = setting("prefix", "");
+    private final Setting<Boolean>  shuffle = setting("shuffle", false);
 
     public FieldRenameTransformer() {
         super("Rename Fields", "renameFields");
@@ -83,11 +83,12 @@ public class FieldRenameTransformer extends Transformer {
                 if(!(arg instanceof Handle handle))
                     continue;
 
-                newNames.append(handle.getName()).append(";");
+                newNames.append(handle.getName());
+                if (i < indy.bsmArgs.length - 1) {
+                    newNames.append(";");
+                }
             }
 
-            // delete last ; cuz idk, it will work with it anyway but still
-            newNames.deleteCharAt(newNames.length() - 1);
             indy.bsmArgs[1] = newNames.toString();
         }
     }
@@ -101,9 +102,6 @@ public class FieldRenameTransformer extends Transformer {
         }
 
         for(var field : clazz.fields()) {
-            if(clazz.isLibField(field.name(), field.desc()))
-                continue;
-
             var impactedClasses = impactedClasses(context, clazz, field);
             if(skipHierarchy(field, impactedClasses))
                 continue;
@@ -134,7 +132,14 @@ public class FieldRenameTransformer extends Transformer {
     }
 
     private boolean skipHierarchy(JField field, Set<JClass> impactedClass) {
+        if(field.owner().isLibField(field))
+            return true;
+
         for(var member : impactedClass) {
+            var opt = member.findField(field.name(), field.desc());
+            if(opt.isPresent())
+                field = opt.get();
+
             if(Exclusions.RENAME_FIELD.excluded(member))
                 return true;
 

@@ -7,7 +7,7 @@ import dev.lvstrng.aidsfuscator.file.Loader;
 
 public class ClassInitOrderLoader implements Loader {
     private final Context context;
-    private final String orderPath;
+    private String orderPath;
 
     public ClassInitOrderLoader(Context context, String orderPath) {
         this.context = context;
@@ -31,5 +31,13 @@ public class ClassInitOrderLoader implements Loader {
                     arr.get(1).getAsString()
             );
         }
+    }
+
+    public void setPath(String orderPath) {
+        this.orderPath = orderPath;
+    }
+
+    public String path() {
+        return orderPath;
     }
 }

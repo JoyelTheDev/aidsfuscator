@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.reference.impl;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.StringFilter;
+import dev.lvstrng.aidsfuscator.exclude.impl.StringFilter;
 import dev.lvstrng.aidsfuscator.reference.IReferenceCandidate;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 

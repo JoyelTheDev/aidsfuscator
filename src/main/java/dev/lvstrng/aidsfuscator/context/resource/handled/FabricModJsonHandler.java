@@ -25,6 +25,9 @@ public class FabricModJsonHandler implements HandledResource {
 
         var entrypoints = modJson.getAsJsonObject("entrypoints");
         if(entrypoints == null) {
+            jos.putNextEntry(new ZipEntry(name));
+            jos.write(bytes);
+            jos.closeEntry();
             Logger.warn("Ignoring `" + name + "`, no entry points found");
             return;
         }

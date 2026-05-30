@@ -1,7 +1,7 @@
 package dev.test.transform;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -28,7 +28,7 @@ public class NewMethodRenameTransformer extends Transformer {
 
     private void mapMethods(Context context, JClass clazz) {
         for(var method : clazz.methods()) {
-            if(clazz.isLibMethod(method.name(), method.desc()))
+            if(clazz.isLibMethod(method))
                 continue;
 
             var impactedClasses = impactedClasses(context, clazz, method);

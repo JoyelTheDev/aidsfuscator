@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.strip;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 
 public class LocalVariableNameTransformer extends Transformer {

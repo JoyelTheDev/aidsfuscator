@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.salt;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.salt.impl.ClassSalt;
 import dev.lvstrng.aidsfuscator.transform.Setting;
@@ -83,7 +83,7 @@ public class ClassSaltTransformer extends Transformer {
             var list = new InsnList();
 
             var n = ASMUtils.getInt(insn);
-            var mask = random.nextInt();
+            var mask = method.seed();
             var masked = saltValue & mask;
 
             list.add(method.salt().load());
@@ -99,7 +99,7 @@ public class ClassSaltTransformer extends Transformer {
 
     private void prepSalt(Context context, JClass clazz, JMethod method, int saltLocal, int saltValue) {
         var list = new InsnBuilder();
-        var mask = random.nextInt();
+        var mask = method.seed();
         var maskedSalt = clazz.salt().value() & mask;
 
         list

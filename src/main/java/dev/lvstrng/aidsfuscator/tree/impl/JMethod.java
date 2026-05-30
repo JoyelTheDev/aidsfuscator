@@ -12,22 +12,26 @@ import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
+import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
  * A MethodNode wrapper for easier use.
  */
-public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod> {
+public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchical<JMethod>, IAnnotatable {
+    private static final SecureRandom random = new SecureRandom();
     private JClass owner;
     private MethodNode core;
     private final PropertyContainer properties;
     private MethodSalt salt;
+    private int seed;
 
     private boolean library;
     private final String originalName, originalDesc;
@@ -41,6 +45,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
         this.originalName = core.name;
         this.originalDesc = core.desc;
+        this.seed = random.nextInt();
 
         this.setCore(core);
     }
@@ -143,6 +148,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
         return salt;
     }
 
+    public int seed() {
+        return seed;
+    }
+
     @Override
     public boolean canSalt(Block block) {
         if(!hasSalt()) return false;
@@ -184,6 +193,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
         return owner;
     }
 
+    public boolean isSpecial() {
+        return name().startsWith("<");
+    }
+
     @Override
     public Set<JMethod> parents() {
         return parents;
@@ -192,6 +205,11 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     @Override
     public Set<JMethod> children() {
         return children;
+    }
+
+    @Override
+    public boolean isNonHierarchical() {
+        return isPrivate() || isStatic() || isSpecial();
     }
 
     public MethodNode core() {
@@ -282,5 +300,27 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     @Override
     public String toString() {
         return fullName();
+    }
+
+    @Override
+    public List<AnnotationNode> annotations() {
+        var list = new ArrayList<AnnotationNode>();
+        if(core.visibleAnnotations != null)
+            list.addAll(core.visibleAnnotations);
+
+        if(core.invisibleAnnotations != null)
+            list.addAll(core.invisibleAnnotations);
+        return list;
+    }
+
+    @Override
+    public void removeAnnotation(String annotation) {
+        annotation = "L%s;".formatted(annotation);
+        var finalAnnotation = annotation;
+
+        if(core.visibleAnnotations != null)
+            core.visibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+        if(core.invisibleAnnotations != null)
+            core.invisibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
     }
 }

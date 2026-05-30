@@ -2,16 +2,20 @@ package dev.lvstrng.aidsfuscator.tree.impl;
 
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
+import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.FieldNode;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * A FieldNode wrapper for easier use.
  */
-public class JField implements IAccessFlags, IHierarchical<JField> {
+public class JField implements IAccessFlags, IHierarchical<JField>, IAnnotatable {
     private JClass owner;
     private FieldNode core;
     private final PropertyContainer properties;
@@ -125,7 +129,34 @@ public class JField implements IAccessFlags, IHierarchical<JField> {
     }
 
     @Override
+    public boolean isNonHierarchical() {
+        return isPrivate() || isStatic();
+    }
+
+    @Override
     public String toString() {
         return fullName();
+    }
+
+    @Override
+    public List<AnnotationNode> annotations() {
+        var list = new ArrayList<AnnotationNode>();
+        if(core.visibleAnnotations != null)
+            list.addAll(core.visibleAnnotations);
+
+        if(core.invisibleAnnotations != null)
+            list.addAll(core.invisibleAnnotations);
+        return list;
+    }
+
+    @Override
+    public void removeAnnotation(String annotation) {
+        annotation = "L%s;".formatted(annotation);
+        var finalAnnotation = annotation;
+
+        if(core.visibleAnnotations != null)
+            core.visibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+        if(core.invisibleAnnotations != null)
+            core.invisibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
     }
 }

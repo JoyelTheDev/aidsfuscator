@@ -1,33 +1,37 @@
 {
-  "in": "eval.jar",
-  "out": "out-out.jar",
-  "libs": "libs/",
+  "in": "clumps.jar",
+  "out": "out.jar",
+  "libs": "mclibs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
-  "watermark": "https://github.com/LvStrnggg/aidsfuscator",
-  "aggressiveOverload": false,
+  "watermark": "",
+  "aggressiveOverload": true,
+  "exclusionPresets": [
+    "api",
+    "mc-fabric"
+  ],
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
     },
     "renameFields": {
       "enabled": true,
+      "preserveRecordNames": true,
       "prefix": "",
-      "shuffle": false,
-      "preserveRecordNames": true
+      "shuffle": true
     },
     "renameMethods": {
       "enabled": true,
       "prefix": "",
-      "shuffle": false
+      "shuffle": true
     },
     "renameClasses": {
       "enabled": true,
       "prefix": "",
-      "randomize": false
+      "randomize": true
     },
     "localNames": {
       "enabled": true

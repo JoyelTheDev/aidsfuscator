@@ -74,7 +74,7 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
         // ---- INSTRUCTIONS ----
         var builder = new InsnBuilder()._int(idxValue);
         if(method.canSalt(frames.get(callSite))) {
-            var mask = random.nextInt();
+            var mask = method.seed();
             var masked = method.salt().value() & mask;
 
             builder

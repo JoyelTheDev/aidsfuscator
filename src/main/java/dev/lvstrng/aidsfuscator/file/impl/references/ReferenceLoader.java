@@ -7,7 +7,7 @@ import dev.lvstrng.aidsfuscator.file.Loader;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class ReferenceLoader implements Loader {
-    public final Context context;
+    private final Context context;
     private final String path;
 
     public ReferenceLoader(Context context, String path) {

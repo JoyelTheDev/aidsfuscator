@@ -4,7 +4,7 @@ import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.FrameString;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;

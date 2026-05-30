@@ -198,7 +198,7 @@ public class DefaultStringDecryptor implements IStringDecryptor {
 
         var builder = new InsnBuilder().add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
         if(method.canSalt(frames.get(callSite))) {
-            var mask = random.nextInt();
+            var mask = method.seed();
             var masked = method.salt().value() & mask;
 
             builder

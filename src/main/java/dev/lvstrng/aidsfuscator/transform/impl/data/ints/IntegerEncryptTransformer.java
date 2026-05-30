@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
 
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.exclude.Exclusions;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.decryptors.DefaultIntegerDecryptor;

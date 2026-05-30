@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.exclude;
+package dev.lvstrng.aidsfuscator.exclude.impl;
 
 import java.util.regex.Pattern;
 

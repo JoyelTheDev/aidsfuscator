@@ -210,7 +210,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 case KEY1 -> list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
                 case KEY2 -> {
                     if(method.canSalt(frames.get(callSite))) {
-                        var mask = random.nextInt();
+                        var mask = method.seed();
                         var masked = method.salt().value() & mask;
 
                         list.add(method.salt().load());

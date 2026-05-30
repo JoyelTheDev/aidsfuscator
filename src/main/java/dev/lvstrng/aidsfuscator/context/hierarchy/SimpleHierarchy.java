@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.context.hierarchy;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -18,8 +19,8 @@ import java.util.function.Predicate;
  */
 public class SimpleHierarchy implements IHierarchy {
     private final Context context;
-    private final Predicate<JMethod> blacklistedMethod = (e -> e.name().equals("<init>") || !e.isVirtual() || e.isPrivate()); // these methods do not have hierarchy at all
-    private final Predicate<JField> blacklistedField = (e -> !e.isVirtual() || e.isPrivate()); // static fields do not have hierarchy
+    private final Predicate<JMethod> blacklistedMethod = (JMethod::isNonHierarchical); // these methods do not have hierarchy at all
+    private final Predicate<JField> blacklistedField = (JField::isNonHierarchical); // static fields do not have hierarchy
 
     public SimpleHierarchy(Context context) {
         this.context = context;
@@ -27,6 +28,8 @@ public class SimpleHierarchy implements IHierarchy {
 
     @Override
     public void build() {
+        Logger.info("Building hierarchy...");
+
         var classes = context.jarClasses();
         this.clearHierarchy(classes);
 

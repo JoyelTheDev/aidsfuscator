@@ -36,6 +36,10 @@ public interface IHierarchical<T> {
         return children().contains(member);
     }
 
+    default boolean isNonHierarchical() {
+        return false;
+    }
+
     /**
      * Clears the hierarchy for this member
      */
