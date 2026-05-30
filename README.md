@@ -1,16 +1,14 @@
 # Aidsfuscator v2.x
 
 ## About
-Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not then one of the best, free obfuscators. 
+Aidsfuscator is a java bytecode obfuscator that aims to become one of, if not the best free obfuscators. 
 <br>
   Join the [discord server](https://discord.gg/4JGANqEZsK)!
 </br>
 
 ## Features
 - Trimming
-- Class Renaming
-- Field Renaming
-- Method Renaming
+- Name obfuscation (optional aggressive overloading!)
 - Control Flow Flattening
 - Control Flow Shuffling
 - LocalVariableTable clearing
@@ -24,14 +22,16 @@ Aidsfuscator is a java bytecode obfuscator that aims to become the best, if not 
 - Fat JAR support
 - CLI
 - Config system
-- Exclusion system
+- Exclusion system with annotations
+- Exclusion preset system
 - Automatic `fabric.mod.json` handling
+- Annotations API
 
 ## Why?
-Over these 2 years of me working with java bytecode, I noticed There's not many good free java bytecode obfuscator options out there, so I decided to make one myself. It is also a passion project.
+Over these 2 years of me working with Java bytecode, I noticed that there's not many good free Java bytecode obfuscator options out there, so I decided to make one myself. It is also a passion project.
 
 ## Why v2?
-I make a poll on [Aidsfuscators/Cryptics discord server](https://discord.gg/4JGANqEZsK), asking if anyone wanted me to rewrite the v1 aidsfuscator. The majority said yes, so that's what makes me want to do this project.
+I made a poll on [Aidsfuscators/Cryptics discord server](https://discord.gg/4JGANqEZsK), asking if anyone wanted me to rewrite the v1 aidsfuscator. The majority said yes, so that's what makes me want to do this project.
 
 ## How to use?
 - Download the zip file from [the releases page](https://github.com/LvStrnggg/aidsfuscator/releases).
@@ -44,12 +44,18 @@ I make a poll on [Aidsfuscators/Cryptics discord server](https://discord.gg/4JGA
 ```
 aidsfuscator.jar
 workspace
+|- aidsfuscator-api.jar
 |- config.json
+|- initOrder.java
+|- references.json
 \- exclusions.json
 ```
 
 ### What not to do
 - Do not run it with `java -jar aidsfuscator --config=workspace/config.json --exclusions=workspace/exclusions.json`. Aidsfuscator automatically prefixes `workspace/` before any workspace item, that isn't the libs folder or input file.
+
+### Aidsfuscator API
+Starting from v2.9.0, Aidsfuscator now has an API JAR file with a few annotations. This JAR can be added to your projects dependencies and you can annotate methods, fields and classes with these annotations to exclude them from obfuscation. These annotations get removed in the Aidsfuscators post-processor.
 
 ## Using the obfuscator
 ### Exclusions and inclusions
@@ -68,6 +74,9 @@ You can add exclusions and inclusions with the follow format in the exclusions f
     "method": [ 
       "example/Exclusion.excludedMethod(IJZBDFSCLjava/lang/String;)V",
       "!example/Inclusion.includedMethod(IJZBDFSCLjava/lang/String;)V"
+    ],
+    "annotation": [
+      "example/ExampleAnnotation"
     ]
   }
 }
