@@ -3,6 +3,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
+import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.decryptors.DefaultIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers.DefaultIntegerInitializer;
@@ -23,6 +24,7 @@ public class IntegerEncryptTransformer extends Transformer {
     private final List<Supplier<IIntegerDecryptor>> decryptors = List.of(
             DefaultIntegerDecryptor::new
     );
+    private final Setting<Boolean> excludeLowSignificant = setting("excludeLowSignificant", true);
 
     public IntegerEncryptTransformer() {
         super("Encrypt Integer Constants", "integerEncrypt");
@@ -54,7 +56,7 @@ public class IntegerEncryptTransformer extends Transformer {
                     if(!ASMUtils.isIntPush(insn))
                         continue;
 
-                    if(ASMUtils.isIconst(insn))
+                    if(ASMUtils.isIconst(insn) && excludeLowSignificant.value())
                         continue;
 
                     if(context.properties().get(insn).has(Property.IGNORE_INTEGER))
