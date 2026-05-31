@@ -315,12 +315,9 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     @Override
     public void removeAnnotation(String annotation) {
-        annotation = "L%s;".formatted(annotation);
-        var finalAnnotation = annotation;
-
         if(core.visibleAnnotations != null)
-            core.visibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+            core.visibleAnnotations.removeIf(e -> e.desc.equals(annotation));
         if(core.invisibleAnnotations != null)
-            core.invisibleAnnotations.removeIf(e -> e.desc.equals(finalAnnotation));
+            core.invisibleAnnotations.removeIf(e -> e.desc.equals(annotation));
     }
 }
