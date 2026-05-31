@@ -51,7 +51,8 @@
       "enabled": true
     },
     "integerEncrypt": {
-      "enabled": true
+      "enabled": true,
+      "excludeLowSignificant": true
     },
     "encryptStrings": {
       "enabled": true,
