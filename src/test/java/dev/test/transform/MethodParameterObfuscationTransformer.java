@@ -1,6 +1,6 @@
 package dev.test.transform;
 
-import dev.lvstrng.aidsfuscator.analysis.ref.MethodCallNode;
+import dev.lvstrng.aidsfuscator.analysis.ref.nodes.MethodReference;
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
@@ -178,7 +178,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
                 return true;
 
             var refs = graph.refs(method);
-            if (refs.stream().anyMatch(MethodCallNode::cantEdit))
+            if (refs.stream().anyMatch(MethodReference::cantEdit))
                 return true;
         }
 

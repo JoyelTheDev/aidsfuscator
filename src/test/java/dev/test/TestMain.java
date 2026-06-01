@@ -16,12 +16,13 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.test.transform.TestTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -31,7 +32,7 @@ public class TestMain {
         //context.referenceManager().addMethodCandidate("*");
 
         context.run(
-                new TrimTransformer(),
+                new TestTransformer(),
 
                 new FieldRenameTransformer(),
                 new MethodRenameTransformer(),
@@ -48,7 +49,6 @@ public class TestMain {
 
                 new ControlFlowFlatteningTransformer(),
                 new ControlFlowShufflingTransformer(),
-                new DeadCodeCleanTransformer(),
                 new ReferenceObfuscationTransformer()
         );
     }

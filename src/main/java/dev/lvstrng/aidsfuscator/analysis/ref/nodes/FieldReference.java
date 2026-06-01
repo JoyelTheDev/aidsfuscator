@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.analysis.ref;
+package dev.lvstrng.aidsfuscator.analysis.ref.nodes;
 
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
@@ -6,7 +6,7 @@ import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
-public record FieldCallNode(JClass callerClass, JMethod caller, JField field, AbstractInsnNode insn) {
+public record FieldReference(JClass callerClass, JMethod caller, JField field, AbstractInsnNode insn) {
     public boolean isGetter() {
         var op = insn.getOpcode();
         return op == Opcodes.GETFIELD || op == Opcodes.GETSTATIC;
