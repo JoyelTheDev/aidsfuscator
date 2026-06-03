@@ -8,6 +8,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTrans
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.optimize.MethodInlineTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
@@ -22,7 +23,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -32,24 +33,7 @@ public class TestMain {
         //context.referenceManager().addMethodCandidate("*");
 
         context.run(
-                new TestTransformer(),
-
-                new FieldRenameTransformer(),
-                new MethodRenameTransformer(),
-                new ClassRenameTransformer(),
-
-                new LocalVariableNameTransformer(),
-                new LineNumberTransformer(),
-                new MethodSaltTransformer(),
-                new ClassSaltTransformer(),
-
-                new ConstantsFixTransformer(),
-                new IntegerEncryptTransformer(),
-                new StringEncryptTransformer(),
-
-                new ControlFlowFlatteningTransformer(),
-                new ControlFlowShufflingTransformer(),
-                new ReferenceObfuscationTransformer()
+                new MethodInlineTransformer()
         );
     }
 }
