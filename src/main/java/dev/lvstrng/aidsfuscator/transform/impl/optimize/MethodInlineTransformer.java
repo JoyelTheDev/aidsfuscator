@@ -129,8 +129,8 @@ public class MethodInlineTransformer extends Transformer {
     }
 
     private boolean canInline(Context context, JMethod method) {
-        if(!method.isAnnotatedBy("aidsfuscator/api/InlineMethod"))
-            return false;
+        /*if(!method.isAnnotatedBy("aidsfuscator/api/InlineMethod")) // comment out for testing purposes
+            return false;*/
 
         if(!method.isNonHierarchical()) // let's not mess with methods with a hierarchy
             return false;
@@ -143,6 +143,9 @@ public class MethodInlineTransformer extends Transformer {
             return false;
 
         if(cantEditMethod(method.owner(), method))
+            return false;
+
+        if(!method.properties().properties().isEmpty())
             return false;
 
         var outRefs = context.referenceGraph().methodRefsIn(method);

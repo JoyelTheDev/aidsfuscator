@@ -23,7 +23,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("eval.jar")
+                .in("crackme-new.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -33,7 +33,26 @@ public class TestMain {
         //context.referenceManager().addMethodCandidate("*");
 
         context.run(
-                new MethodInlineTransformer()
+                new MethodInlineTransformer(),
+                new TestTransformer(),
+
+                new FieldRenameTransformer(),
+                new MethodRenameTransformer(),
+                new ClassRenameTransformer(),
+
+                new LocalVariableNameTransformer(),
+                new LineNumberTransformer(),
+                new MethodSaltTransformer(),
+                new ClassSaltTransformer(),
+
+                new ConstantsFixTransformer(),
+                new IntegerEncryptTransformer(),
+                new StringEncryptTransformer(),
+
+                new ControlFlowFlatteningTransformer(),
+                new ControlFlowShufflingTransformer(),
+                new DeadCodeCleanTransformer(),
+                new ReferenceObfuscationTransformer()
         );
     }
 }
