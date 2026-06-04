@@ -1,6 +1,5 @@
-package dev.lvstrng.aidsfuscator.transform.impl.optimize;
+package dev.test.transform;
 
-import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.analysis.ref.nodes.MethodReference;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
@@ -14,14 +13,13 @@ import org.objectweb.asm.tree.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public class MethodInlineTransformer extends Transformer {
     private final Setting<Boolean> keepMethod = setting("keepMethod", false);
 
     public MethodInlineTransformer() {
         super("Method Inlining", "methodInline");
+        setExperimental();
     }
 
     @Override
