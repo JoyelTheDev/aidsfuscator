@@ -108,10 +108,13 @@ public class FieldRenameTransformer extends Transformer {
 
             var name = findOrGenerateName(context, clazz, impactedClasses, field);
             for(var member : impactedClasses) {
-                var oldId = MemberUtils.fullField(member, field);
-                if(Mappings.FIELD.containsOld(oldId))
-                    continue;
+                var opt = member.findField(field.name(), field.desc());
+                if(opt.isPresent()) {
+                    var f = opt.get();
+                    f.setMappedName(name);
+                }
 
+                var oldId = MemberUtils.fullField(member, field);
                 var newId = MemberUtils.fullField(member.name(), name, field.desc());
                 Mappings.FIELD.register(oldId, new Mapping(newId, name));
 

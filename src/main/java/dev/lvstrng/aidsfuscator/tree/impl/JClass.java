@@ -225,8 +225,9 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            method = parent.findMethod(name, desc, e -> e.isVirtual() && !e.isPrivate() && !e.name().startsWith("<")).orElse(null);
+            method = parent.findMethod(name, desc, e -> !e.isNonHierarchical()).orElse(null);
             if(method == null) continue;
+
             return method;
         }
 
@@ -242,7 +243,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            field = parent.findField(name, desc, e -> e.isVirtual() && !e.isPrivate()).orElse(null);
+            field = parent.findField(name, desc, e -> !e.isNonHierarchical()).orElse(null);
             if(field == null) continue;
 
             return field;

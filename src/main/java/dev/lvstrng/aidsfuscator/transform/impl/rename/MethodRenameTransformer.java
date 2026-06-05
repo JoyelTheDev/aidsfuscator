@@ -47,10 +47,13 @@ public class MethodRenameTransformer extends Transformer {
 
             var name = findOrGenerateName(context, clazz, impactedClasses, method);
             for(var member : impactedClasses) {
-                var oldId = MemberUtils.fullMethod(member, method);
-                if(Mappings.METHOD.containsOld(oldId))
-                    continue;
+                var opt = member.findMethod(method.name(), method.desc());
+                if(opt.isPresent()) {
+                    var mth = opt.get();
+                    mth.setMappedName(name);
+                }
 
+                var oldId = MemberUtils.fullMethod(member, method);
                 var newId = MemberUtils.fullMethod(member.name(), name, method.desc());
                 Mappings.METHOD.register(oldId, new Mapping(newId, name));
 

@@ -87,36 +87,20 @@ public class AggressiveDictionary implements IDictionary {
 
     private boolean isFieldMapped(JClass owner, String name, String desc) {
         for(var member : owner.tree()) {
-            var mappedName = "%s.%s %s".formatted(member.name(), name, desc);
-            if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().equals(mappedName)))
-                return true;
-
-            if(member.fields().stream().anyMatch(e -> e.name().equals(name)))
+            if(member.fields().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
 
-        var mappedName = "%s.%s %s".formatted(owner.name(), name, desc);
-        if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-            return true;
-
-        return owner.fields().stream().anyMatch(e -> e.name().equals(name));
+        return owner.fields().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc));
     }
 
     private boolean isMethodMapped(JClass owner, String name, String desc) {
         for(var member : owner.tree()) {
-            var mappedName = "%s.%s%s".formatted(member.name(), name, desc);
-            if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().equals(mappedName)))
-                return true;
-
-            if(member.methods().stream().anyMatch(e -> e.name().equals(name)))
+            if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
 
-        var mappedName = "%s.%s%s".formatted(owner.name(), name, desc);
-        if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-            return true;
-
-        return owner.methods().stream().anyMatch(e -> e.name().equals(name));
+        return owner.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc));
     }
 
     @Override

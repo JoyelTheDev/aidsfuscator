@@ -93,37 +93,21 @@ public class SimpleDictionary implements IDictionary {
     public void revertField() {}
 
     // ---- UNIQUE ----
-    private boolean isMappedMethod(JClass clazz, String name) {
-        for(var member : clazz.tree()) {
-            var mappedName = "%s.%s(".formatted(member.name(), name);
-            if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-                return true;
-
-            if(member.methods().stream().anyMatch(e -> e.name().equals(name)))
+    private boolean isMappedMethod(JClass owner, String name) {
+        for(var member : owner.tree()) {
+            if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name)))
                 return true;
         }
 
-        var mappedName = "%s.%s(".formatted(clazz.name(), name);
-        if(Mappings.METHOD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-            return true;
-
-        return clazz.methods().stream().anyMatch(e -> e.name().equals(name));
+        return owner.methods().stream().anyMatch(e -> e.mappedName().equals(name));
     }
 
-    private boolean isMappedField(JClass clazz, String name) {
-        for(var member : clazz.tree()) {
-            var mappedName = "%s.%s ".formatted(member.name(), name);
-            if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-                return true;
-
-            if(member.fields().stream().anyMatch(e -> e.name().equals(name)))
+    private boolean isMappedField(JClass owner, String name) {
+        for(var member : owner.tree()) {
+            if(member.fields().stream().anyMatch(e -> e.mappedName().equals(name)))
                 return true;
         }
 
-        var mappedName = "%s.%s ".formatted(clazz.name(), name);
-        if(Mappings.FIELD.getMappings().values().stream().anyMatch(e -> e.key().startsWith(mappedName)))
-            return true;
-
-        return clazz.fields().stream().anyMatch(e -> e.name().equals(name));
+        return owner.fields().stream().anyMatch(e -> e.mappedName().equals(name));
     }
 }
