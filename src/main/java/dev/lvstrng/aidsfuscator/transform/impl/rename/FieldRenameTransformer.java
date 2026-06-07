@@ -13,6 +13,7 @@ import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 
+import java.io.Externalizable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
@@ -20,6 +21,7 @@ import java.util.Set;
 
 public class FieldRenameTransformer extends Transformer {
     private final Setting<Boolean>  preserveRecordNames = setting("preserveRecordNames", true);
+    private final Setting<Boolean>  keepSerializableNames = setting("keepSerializableNames", true);
     private final Setting<String>   prefix = setting("prefix", "");
     private final Setting<Boolean>  shuffle = setting("shuffle", false);
 
@@ -147,6 +149,9 @@ public class FieldRenameTransformer extends Transformer {
                 return true;
 
             if(Exclusions.RENAME_FIELD.excluded(member, field))
+                return true;
+
+            if(keepSerializableNames.value() && member.tree().stream().anyMatch(e -> e.name().equals("java/io/Serializable")))
                 return true;
         }
 

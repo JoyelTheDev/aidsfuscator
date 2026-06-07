@@ -36,7 +36,7 @@ public class SimpleDictionary implements IDictionary {
 
         do {
             result = prefix + newName(counter++);
-        } while (isMappedMethod(owner, result));
+        } while (owner.isMethodMapped(result));
 
         return result;
     }
@@ -48,7 +48,7 @@ public class SimpleDictionary implements IDictionary {
 
         do {
             result = prefix + newName(counter++);
-        } while (isMappedField(owner, result));
+        } while (owner.isFieldMapped(result));
 
         return result;
     }
@@ -91,23 +91,4 @@ public class SimpleDictionary implements IDictionary {
 
     @Override
     public void revertField() {}
-
-    // ---- UNIQUE ----
-    private boolean isMappedMethod(JClass owner, String name) {
-        for(var member : owner.tree()) {
-            if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name)))
-                return true;
-        }
-
-        return owner.methods().stream().anyMatch(e -> e.mappedName().equals(name));
-    }
-
-    private boolean isMappedField(JClass owner, String name) {
-        for(var member : owner.tree()) {
-            if(member.fields().stream().anyMatch(e -> e.mappedName().equals(name)))
-                return true;
-        }
-
-        return owner.fields().stream().anyMatch(e -> e.mappedName().equals(name));
-    }
 }
