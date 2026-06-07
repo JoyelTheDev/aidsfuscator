@@ -10,10 +10,7 @@ import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class MethodRenameTransformer extends Transformer {
     private final Setting<String> prefix = setting("prefix", "");
@@ -30,6 +27,7 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         remap(context);
+        Mappings.METHOD.clearTemp();
     }
 
     private void mapMethods(Context context, JClass clazz) {

@@ -13,7 +13,6 @@ import dev.lvstrng.aidsfuscator.utils.MemberUtils;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 
-import java.io.Externalizable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
@@ -38,6 +37,7 @@ public class FieldRenameTransformer extends Transformer {
         remap(context);
         if(!preserveRecordNames.value())
             transformRecordMethods(context);
+        Mappings.FIELD.clearTemp();
     }
 
     /**
