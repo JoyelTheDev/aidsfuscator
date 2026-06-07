@@ -58,7 +58,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
      */
     public boolean isMethodMappedExact(String name, String desc) {
         for(var member : tree()) {
-            if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
+            if(member.methods().stream().anyMatch(e -> (e.mappedName().equals(name) || e.name().equals(name)) && e.desc().equals(desc)))
                 return true;
         }
 

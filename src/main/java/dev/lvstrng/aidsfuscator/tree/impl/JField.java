@@ -31,6 +31,7 @@ public class JField implements IAccessFlags, IHierarchical<JField>, IAnnotatable
         this.library = false;
         this.originalName = core.name;
         this.originalDesc = core.desc;
+
         this.setCore(core);
     }
 
