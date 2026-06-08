@@ -18,12 +18,14 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
 import dev.test.transform.MethodInlineTransformer;
+import dev.test.transform.MethodParameterObfuscationTransformer;
+import dev.test.transform.TestTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("out/artifacts/aidsfuscator_jar/aidsfuscator.jar")
+                .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -34,22 +36,7 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                new FieldRenameTransformer(),
-                new MethodRenameTransformer(),
-                new ClassRenameTransformer(),
-
-                new LocalVariableNameTransformer(),
-                new LineNumberTransformer(),
-                new MethodSaltTransformer(),
-                new ClassSaltTransformer(),
-
-                new ConstantsFixTransformer(),
-                new IntegerEncryptTransformer(),
-                new StringEncryptTransformer(),
-
-                new ControlFlowFlatteningTransformer(),
-                new ControlFlowShufflingTransformer(),
-                new ReferenceObfuscationTransformer()
+                new MethodParameterObfuscationTransformer()
         );
     }
 }

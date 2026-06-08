@@ -1,5 +1,6 @@
 package dev.test.transform;
 
+import dev.lvstrng.aidsfuscator.analysis.flow.export.DotGraphExport;
 import dev.lvstrng.aidsfuscator.analysis.ref.nodes.ClassReference;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
@@ -16,6 +17,14 @@ public class TestTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
+        context.classes().forEach(clazz -> clazz.methods().forEach(method -> {
+            System.out.println(method.fullOriginalName());
+            System.out.println(new DotGraphExport(method.createFlowGraph(context)).export());
+            System.out.println();
+        }));
+    }
+
+    private void auto(Context context) {
         var graph = context.referenceGraph().build();
 
         for(var clazz : context.classes()) {
