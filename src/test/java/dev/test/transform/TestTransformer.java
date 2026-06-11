@@ -17,6 +17,10 @@ public class TestTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
+        auto(context);
+    }
+
+    private void graph(Context context) {
         context.classes().forEach(clazz -> clazz.methods().forEach(method -> {
             System.out.println(method.fullOriginalName());
             System.out.println(new DotGraphExport(method.createFlowGraph(context)).export());
@@ -33,6 +37,8 @@ public class TestTransformer extends Transformer {
                     .map(ClassReference::callerClass)
                     .filter(e -> e != clazz)
                     .filter(e -> e.core().innerClasses.stream().noneMatch(d -> d.name.equals(clazz.name()))) // gay ass inner classes
+                    .filter(e -> !e.hasParent(clazz))
+                    .filter(e -> !e.hasChild(clazz))
                     .collect(Collectors.toSet());
 
             if(callerClasses.size() != 1)
@@ -41,6 +47,7 @@ public class TestTransformer extends Transformer {
             var initer = callerClasses.stream().toList().getFirst();
             Logger.success("Automatically found (%s -> %s) class init order pair", initer, clazz);
             context.initOrder().add(initer.originalName(), clazz.originalName());
+            markChange();
         }
     }
 }

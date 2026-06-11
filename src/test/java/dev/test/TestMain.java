@@ -28,7 +28,7 @@ public class TestMain {
                 .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
-                .setAggressiveOverload(true);
+                .setAggressiveOverload(false);
 
         //context.referenceManager().addMethodCandidate("*");
         context.referenceManager().addFieldCandidate("*");
@@ -36,6 +36,7 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
+                new MethodRenameTransformer(),
                 new MethodParameterObfuscationTransformer()
         );
     }
