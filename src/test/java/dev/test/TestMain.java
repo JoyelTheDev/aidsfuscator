@@ -17,18 +17,20 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.test.transform.InjectorTransformer;
 import dev.test.transform.MethodInlineTransformer;
 import dev.test.transform.MethodParameterObfuscationTransformer;
 import dev.test.transform.TestTransformer;
+import org.objectweb.asm.Opcodes;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("eval.jar")
+                .in("flappy.jar")
                 .libs("libs")
                 .out("out.jar")
-                .setAggressiveOverload(false);
+                .setAggressiveOverload(true);
 
         //context.referenceManager().addMethodCandidate("*");
         context.referenceManager().addFieldCandidate("*");
@@ -36,8 +38,25 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
+                new InjectorTransformer(),
+
+                new FieldRenameTransformer(),
                 new MethodRenameTransformer(),
-                new MethodParameterObfuscationTransformer()
+                new ClassRenameTransformer(),
+
+                new LocalVariableNameTransformer(),
+                new LineNumberTransformer(),
+                new MethodSaltTransformer(),
+                new ClassSaltTransformer(),
+
+                new ConstantsFixTransformer(),
+                new IntegerEncryptTransformer(),
+                new StringEncryptTransformer(),
+
+                new ControlFlowFlatteningTransformer(),
+                new ControlFlowShufflingTransformer(),
+                new DeadCodeCleanTransformer(),
+                new ReferenceObfuscationTransformer()
         );
     }
 }

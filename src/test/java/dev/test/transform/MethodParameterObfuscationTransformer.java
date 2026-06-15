@@ -38,7 +38,7 @@ public class MethodParameterObfuscationTransformer extends Transformer {
                 unpackArgs(context, method, method.args());
             }
 
-            method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
+            method.core().desc = "([Ljava/lang/Object;)" + method.returnType();
 
             var refs = graph.refs(method);
             for(var ref : refs) {
@@ -198,6 +198,5 @@ public class MethodParameterObfuscationTransformer extends Transformer {
 
         if(method.hasSalt())
             method.salt().updateVar(method.salt().local() + 1);
-        method.core().desc = "([Ljava/lang/Object;)" + method.returnType().getDescriptor();
     }
 }

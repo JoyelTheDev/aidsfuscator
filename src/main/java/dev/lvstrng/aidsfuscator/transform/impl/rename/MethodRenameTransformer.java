@@ -109,6 +109,7 @@ public class MethodRenameTransformer extends Transformer {
                 continue;
 
             classes.add(parent);
+            classes.addAll(parent.children());
         }
 
         return classes;
