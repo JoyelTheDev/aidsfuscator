@@ -65,7 +65,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 int flattenerLocal = -1;
 
                 for(var group : grouped) {
-                    group = group.stream().filter(e -> goodBlock.test(graph, e)).toList();
+                    group.removeIf(e -> !goodBlock.test(graph, e));
                     if(group.size() < 3)
                         continue;
 
@@ -136,7 +136,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
             map.computeIfAbsent(FrameString.generate(block.start()), _ -> new ArrayList<>()).add(block);
         }
 
-        return map.values().stream().toList();
+        return new ArrayList<>(map.values());
     }
 
     private void fixLocals(JMethod method) {
