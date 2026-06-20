@@ -76,9 +76,37 @@ public class InsnBuilder {
         return this;
     }
 
-    public InsnBuilder _const(Object value) {
-        list.add(new LdcInsnNode(value));
+    private static final int STRING_CHUNK_SIZE = 16384;
+
+    /**
+     * Append string load.
+     * @author a114
+     */
+    private InsnBuilder appendStringLoad(String str) {
+        if (str.length() <= STRING_CHUNK_SIZE) {
+            list.add(new LdcInsnNode(str));
+            return this;
+        }
+        list.add(new TypeInsnNode(NEW, "java/lang/StringBuilder"));
+        list.add(new InsnNode(DUP));
+        list.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V"));
+
+        for (int i = 0; i < str.length(); i += STRING_CHUNK_SIZE) {
+            String chunk = str.substring(i, Math.min(i + STRING_CHUNK_SIZE, str.length()));
+            list.add(new LdcInsnNode(chunk));
+            list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;"));
+        }
+        list.add(new MethodInsnNode(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;"));
         return this;
+    }
+
+    public InsnBuilder _const(Object value) {
+        if (value instanceof String str) {
+            return appendStringLoad(str);
+        } else {
+            list.add(new LdcInsnNode(value));
+            return this;
+        }
     }
 
     public InsnBuilder method(int op, String owner, String name, String desc) {
