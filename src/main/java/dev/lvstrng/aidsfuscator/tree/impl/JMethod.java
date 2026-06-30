@@ -211,7 +211,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     @Override
     public boolean isNonHierarchical() {
-        return isPrivate() || isStatic() || isSpecial();
+        return isPrivate();
     }
 
     public MethodNode core() {

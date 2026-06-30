@@ -8,6 +8,7 @@ import dev.lvstrng.aidsfuscator.analysis.ref.nodes.ClassReference;
 import dev.lvstrng.aidsfuscator.analysis.ref.nodes.FieldReference;
 import dev.lvstrng.aidsfuscator.analysis.ref.nodes.MethodReference;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -57,9 +58,13 @@ public class ReferenceGraph {
         this.clear();
 
         for(var clazz : context.jarClasses()) {
-            for(var method : clazz.methods()) {
-                method.insns().forEach(insn -> collectors.stream().filter(e -> e.isOfType(insn)).forEach(e -> e.collect(context, this, clazz, method, insn)));
-            }
+            try {
+                for(var method : clazz.methods()) {
+                    method.insns().forEach(insn -> collectors.stream()
+                            .filter(e -> e.isOfType(insn))
+                            .forEach(e -> e.collect(context, this, clazz, method, insn)));
+                }
+            } catch (MissingMemberException _) {}
         }
 
         return this;

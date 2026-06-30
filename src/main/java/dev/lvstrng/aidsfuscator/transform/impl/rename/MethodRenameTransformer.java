@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Setting;
@@ -43,7 +44,16 @@ public class MethodRenameTransformer extends Transformer {
             if(skipHierarchy(method, impactedClasses))
                 continue;
 
+            if(method.name().equals("isEmpty") || method.name().equals("isFrozen")) {
+                System.out.println();
+            }
             var name = findOrGenerateName(context, clazz, impactedClasses, method);
+            clazz.methods().stream()
+                    .filter(e -> e.mappedName().equals(name))
+                    .filter(e -> e.desc().equals(method.desc()))
+                    .filter(e -> e != method)
+                    .findFirst().ifPresent(other -> Logger.error("[%s] %s (%s) -> %s (%s)", clazz.originalName(), method.simpleOriginalName(), name, other.simpleOriginalName(), other.mappedName()));
+
             for(var member : impactedClasses) {
                 var opt = member.findMethod(method.name(), method.desc());
                 if(opt.isPresent()) {
@@ -63,12 +73,15 @@ public class MethodRenameTransformer extends Transformer {
     private String findOrGenerateName(Context context, JClass clazz, Set<JClass> impactedClasses, JMethod method) {
         for(var member : impactedClasses) {
             var id = MemberUtils.fullMethod(member, method);
-
             if(Mappings.METHOD.containsOld(id))
                 return Mappings.METHOD.retrieve(id).value();
         }
 
-        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc());
+        var id = MemberUtils.fullMethod(clazz, method);
+        if(Mappings.METHOD.containsOld(id))
+            return Mappings.METHOD.retrieve(id).value();
+
+        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), impactedClasses);
     }
 
     /**

@@ -48,7 +48,7 @@ public class DefaultStringInitializer implements IStringInitializer {
         var varLbl = new LabelNode();
 
         var builder = new InsnBuilder()
-                .label(new LabelNode());
+                .label();
         if(clazz.hasSalt()) {
             builder.add(context.properties().add(ASMUtils.pushInt(key ^ clazz.salt().value()), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
                     .add(clazz.salt().load())
@@ -58,23 +58,16 @@ public class DefaultStringInitializer implements IStringInitializer {
         }
 
         builder._var(ISTORE, keyVar)
+                .insertRandomly(new InsnBuilder().label()._const(theStr)._var(ASTORE, strVar))
+                .insertRandomly(new InsnBuilder().label()._const(lenStr).method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")._var(ASTORE, lenArrVar))
 
-                .label(new LabelNode())
-                ._const(theStr)
-                ._var(ASTORE, strVar)
-
-                .label(new LabelNode())
-                ._const(lenStr)
-                .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
-                ._var(ASTORE, lenArrVar)
-
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, lenArrVar)
                 .arraylength()
                 .anewarray("java/lang/String")
                 ._var(ASTORE, strArrVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(-1)
                 ._var(ISTORE, statusVar)
                 ._goto(varLbl)
@@ -88,7 +81,7 @@ public class DefaultStringInitializer implements IStringInitializer {
                 .ixor()
                 ._var(ISTORE, lenVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 ._var(ILOAD, iVar)
 
@@ -100,23 +93,23 @@ public class DefaultStringInitializer implements IStringInitializer {
                 .method(INVOKEVIRTUAL, "java/lang/String", "substring", "(II)Ljava/lang/String;") // target method
                 .aastore()
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, offsetVar)
                 ._var(ILOAD, lenVar)
                 .iadd()
                 ._var(ISTORE, offsetVar)
 
-                .label(new LabelNode())
+                .label()
                 .iinc(iVar, 1)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, iVar)
                 ._var(ALOAD, lenArrVar)
                 .arraylength()
                 .jump(IF_ICMPLT, loop)
 
                 // loop end
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, statusVar)
 
@@ -124,23 +117,23 @@ public class DefaultStringInitializer implements IStringInitializer {
                 ._int(0)
                 ._var(ISTORE, iVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, offsetVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, lenVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, statusVar)
                 .jump(IFNE, loop)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 .arraylength()
                 .anewarray("java/lang/Object")

@@ -1,5 +1,5 @@
 {
-  "in": "snake.jar",
+  "in": "sigma.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",
@@ -62,6 +62,11 @@
       "translateConcat": true,
       "minLength": 2
     },
+    "flowInts": {
+      "enabled": true,
+      "obfuscateLongs": true,
+      "separateBlocks": true
+    },
     "controlFlowFlatten": {
       "enabled": true,
       "useSalt": true
@@ -70,10 +75,10 @@
       "enabled": true
     },
     "cleanDeadCode": {
-      "enabled": false
+      "enabled": true
     },
     "referenceObfuscate": {
-      "enabled": false
+      "enabled": true
     }
   }
 }

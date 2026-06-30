@@ -1,12 +1,13 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
+package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.decryptors.DefaultIntegerDecryptor;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers.DefaultIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.decryptors.DefaultIntegerDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers.DefaultIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers.VarlessIntegerInitializer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 
 import java.util.ArrayList;
@@ -18,7 +19,8 @@ import java.util.function.Supplier;
  */
 public class IntegerEncryptTransformer extends Transformer {
     private final List<Supplier<IIntegerInitializer>> initializers = List.of(
-            DefaultIntegerInitializer::new
+            DefaultIntegerInitializer::new,
+            VarlessIntegerInitializer::new
     );
 
     private final List<Supplier<IIntegerDecryptor>> decryptors = List.of(

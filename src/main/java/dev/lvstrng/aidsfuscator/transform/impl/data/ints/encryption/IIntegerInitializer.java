@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints;
+package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;

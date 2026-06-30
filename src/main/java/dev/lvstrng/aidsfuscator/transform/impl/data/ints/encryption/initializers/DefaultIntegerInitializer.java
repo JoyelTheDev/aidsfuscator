@@ -1,8 +1,8 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.initializers;
+package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.IIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.IIntegerInitializer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
@@ -35,8 +35,7 @@ public class DefaultIntegerInitializer implements IIntegerInitializer {
         // ---- INSNS ----
         var loop = new LabelNode();
 
-        var builder = new InsnBuilder()
-                .label(new LabelNode());
+        var builder = new InsnBuilder().label();
         if(!clazz.hasSalt()) {
             builder.add(context.properties().add(ASMUtils.pushInt(key), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER));
         } else {
@@ -45,30 +44,29 @@ public class DefaultIntegerInitializer implements IIntegerInitializer {
                     .ixor();
         }
         builder._var(ISTORE, keyVar)
-
-                .label(new LabelNode())
+                .label()
                 .add(context.properties().add(new LdcInsnNode(theStr.toString()), Property.IGNORE_STRING))
                 .add(context.properties().add(new LdcInsnNode("ISO-8859-1"), Property.IGNORE_STRING))
                 .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
                 ._var(ASTORE, bytesVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, bytesVar)
                 .arraylength()
                 ._int(4)
                 .idiv()
                 ._var(ISTORE, lenVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, lenVar)
                 .newarray(T_INT)
                 .field(PUTSTATIC, clazz.name(), fieldName, "[I")
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, iVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, iVarReal)
 
@@ -114,7 +112,7 @@ public class DefaultIntegerInitializer implements IIntegerInitializer {
                 .ior()
                 ._var(ISTORE, valVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, valVar)
                 ._var(ILOAD, keyVar)
                 .ixor()
@@ -125,7 +123,7 @@ public class DefaultIntegerInitializer implements IIntegerInitializer {
                 ._var(ILOAD, valVar)
                 .iastore()
 
-                .label(new LabelNode())
+                .label()
                 .iinc(iVar, 4)
                 .iinc(iVarReal, 1)
                 ._var(ILOAD, iVarReal)

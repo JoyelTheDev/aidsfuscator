@@ -4,6 +4,8 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 
+import java.util.Collection;
+
 public class SimpleDictionary implements IDictionary {
     private final Context context;
     private final String dictionary;
@@ -25,32 +27,42 @@ public class SimpleDictionary implements IDictionary {
         return result;
     }
 
+    @Override
+    public String newMethodName(String prefix, JClass owner, String desc, Collection<JClass> classes) {
+        int counter = 0;
+        var result = "";
+
+        do {
+            result = prefix + newName(counter++);
+        } while (owner.isMethodMapped(result, desc, classes));
+
+        return result;
+    }
+
+    @Override
+    public String newFieldName(String prefix, JClass owner, String desc, Collection<JClass> classes) {
+        int counter = 0;
+        var result = "";
+
+        do {
+            result = prefix + newName(counter++);
+        } while (owner.isFieldMapped(result, desc, classes));
+
+        return result;
+    }
+
     private boolean isClassMapped(String name) {
         return context.hasJarClass(name) || Mappings.CLASS.containsNew(name);
     }
 
     @Override
     public String newMethodName(String prefix, JClass owner, String desc) {
-        int counter = 0;
-        var result = "";
-
-        do {
-            result = prefix + newName(counter++);
-        } while (owner.isMethodMapped(result));
-
-        return result;
+        return newMethodName(prefix, owner, desc, owner.tree());
     }
 
     @Override
     public String newFieldName(String prefix, JClass owner, String desc) {
-        int counter = 0;
-        var result = "";
-
-        do {
-            result = prefix + newName(counter++);
-        } while (owner.isFieldMapped(result));
-
-        return result;
+        return newFieldName(prefix, owner, desc, owner.tree());
     }
 
     @Override

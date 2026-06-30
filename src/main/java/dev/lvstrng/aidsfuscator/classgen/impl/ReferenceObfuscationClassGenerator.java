@@ -77,7 +77,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
 
         var clinit = clazz.findOrCreateClinit();
         var clinitBuilder = new InsnBuilder()
-                .label(new LabelNode())
+                .label()
                 ._int(references.size())
                 .anewarray("java/lang/String")
                 .field(PUTSTATIC, clazz.name(), refField.name(), refField.desc());
@@ -108,19 +108,19 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
     private void createDecryptor(JClass clazz, String name) {
         var method = clazz.createMethod(ACC_STATIC, name, "(II)Ljava/lang/String;");
         // ---- LOCALS ----
-        var idxVar = method.allocVar(Type.INT_TYPE);
-        var keyVar = method.allocVar(Type.INT_TYPE);
+        var idxParam = method.allocVar(Type.INT_TYPE);
+        var keyParam = method.allocVar(Type.INT_TYPE);
 
         var sb = method.allocVar();
 
         // ---- CODE ----
         var loop = new LabelNode();
         var builder = new InsnBuilder(method.insns())
-                .label(new LabelNode())
+                .label()
                 .type(NEW, "java/lang/StringBuilder")
                 .dup()
                 .field(GETSTATIC, clazz.name(), refField.name(), refField.desc())
-                ._var(ILOAD, idxVar)
+                ._var(ILOAD, idxParam)
                 .aaload()
                 .method(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "(Ljava/lang/String;)V")
                 ._var(ASTORE, sb)
@@ -132,7 +132,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .swap()
                 .dup_x1()
                 .method(INVOKEVIRTUAL, "java/lang/StringBuilder", "charAt", "(I)C")
-                ._var(ILOAD, keyVar)
+                ._var(ILOAD, keyParam)
                 ._int(16)
                 .iushr()
                 .ixor()
@@ -147,7 +147,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .swap()
                 .method(INVOKEVIRTUAL, "java/lang/StringBuilder", "setCharAt", "(IC)V")
 
-                .label(new LabelNode())
+                .label()
                 ._int(1)
                 .iadd()
                 .dup() // i, i
@@ -168,14 +168,14 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
         var name = context.dictionary().newMethodName(clazz, invokerDesc);
         var method = clazz.createMethod(ACC_PUBLIC | ACC_STATIC, name, invokerDesc);
         var builder = new InsnBuilder(method.insns())
-                .label(new LabelNode()) // var v3 = new MutableCallSite();
+                .label() // var v3 = new MutableCallSite();
                 .type(NEW, "java/lang/invoke/MutableCallSite")
                 .dup()
                 ._var(ALOAD, 2)
                 .method(INVOKESPECIAL, "java/lang/invoke/MutableCallSite", "<init>", "(Ljava/lang/invoke/MethodType;)V")
                 ._var(ASTORE, 3)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 3)
                 .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;")
                 ._const(clazz.type())
@@ -248,7 +248,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
     private void createMiddleInvoker(Context context, JClass clazz, String name, String mainInvokerName) {
         var method = clazz.createMethod(ACC_PRIVATE | ACC_STATIC, name, middleInvokerDesc);
         var builder = new InsnBuilder(method.insns())
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 4)
                 .dup()
                 .arraylength()
@@ -259,7 +259,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .method(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
                 ._var(ISTORE, 5) //index key
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 4)
                 .dup()
                 .arraylength()
@@ -270,7 +270,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .method(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I")
                 ._var(ISTORE, 6) //dec key
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 1)
                 ._var(ALOAD, 0)
                 ._var(ALOAD, 1)
@@ -281,13 +281,13 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .method(INVOKESTATIC, clazz.name(), mainInvokerName, "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/invoke/MutableCallSite;Ljava/lang/String;Ljava/lang/invoke/MethodType;II)Ljava/lang/invoke/MethodHandle;")
                 ._var(ASTORE, 7)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 7)
                 ._var(ALOAD, 3)
                 .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "explicitCastArguments", "(Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;")
                 .method(INVOKEVIRTUAL, "java/lang/invoke/MutableCallSite", "setTarget", "(Ljava/lang/invoke/MethodHandle;)V")
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, 7)
                 ._const(Type.getObjectType("[Ljava/lang/Object;"))
                 ._var(ALOAD, 4)
@@ -303,12 +303,12 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
         var method = clazz.createMethod(ACC_PRIVATE | ACC_STATIC, mainInvokerName, mainInvokerDesc);
         // ---- LOCALS ----
         // -(args)
-        var lookup = method.allocVar();
-        var mutableCallSite = method.allocVar();
-        var name = method.allocVar();
-        var methodType = method.allocVar();
-        var indexXorKey = method.allocVar(Type.INT_TYPE);
-        var decryptionKey = method.allocVar(Type.INT_TYPE);
+        var lookupParam = method.allocVar();
+        var mutableCallSiteParam = method.allocVar();
+        var nameParam = method.allocVar();
+        var methodTypeParam = method.allocVar();
+        var indexXorKeyParam = method.allocVar(Type.INT_TYPE);
+        var decryptionKeyParam = method.allocVar(Type.INT_TYPE);
 
         // -(real locals)
         var indexVar = method.allocVar(Type.INT_TYPE);
@@ -320,40 +320,41 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
         var handle = method.allocVar();
 
         var builder = new InsnBuilder(method.insns())
-                .label(new LabelNode())
-                ._var(ILOAD, indexXorKey)
+                .label()
+                ._var(ILOAD, indexXorKeyParam)
                 ._int(indexKey)
                 .ixor()
                 ._var(ISTORE, indexVar)
+                .insertRandomly(new InsnBuilder()
+                        .label()
+                        ._var(ALOAD, nameParam)
+                        ._int(0)
+                        .method(INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C")
+                        ._var(ISTORE, typeVar)
+                )
 
-                .label(new LabelNode())
-                ._var(ALOAD, name)
-                ._int(0)
-                .method(INVOKEVIRTUAL, "java/lang/String", "charAt", "(I)C")
-                ._var(ISTORE, typeVar)
-
-                .label(new LabelNode()) // var strings = refField[idx].split(":");
+                .label() // var strings = refField[idx].split(":");
                 ._var(ILOAD, indexVar)
-                ._var(ILOAD, decryptionKey)
+                ._var(ILOAD, decryptionKeyParam)
                 .method(INVOKESTATIC, clazz.name(), decryptorName, "(II)Ljava/lang/String;")
                 ._const(":")
                 .method(INVOKEVIRTUAL, "java/lang/String", "split", "(Ljava/lang/String;)[Ljava/lang/String;")
                 ._var(ASTORE, stringsVar)
 
-                .label(new LabelNode()) // var clazz = Class.forName(strings[0]);
+                .label() // var clazz = Class.forName(strings[0]);
                 ._var(ALOAD, stringsVar)
                 ._int(0)
                 .aaload()
                 .method(INVOKESTATIC, "java/lang/Class", "forName", "(Ljava/lang/String;)Ljava/lang/Class;")
                 ._var(ASTORE, classVar)
 
-                .label(new LabelNode()) // var name = strings[1];
+                .label() // var name = strings[1];
                 ._var(ALOAD, stringsVar)
                 ._int(1)
                 .aaload()
                 ._var(ASTORE, nameVar)
 
-                .label(new LabelNode()) // var targetType = MethodType.fromMethodDescriptorString(var2[2], Dispatcher.class.getClassLoader());
+                .label() // var targetType = MethodType.fromMethodDescriptorString(var2[2], Dispatcher.class.getClassLoader());
                 ._var(ALOAD, stringsVar)
                 ._int(2)
                 .aaload()
@@ -362,7 +363,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .method(INVOKESTATIC, "java/lang/invoke/MethodType", "fromMethodDescriptorString", "(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/invoke/MethodType;")
                 ._var(ASTORE, targetType)
 
-                .label(new LabelNode());
+                .label();
 
         // {v, s, vg, sg, vs, ss}
         var virtualLabel = new LabelNode();
@@ -385,7 +386,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                         (int) chars[5], staticFieldLabel
                 )))
                 .label(virtualLabel)
-                ._var(ALOAD, lookup)
+                ._var(ALOAD, lookupParam)
                 ._var(ALOAD, classVar)
                 ._var(ALOAD, nameVar)
                 ._var(ALOAD, targetType)
@@ -394,7 +395,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 ._goto(exit)
 
                 .label(staticLabel)
-                ._var(ALOAD, lookup)
+                ._var(ALOAD, lookupParam)
                 ._var(ALOAD, classVar)
                 ._var(ALOAD, nameVar)
                 ._var(ALOAD, targetType)
@@ -403,7 +404,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 ._goto(exit)
 
                 .label(virtualFieldLabel)
-                ._var(ALOAD, lookup)
+                ._var(ALOAD, lookupParam)
                 ._var(ALOAD, classVar)
                 ._var(ALOAD, nameVar)
                 ._var(ALOAD, targetType)
@@ -422,7 +423,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 ._goto(exit)
 
                 .label(staticFieldLabel)
-                ._var(ALOAD, lookup)
+                ._var(ALOAD, lookupParam)
                 ._var(ALOAD, classVar)
                 ._var(ALOAD, nameVar)
                 ._var(ALOAD, targetType)
@@ -448,7 +449,7 @@ public class ReferenceObfuscationClassGenerator implements IClassGen {
                 .label(exit)
                 ._var(ALOAD, handle)
 
-                ._var(ALOAD, methodType)
+                ._var(ALOAD, methodTypeParam)
                 .method(INVOKEVIRTUAL, "java/lang/invoke/MethodType", "parameterCount", "()I")
                 ._int(2)
                 .isub()

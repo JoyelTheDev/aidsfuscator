@@ -141,7 +141,7 @@ public class JField implements IAccessFlags, IHierarchical<JField>, IAnnotatable
 
     @Override
     public boolean isNonHierarchical() {
-        return isPrivate() || isStatic();
+        return isPrivate();
     }
 
     @Override

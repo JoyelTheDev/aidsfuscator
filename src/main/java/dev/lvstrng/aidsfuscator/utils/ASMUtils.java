@@ -27,6 +27,27 @@ public class ASMUtils implements Opcodes {
 
         return new LdcInsnNode(n);
     }
+    
+    public static long getLong(AbstractInsnNode insn) {
+        if(insn instanceof LdcInsnNode ldc && ldc.cst instanceof Long l)
+            return l;
+
+        if(isLconst(insn))
+            return insn.getOpcode() - LCONST_0;
+
+        throw new IllegalArgumentException("Not long insn: " + insn.getOpcode());
+    }
+
+    public static boolean isLongPush(AbstractInsnNode insn) {
+        if(isLconst(insn))
+            return true;
+
+        return insn instanceof LdcInsnNode ldc && ldc.cst instanceof Long;
+    }
+
+    public static boolean isLconst(AbstractInsnNode insn) {
+        return insn.getOpcode() == LCONST_0 || insn.getOpcode() == LCONST_1;
+    }
 
     public static AbstractInsnNode pushLong(long l) {
         if(l == 0 || l == 1)

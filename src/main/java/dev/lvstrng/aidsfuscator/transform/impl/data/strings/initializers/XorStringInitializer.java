@@ -13,7 +13,7 @@ import org.objectweb.asm.tree.LabelNode;
 import java.util.List;
 
 /**
- * String initializer that uses a loop and a switch to XOR strings.
+ * String initializer that uses a loop and a switch with a set of keys to XOR strings.
  * @author lvstrng
  */
 public class XorStringInitializer implements IStringInitializer {
@@ -61,7 +61,7 @@ public class XorStringInitializer implements IStringInitializer {
         var varLbl = new LabelNode();
 
         var builder = new InsnBuilder()
-                .label(new LabelNode());
+                .label();
         if(clazz.hasSalt()) {
             builder.add(context.properties().add(ASMUtils.pushInt(key ^ clazz.salt().value()), Property.SENSITIVE_CONSTANT, Property.IGNORE_INTEGER))
                     .add(clazz.salt().load())
@@ -71,24 +71,15 @@ public class XorStringInitializer implements IStringInitializer {
         }
 
         builder._var(ISTORE, keyVar)
-                .label(new LabelNode())
-                ._const(theStr)
-                ._var(ASTORE, strVar)
+                .insertRandomly(new InsnBuilder().label()._const(theStr)._var(ASTORE, strVar))
+                .insertRandomly(new InsnBuilder().label()._const(lenStr).method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")._var(ASTORE, lenArrVar))
 
-                .label(new LabelNode())
-                ._const(lenStr)
-                .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
-                ._var(ASTORE, lenArrVar)
-
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, lenArrVar)
                 .arraylength()
                 .anewarray("java/lang/String")
                 ._var(ASTORE, strArrVar)
-
-                .label(new LabelNode())
-                ._int(-1)
-                ._var(ISTORE, statusVar)
+                .insertRandomly(new InsnBuilder().label()._int(-1)._var(ISTORE, statusVar))
                 ._goto(varLbl)
 
                 // loop start
@@ -100,7 +91,7 @@ public class XorStringInitializer implements IStringInitializer {
             builder._var(ILOAD, keyVar).ixor();
         builder._var(ISTORE, lenVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strVar) // str
                 ._var(ILOAD, offsetVar)
                 ._var(ILOAD, offsetVar)
@@ -117,7 +108,7 @@ public class XorStringInitializer implements IStringInitializer {
                 ._var(ILOAD, jVar)
                 .add(context.properties().add(ASMUtils.pushInt(keys.length), Property.IGNORE_INTEGER))
                 .irem()
-                ;
+        ;
 
 
         var end = new LabelNode();
@@ -139,7 +130,7 @@ public class XorStringInitializer implements IStringInitializer {
                 .label(end)
                 ._var(ISTORE, xorKey)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, charsVar)
                 ._var(ILOAD, jVar)
                 .dup2()
@@ -151,16 +142,16 @@ public class XorStringInitializer implements IStringInitializer {
         builder.i2c()
                 .castore()
 
-                .label(new LabelNode())
+                .label()
                 .iinc(jVar, 1)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, jVar)
                 ._var(ALOAD, charsVar)
                 .arraylength()
                 .jump(IF_ICMPLT, innerLoop)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 ._var(ILOAD, iVar)
                 .type(NEW, "java/lang/String")
@@ -170,23 +161,23 @@ public class XorStringInitializer implements IStringInitializer {
                 .method(INVOKEVIRTUAL, "java/lang/String", "intern", "()Ljava/lang/String;")
                 .aastore()
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, offsetVar)
                 ._var(ILOAD, lenVar)
                 .iadd()
                 ._var(ISTORE, offsetVar)
 
-                .label(new LabelNode())
+                .label()
                 .iinc(iVar, 1)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, iVar)
                 ._var(ALOAD, lenArrVar)
                 .arraylength()
                 .jump(IF_ICMPLT, loop)
 
                 // loop end
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, statusVar)
 
@@ -194,23 +185,23 @@ public class XorStringInitializer implements IStringInitializer {
                 ._int(0)
                 ._var(ISTORE, iVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, offsetVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, lenVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, statusVar)
                 .jump(IFNE, loop)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 .field(PUTSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, strArrVar)
                 .arraylength()
                 .anewarray("java/lang/Object")

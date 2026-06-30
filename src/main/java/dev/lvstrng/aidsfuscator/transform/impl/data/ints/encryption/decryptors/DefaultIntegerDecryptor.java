@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.decryptors;
+package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.decryptors;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.polymorph.impl.AddMask;
 import dev.lvstrng.aidsfuscator.polymorph.impl.SubMask;
 import dev.lvstrng.aidsfuscator.polymorph.impl.XorMask;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.IIntegerDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.IIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -16,7 +16,6 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.List;
@@ -57,9 +56,9 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
         var value = method.allocVar(Type.INT_TYPE);
 
         new InsnBuilder(method.insns())
-                .label(new LabelNode())
+                .label()
 
-                .label(new LabelNode())
+                .label()
                 .field(GETSTATIC, clazz.name(), fieldName, "[I")
                 ._var(ILOAD, idxVal)
                 ._int(idxXor)

@@ -4,6 +4,8 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 
+import java.util.Collection;
+
 /**
  * Dictionary that does aggressive renaming. {@code revert} methods do not have implementations (shouldn't have one either way).
  * @author lvstrng
@@ -30,27 +32,37 @@ public class AggressiveDictionary implements IDictionary {
     }
 
     @Override
-    public String newMethodName(String prefix, JClass owner, String desc) {
+    public String newMethodName(String prefix, JClass owner, String desc, Collection<JClass> classes) {
         int counter = 0;
         var result = "";
 
         do {
             result = prefix + newName(counter++);
-        } while (owner.isMethodMappedExact(result, desc));
+        } while (owner.isMethodMappedExact(result, desc, classes));
 
         return result;
     }
 
     @Override
-    public String newFieldName(String prefix, JClass owner, String desc) {
+    public String newFieldName(String prefix, JClass owner, String desc, Collection<JClass> classes) {
         int counter = 0;
         var result = "";
 
         do {
             result = prefix + newName(counter++);
-        } while (owner.isFieldMappedExact(result, desc));
+        } while (owner.isFieldMappedExact(result, desc, classes));
 
         return result;
+    }
+
+    @Override
+    public String newMethodName(String prefix, JClass owner, String desc) {
+        return newMethodName(prefix, owner, desc, owner.tree());
+    }
+
+    @Override
+    public String newFieldName(String prefix, JClass owner, String desc) {
+        return newFieldName(prefix, owner, desc, owner.tree());
     }
 
     @Override

@@ -26,7 +26,7 @@ import java.util.function.Supplier;
  * A string decryptor that changes arguments and body each time a new instance is being created. Uses the polymorphism engine/stack to achieve this.
  * @author lvstrng
  */
-public class PolymorphicStringDecryptor implements IStringDecryptor {
+public class Poly1StringDecryptor implements IStringDecryptor {
     private String name;
     private final int idxXor, traceXor;
     private final IntPolymorphStack stack;
@@ -34,7 +34,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
             Arg.INDEX, Arg.KEY1, Arg.KEY2)
     );
 
-    public PolymorphicStringDecryptor() {
+    public Poly1StringDecryptor() {
         this.idxXor = random.nextInt(Character.MAX_VALUE);
         this.traceXor = random.nextInt(Short.MAX_VALUE);
 
@@ -86,31 +86,31 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
         var exitLabel = new LabelNode();
 
         var body = new InsnBuilder(method.insns())
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, idxValVar)
                 .add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER))
                 .ixor()
                 ._var(ISTORE, idxVar)
 
-                .label(new LabelNode())
+                .label()
                 .field(GETSTATIC, clazz.name(), fieldName, "[Ljava/lang/String;")
                 ._var(ILOAD, idxVar)
                 .aaload()
                 .method(INVOKEVIRTUAL, "java/lang/String", "toCharArray", "()[C")
                 ._var(ASTORE, charArrVar)
 
-                .label(new LabelNode())
+                .label()
                 .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
                 ._var(ILOAD, idxVar)
                 .aaload()
                 .type(CHECKCAST, "[Ljava/lang/StackTraceElement;")
                 ._var(ASTORE, cachedTraceVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, cachedTraceVar)
                 .jump(IFNULL, newTraceLabel)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, cachedTraceVar)
                 ._var(ASTORE, stackElementsVar)
                 ._goto(exitLabel)
@@ -122,7 +122,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .method(INVOKEVIRTUAL, "java/lang/Throwable", "getStackTrace", "()[Ljava/lang/StackTraceElement;")
                 ._var(ASTORE, stackElementsVar)
 
-                .label(new LabelNode())
+                .label()
                 .field(GETSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;")
                 ._var(ILOAD, idxVar)
                 ._var(ALOAD, stackElementsVar)
@@ -133,7 +133,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .aaload()
                 ._var(ASTORE, elementVar)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ALOAD, elementVar)
                 .method(INVOKEVIRTUAL, "java/lang/StackTraceElement", "getClassName", "()Ljava/lang/String;")
                 .method(INVOKEVIRTUAL, "java/lang/String", "hashCode", "()I")
@@ -147,7 +147,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .ixor()
                 ._var(ISTORE, hashVar)
 
-                .label(new LabelNode())
+                .label()
                 ._int(0)
                 ._var(ISTORE, iVar)
 
@@ -171,16 +171,16 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .i2c()
                 .castore()
 
-                .label(new LabelNode())
+                .label()
                 .iinc(iVar, 1)
 
-                .label(new LabelNode())
+                .label()
                 ._var(ILOAD, iVar)
                 ._var(ALOAD, charArrVar)
                 .arraylength()
                 .jump(IF_ICMPLT, loop)
 
-                .label(new LabelNode())
+                .label()
                 .type(NEW, "java/lang/String")
                 .dup()
                 ._var(ALOAD, charArrVar)
@@ -188,7 +188,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
                 .method(INVOKEVIRTUAL, "java/lang/String", "intern", "()Ljava/lang/String;")
                 ._areturn()
 
-                ;
+        ;
     }
 
     @Override
@@ -251,7 +251,7 @@ public class PolymorphicStringDecryptor implements IStringDecryptor {
     }
 
     private enum Arg {
-        INDEX("CCCI"), KEY1("CCSSSI"), KEY2("I");
+        INDEX("CCI"), KEY1("CCSSI"), KEY2("I");
         private final String possibleTypes;
         private String type;
 

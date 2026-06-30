@@ -51,18 +51,24 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         core.fields.forEach(this::add);
     }
 
+    public boolean isMethodMappedExact(String name, String desc) {
+        return isMethodMappedExact(name, desc, tree());
+    }
+
     /**
      * Scans the class tree to see if theres a method with the specified name AND descriptor
      * @param name name to check for
      * @param desc descriptor to check for
      */
-    public boolean isMethodMappedExact(String name, String desc) {
-        for(var member : tree()) {
+    public boolean isMethodMappedExact(String name, String desc, Collection<JClass> classes) {
+        if(methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
+            return true;
+
+        for(var member : classes) {
             if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
-
-        return methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc));
+        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
     }
 
     /**
@@ -71,41 +77,62 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
      * @param desc descriptor to check for
      */
     public boolean isFieldMappedExact(String name, String desc) {
-        if(tree().stream().anyMatch(e -> e.name().equals("java/io/Serializable"))) // serializable check
-            return isFieldMapped(name);
+        return isFieldMappedExact(name, desc, tree());
+    }
 
-        for(var member : tree()) {
+    public boolean isFieldMappedExact(String name, String desc, Collection<JClass> classes) {
+        if(tree().stream().anyMatch(e -> e.name().equals("java/io/Serializable"))) // serializable check
+            return isFieldMapped(name, desc, classes);
+
+        if(fields().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
+            return true;
+
+        for(var member : classes) {
             if(member.fields().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
 
-        return fields().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc));
+        return fields().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
     }
 
     /**
      * Scans the class tree to see if theres a method with the specified name (no descriptor checking)
      * @param name name to check for
      */
-    public boolean isMethodMapped(String name) {
-        for(var member : tree()) {
+    public boolean isMethodMapped(String name, String desc) {
+        return isMethodMapped(name, desc, tree());
+    }
+
+    public boolean isMethodMapped(String name, String desc, Collection<JClass> classes) {
+        if(methods().stream().anyMatch(e -> e.mappedName().equals(name)))
+            return true;
+
+        for(var member : classes) {
             if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name)))
                 return true;
         }
 
-        return methods().stream().anyMatch(e -> e.mappedName().equals(name));
+        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findFirst().isPresent();
+    }
+
+    public boolean isFieldMapped(String name, String desc) {
+        return isFieldMapped(name, desc, tree());
     }
 
     /**
      * Scans the class tree to see if theres a field with the specified name (no descriptor checking)
      * @param name name to check for
      */
-    public boolean isFieldMapped(String name) {
-        for(var member : tree()) {
+    public boolean isFieldMapped(String name, String desc, Collection<JClass> classes) {
+        if(fields().stream().anyMatch(e -> e.mappedName().equals(name)))
+            return true;
+
+        for(var member : classes) {
             if(member.fields().stream().anyMatch(e -> e.mappedName().equals(name)))
                 return true;
         }
 
-        return fields().stream().anyMatch(e -> e.mappedName().equals(name));
+        return false;
     }
 
     public boolean isMixin() {
@@ -205,15 +232,11 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         if(method.owner().isLibrary())
             return true;
 
-        if(method.isNonHierarchical())
-            return false;
-
         for(var member : tree()) {
             if(!member.isLibrary())
                 continue;
 
             var found = member.methods.stream()
-                    .filter(e -> !e.isNonHierarchical())
                     .filter(e -> e.name().equals(method.name()))
                     .anyMatch(e -> e.desc().equals(method.desc()));
 
@@ -228,15 +251,11 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         if(field.owner().isLibrary())
             return true;
 
-        if(field.isNonHierarchical())
-            return false;
-
         for(var parent : tree()) {
             if(!parent.isLibrary())
                 continue;
 
             var found = parent.fields.stream()
-                    .filter(e -> !e.isNonHierarchical())
                     .filter(e -> e.name().equals(field.name()))
                     .filter(e -> e.desc().equals(field.desc())).findAny();
 
@@ -262,6 +281,8 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean hasMethodInTree(Context context, JMethod method) {
+        if(method.owner().name().endsWith("StringMap") && (method.name().equals("isEmpty") || method.name().equals("isFrozen")))
+            return hasMethodInTree(context, method.name(), method.desc());
         return hasMethodInTree(context, method.name(), method.desc());
     }
 
@@ -282,7 +303,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            method = parent.findMethod(name, desc, e -> !e.isNonHierarchical()).orElse(null);
+            method = parent.findMethod(name, desc).orElse(null);
             if(method == null) continue;
 
             return method;
@@ -300,7 +321,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             context.hierarchy().build(this);
 
         for(var parent : parents) {
-            field = parent.findField(name, desc, e -> !e.isNonHierarchical()).orElse(null);
+            field = parent.findField(name, desc).orElse(null);
             if(field == null) continue;
 
             return field;

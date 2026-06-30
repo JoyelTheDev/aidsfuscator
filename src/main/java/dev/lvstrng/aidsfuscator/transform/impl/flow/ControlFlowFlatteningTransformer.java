@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
+import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import dev.lvstrng.aidsfuscator.utils.SwitchUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
 /**
@@ -26,6 +28,10 @@ import java.util.function.BiPredicate;
  */
 public class ControlFlowFlatteningTransformer extends Transformer {
     private final Setting<Boolean> useSalt = setting("useSalt", true);
+    private final Setting<Boolean> obfuscateValues = setting("obfuscateValues", true);
+
+    private final BiFunction<Integer, Integer, Integer> or = (v1, v2) -> v1 | v2;
+    private final BiFunction<Integer, Integer, Integer> and = (v1, v2) -> v1 & v2;
 
     private final BiPredicate<ControlFlowGraph, Block> goodBlock = (graph, block) -> {
         if(block.inTrapHandler())   return false;
@@ -85,13 +91,15 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                     for(var block : group) {
                         var list = new InsnList();
                         var lbl = new LabelNode();
-                        var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE);
+                        var useOr = random.nextBoolean();
+                        var func = useOr ? or : and;
+                        var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE, func);
 
-                        if(useSalt.value() && method.canSalt(block)) {
+                        if (useSalt.value() && method.canSalt(block)) {
                             list.add(method.salt().load());
                             list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
-                            list.add(new InsnNode(IAND));
-                            key = method.salt().value() & key;
+                            list.add(new InsnNode(useOr ? IOR : IAND));
+                            key = func.apply(method.salt().value(), key);
                         } else {
                             list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                         }
@@ -102,6 +110,26 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                         cases.put(lbl, key);
                         method.insns().insert(block.label(), list);
+
+                        if(!obfuscateValues.value())
+                            continue;
+
+                        for(var insn : block.insns()) {
+                            if(!ASMUtils.isIntPush(insn))
+                                continue;
+
+                            if(ASMUtils.isIconst(insn))
+                                continue;
+
+                            var num = ASMUtils.getInt(insn);
+                            method.insns().insertBefore(insn, new InsnBuilder()
+                                    ._int(num ^ key)
+                                    ._var(ILOAD, flattenerLocal)
+                                    .ixor()
+                                    .result()
+                            );
+                            method.insns().remove(insn);
+                        }
                     }
 
                     var list = new InsnList();
@@ -117,11 +145,11 @@ public class ControlFlowFlatteningTransformer extends Transformer {
         }
     }
 
-    private int uniqueInt(Map<LabelNode, Integer> cases, int mask) {
+    private int uniqueInt(Map<LabelNode, Integer> cases, int mask, BiFunction<Integer, Integer, Integer> func) {
         int res;
         do {
             res = random.nextInt();
-        } while (cases.containsValue(res & mask));
+        } while (cases.containsValue(func.apply(res, mask)));
 
         return res;
     }

@@ -7,8 +7,9 @@ import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultStringDecryptor;
-import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.PolymorphicStringDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.Poly1StringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.DefaultStringInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.SecondStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.XorStringInitializer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -23,12 +24,13 @@ public class StringEncryptTransformer extends Transformer {
 
     private static final List<Supplier<IStringInitializer>> initializers = List.of(
             DefaultStringInitializer::new,
+            SecondStringInitializer::new,
             XorStringInitializer::new
     );
 
     private static final List<Supplier<IStringDecryptor>> decryptors = List.of(
             DefaultStringDecryptor::new,
-            PolymorphicStringDecryptor::new
+            Poly1StringDecryptor::new
     );
 
     public StringEncryptTransformer() {

@@ -6,9 +6,12 @@ import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.tree.*;
 
+import java.util.Random;
+
 import static org.objectweb.asm.Opcodes.*;
 
 public class InsnBuilder {
+    private final Random random = new Random();
     private final InsnList list;
 
     public InsnBuilder(InsnList list) {
@@ -25,6 +28,26 @@ public class InsnBuilder {
 
     public InsnList result() {
         return list;
+    }
+
+    public InsnBuilder insertRandomly(InsnList toAdd) {
+        var randomInsn = list.get(random.nextInt(list.size()));
+        list.insert(randomInsn, toAdd);
+        return this;
+    }
+
+    public InsnBuilder insertBeforeRandomly(InsnList toAdd) {
+        var randomInsn = list.get(random.nextInt(list.size()));
+        list.insertBefore(randomInsn, toAdd);
+        return this;
+    }
+
+    public InsnBuilder insertRandomly(InsnBuilder builder) {
+        return insertRandomly(builder.result());
+    }
+
+    public InsnBuilder insertBeforeRandomly(InsnBuilder builder) {
+        return insertBeforeRandomly(builder.result());
     }
 
     public InsnBuilder add(AbstractInsnNode node) {
@@ -63,6 +86,11 @@ public class InsnBuilder {
 
     public InsnBuilder label(LabelNode label) {
         list.add(label);
+        return this;
+    }
+
+    public InsnBuilder label() {
+        list.add(new LabelNode());
         return this;
     }
 
