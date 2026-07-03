@@ -49,6 +49,9 @@ public class Block {
     }
 
     public boolean isInitialized(int local) {
+        if(start == null)
+            return false;
+
         return !start.getLocal(local).isUninitialized();
     }
 

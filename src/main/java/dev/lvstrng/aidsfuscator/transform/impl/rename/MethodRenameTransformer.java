@@ -44,9 +44,6 @@ public class MethodRenameTransformer extends Transformer {
             if(skipHierarchy(method, impactedClasses))
                 continue;
 
-            if(method.name().equals("isEmpty") || method.name().equals("isFrozen")) {
-                System.out.println();
-            }
             var name = findOrGenerateName(context, clazz, impactedClasses, method);
             clazz.methods().stream()
                     .filter(e -> e.mappedName().equals(name))

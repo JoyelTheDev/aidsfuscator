@@ -281,8 +281,6 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
     }
 
     public boolean hasMethodInTree(Context context, JMethod method) {
-        if(method.owner().name().endsWith("StringMap") && (method.name().equals("isEmpty") || method.name().equals("isFrozen")))
-            return hasMethodInTree(context, method.name(), method.desc());
         return hasMethodInTree(context, method.name(), method.desc());
     }
 

@@ -31,9 +31,11 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 ._const("ISO-8859-1").addProps(context, Property.IGNORE_STRING)
                 .method(INVOKEVIRTUAL, "java/lang/String", "getBytes", "(Ljava/lang/String;)[B")
                 .insertRandomly(new InsnBuilder()
+                        .label()
                         ._int(numbers.size())
                         .newarray(T_INT)
                         .field(PUTSTATIC, clazz.name(), fieldName, "[I")
+                        .label()
                 )
 
                 .label(loopLbl) //idx, ptr, byte[]
@@ -42,6 +44,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .dup_x1() // idx, byte[], ptr, byte[], ptr
 
                 // load bytes
+                .label()
                 .baload() // idx, byte[], ptr, byte1
                 ._int(0xFF)
                 .iand()
@@ -50,6 +53,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .dup_x2()
                 .pop() // idx, byte1, byte[], ptr
 
+                .label()
                 .dup2()
                 ._int(1)
                 .iadd()
@@ -61,6 +65,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .dup_x2()
                 .pop() // idx, byte1, byte2, byte[], ptr
 
+                .label()
                 .dup2() // idx, byte1, byte2, byte[], ptr, byte[], ptr
                 ._int(2)
                 .iadd()
@@ -72,6 +77,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .dup_x2()
                 .pop() // idx, byte1, byte2, byte3, byte[], ptr
 
+                .label()
                 .dup2() // idx, byte1, byte2, byte3, byte[], ptr, byte[], ptr
                 ._int(3)
                 .iadd()
@@ -82,6 +88,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .pop() // idx, byte1, byte2, byte3, byte4, byte[], ptr
 
                 // OR gate all of them together
+                .label()
                 .dup2_x2() // idx, byte1, byte2, byte[], ptr, byte3, byte4, byte[], ptr
                 .pop2()
                 .ior() // idx, byte1, byte2, byte[], ptr, byte3_4
@@ -100,14 +107,15 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .dup_x2()
                 .pop() // ptr, byte[], int, idx
                 .dup_x1()
-                .swap(); // ptr, byte[], idx, idx, int
+                .swap() // ptr, byte[], idx, idx, int
+                .label();
         if(clazz.hasSalt()) {
             builder._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER)
                     .add(clazz.salt().load())
-                    .ixor()
+                    .ixor().label()
             ;
         } else {
-            builder._int(key);
+            builder._int(key).label();
         }
 
         builder
@@ -126,7 +134,9 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .swap()
                 .dup2()
                 .arraylength()
+                .label()
                 .jump(IF_ICMPLT, loopLbl)
+                .label()
                 .pop2()
                 .pop()
         ;

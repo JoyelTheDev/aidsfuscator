@@ -29,7 +29,6 @@ public class FlowIntsTransformer extends Transformer {
 
     public FlowIntsTransformer() {
         super("Flow Ints", "flowInts");
-        setExperimental();
     }
 
     @Override
@@ -161,6 +160,9 @@ public class FlowIntsTransformer extends Transformer {
                     if (ASMUtils.isIconst(insn))
                         continue;
 
+                    if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
+                        continue;
+
                     var num = ASMUtils.getInt(insn);
 
                     list = new InsnList();
@@ -172,6 +174,9 @@ public class FlowIntsTransformer extends Transformer {
                     method.insns().remove(insn);
                 } else if(ASMUtils.isLongPush(insn) && obfuscateLongs.value()) {
                     if(ASMUtils.isLconst(insn))
+                        continue;
+
+                    if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
                         continue;
 
                     var num = ASMUtils.getLong(insn);

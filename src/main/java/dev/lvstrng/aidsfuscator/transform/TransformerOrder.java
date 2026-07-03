@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.transform;
 
 import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.IntegerEncryptTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.ints.flowInts.FlowIntsTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
@@ -41,6 +42,7 @@ public final class TransformerOrder {
             new ConstantsFixTransformer(),
             new IntegerEncryptTransformer(),
             new StringEncryptTransformer(),
+            new FlowIntsTransformer(),
 
             new ControlFlowFlatteningTransformer(),
             new ControlFlowShufflingTransformer(),

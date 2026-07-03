@@ -123,8 +123,8 @@ public class ControlFlowFlatteningTransformer extends Transformer {
 
                             var num = ASMUtils.getInt(insn);
                             method.insns().insertBefore(insn, new InsnBuilder()
-                                    ._int(num ^ key)
                                     ._var(ILOAD, flattenerLocal)
+                                    ._int(num ^ key)
                                     .ixor()
                                     .result()
                             );
