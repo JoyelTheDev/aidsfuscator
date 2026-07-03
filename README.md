@@ -1,10 +1,10 @@
 # Aidsfuscator v2.x
-
-## About
 Aidsfuscator is a java bytecode obfuscator that aims to become one of, if not the best free obfuscators. 
 <br>
   Join the [discord server](https://discord.gg/4JGANqEZsK)!
 </br>
+
+### IF YOU'RE PLANNING TO CONTRIBUTE, SCROLL DOWN AND READ THE README!!!
 
 ## Features
 - Trimming
@@ -174,3 +174,14 @@ Reference Obfuscation Inclusions is a file that specifies reference obfuscation 
   `*/pkg/*.test *`
   </br>
 Keep in mind: for fields, separate return type from name with a space.
+
+## Contributing
+Since I've received some pull requests that don't live up to my expectations, I wan't to avoid wasting other peoples' time, so:
+When contributing, I expect bug fixes rather than new features. I can decide on features myself: what's good and what's not.
+
+<div>
+  If you're thinking about adding a feature, please contact me on discord `lvstrng` to talk it out. Or create an issue as a suggestion, stating what you want to see getting added into the obfuscator. One good example was: instead of forking the repo, writing the transformer and creating a pull request a guy made an issue as a suggestion, stating that they want to see Zelix-style flow in the obfuscator. I told the user this is probably not needed, because the current control flow obfuscation already does its magic. This user avoided wasting tons of time on something that I wouldn't agree on either way.
+</div>
+
+### TL;DR
+If you're thinking about adding new features to obfuscator, contact me on discord or make a suggestion. Otherwise, please only push bug fixes.
