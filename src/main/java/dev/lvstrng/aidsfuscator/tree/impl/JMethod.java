@@ -38,7 +38,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     private String mappedName;
 
     private Set<JMethod> parents, children;
-    private AbstractInsnNode safeInsn;
+    private List<AbstractInsnNode> unsafeInstructions;
 
     public JMethod(MethodNode core) {
         this.properties = new PropertyContainer();
@@ -46,26 +46,33 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
         this.originalName = core.name;
         this.originalDesc = core.desc;
+        this.unsafeInstructions = new ArrayList<>();
         this.seed = random.nextInt();
 
         this.setCore(core);
     }
 
     public void insertSafe(InsnList list) {
-        if(safeInsn == null) {
+        if(unsafeInstructions.isEmpty())
             insns().insert(list);
-        } else {
-            insns().insert(safeInsn, list);
-        }
+        else insns().insert(unsafeInstructions.getLast(), list);
     }
 
-    public AbstractInsnNode safeInsn() {
-        return safeInsn;
+    public void reinitUnsafeInstructions() {
+        unsafeInstructions.forEach(insns()::remove);
+        unsafeInstructions.reversed().forEach(insns()::insert);
     }
 
-    public AbstractInsnNode setSafeInsn(AbstractInsnNode insn) {
-        this.safeInsn = insn;
-        return safeInsn;
+    public void addUnsafeInstructions(InsnList list) {
+        list.forEach(unsafeInstructions::add);
+    }
+
+    public void clearUnsafeInstructions() {
+        unsafeInstructions.clear();
+    }
+
+    public boolean isUnsafe(AbstractInsnNode insn) {
+        return unsafeInstructions.contains(insn);
     }
 
     public String originalName() {

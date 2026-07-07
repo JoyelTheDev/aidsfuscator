@@ -80,6 +80,7 @@ public class StringEncryptTransformer extends Transformer {
                     method.insns().remove(ldc);
                     markChange();
                 }
+                method.reinitUnsafeInstructions();
             }
 
             if(strings.isEmpty()) {

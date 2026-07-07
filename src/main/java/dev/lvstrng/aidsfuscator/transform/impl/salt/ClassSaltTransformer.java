@@ -111,6 +111,7 @@ public class ClassSaltTransformer extends Transformer {
                 ._var(ISTORE, saltLocal);
 
         method.makeSalt(saltValue, saltLocal);
+        method.addUnsafeInstructions(list.result());
         method.insns().insert(list.result());
     }
 }

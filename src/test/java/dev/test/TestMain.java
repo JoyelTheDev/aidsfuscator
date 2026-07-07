@@ -33,11 +33,26 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
+                new TrimTransformer(),
+
+                new FieldRenameTransformer(),
+                new MethodRenameTransformer(),
+                new ClassRenameTransformer(),
+
                 new LocalVariableNameTransformer(),
                 new LineNumberTransformer(),
                 new MethodSaltTransformer(),
                 new ClassSaltTransformer(),
-                new FlowIntsTransformer()
+
+                new ConstantsFixTransformer(),
+                new IntegerEncryptTransformer(),
+                new StringEncryptTransformer(),
+                new FlowIntsTransformer(),
+
+                new ControlFlowFlatteningTransformer(),
+                new ControlFlowShufflingTransformer(),
+                new DeadCodeCleanTransformer(),
+                new ReferenceObfuscationTransformer()
         );
     }
 }

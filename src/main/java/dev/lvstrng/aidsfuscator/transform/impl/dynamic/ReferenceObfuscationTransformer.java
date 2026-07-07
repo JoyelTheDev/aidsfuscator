@@ -56,6 +56,9 @@ public class ReferenceObfuscationTransformer extends Transformer {
                     if(!frame.isInitThis())
                         continue;
 
+                    if(method.isUnsafe(insn))
+                        continue;
+
                     switch (insn) {
                         case MethodInsnNode call -> {
                             if(call.owner.startsWith("["))
@@ -91,7 +94,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
-                            if(method.canSalt(frame)) {
+                            if(method.hasSalt()) {
                                 var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
@@ -163,7 +166,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             int idxXor = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(idxXor), Property.IGNORE_INTEGER));
-                            if(method.canSalt(frame)) {
+                            if(method.hasSalt()) {
                                 var mask = method.seed();
                                 var masked = method.salt().value() & mask;
 
@@ -184,6 +187,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
                         default -> {}
                     }
                 }
+                method.reinitUnsafeInstructions();
             }
         }
 

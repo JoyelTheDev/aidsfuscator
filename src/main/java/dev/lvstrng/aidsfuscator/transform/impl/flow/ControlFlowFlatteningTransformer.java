@@ -27,7 +27,6 @@ import java.util.function.BiPredicate;
  * It can also use a methods salt (if present) to lightly obfuscate the switch values a little.
  */
 public class ControlFlowFlatteningTransformer extends Transformer {
-    private final Setting<Boolean> useSalt = setting("useSalt", true);
     private final Setting<Boolean> obfuscateValues = setting("obfuscateValues", true);
 
     private final BiFunction<Integer, Integer, Integer> or = (v1, v2) -> v1 | v2;
@@ -38,11 +37,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
         if(block.inTrapEnd())       return false;
         if(block.expectsValue())    return false;
 
-        if(!block.start().isInitThis())
-            return false;
-
-        var method = graph.method();
-        return (!useSalt.value() || !method.hasSalt()) || method.canSalt(block);
+        return block.start().isInitThis();
     };
 
     public ControlFlowFlatteningTransformer() {
@@ -95,7 +90,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                         var func = useOr ? or : and;
                         var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE, func);
 
-                        if (useSalt.value() && method.canSalt(block)) {
+                        if (method.hasSalt()) {
                             list.add(method.salt().load());
                             list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
                             list.add(new InsnNode(useOr ? IOR : IAND));
@@ -141,6 +136,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 }
 
                 markChange();
+                method.reinitUnsafeInstructions();
             }
         }
     }

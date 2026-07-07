@@ -209,7 +209,7 @@ public class Poly1StringDecryptor implements IStringDecryptor {
                 case INDEX -> list.add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
                 case KEY1 -> list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
                 case KEY2 -> {
-                    if(method.canSalt(frames.get(callSite))) {
+                    if(method.hasSalt()) {
                         var mask = method.seed();
                         var masked = method.salt().value() & mask;
 

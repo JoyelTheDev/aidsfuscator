@@ -69,6 +69,7 @@ public class IntegerEncryptTransformer extends Transformer {
                     method.insns().remove(insn);
                     markChange();
                 }
+                method.reinitUnsafeInstructions();
             }
 
             if(numbers.isEmpty()) {

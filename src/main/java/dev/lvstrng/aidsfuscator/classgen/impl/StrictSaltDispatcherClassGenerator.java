@@ -74,7 +74,7 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
             }
 
             var clinit = c.findOrCreateClinit();
-            clinit.setSafeInsn(list.result().getLast());
+            clinit.addUnsafeInstructions(list.result());
             clinit.insns().insert(list.result());
         }
     }

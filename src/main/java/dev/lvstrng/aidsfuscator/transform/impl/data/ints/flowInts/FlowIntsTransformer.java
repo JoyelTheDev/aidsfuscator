@@ -102,10 +102,6 @@ public class FlowIntsTransformer extends Transformer {
             blockValues.put(block, rootValues.get(root));
         }
 
-        Block safeBlock = null;
-        if(method.safeInsn() != null)
-            safeBlock = graph.blockContaining(method.safeInsn());
-
         for(var block : graph.blocks()) {
             var list = new InsnList();
             var predecessorValue = blockValues.get(block.predecessors().stream().findFirst().orElse(null));
@@ -113,23 +109,9 @@ public class FlowIntsTransformer extends Transformer {
             if(value == null)
                 continue;
 
-            if(block == safeBlock && method.hasSalt()) {
-                var masked = method.salt().value() | method.seed();
-                var xor = masked ^ value;
-
-                list.add(method.salt().load());
-                list.add(context.properties().add(ASMUtils.pushInt(method.seed()), Property.IGNORE_INTEGER));
-                list.add(new InsnNode(IOR));
-                list.add(ASMUtils.pushInt(xor));
-                list.add(new InsnNode(IXOR));
-                list.add(new VarInsnNode(ISTORE, variable));
-
-                method.insns().insert(method.safeInsn(), list);
-            } else if(!Objects.equals(value, predecessorValue)) {
+            if(!Objects.equals(value, predecessorValue)) {
                 if (predecessorValue == null) {
-                    if(!method.canSalt(block)) {
-                        list.add(context.properties().add(ASMUtils.pushInt(value), Property.SENSITIVE_CONSTANT));
-                    } else {
+                    if(method.hasSalt()) {
                         var masked = method.salt().value() | method.seed();
                         var xor = masked ^ value;
 
@@ -138,6 +120,8 @@ public class FlowIntsTransformer extends Transformer {
                         list.add(new InsnNode(IOR));
                         list.add(ASMUtils.pushInt(xor));
                         list.add(new InsnNode(IXOR));
+                    } else {
+                        list.add(context.properties().add(ASMUtils.pushInt(value), Property.SENSITIVE_CONSTANT));
                     }
                     list.add(new VarInsnNode(ISTORE, variable));
                 } else {
@@ -152,10 +136,10 @@ public class FlowIntsTransformer extends Transformer {
                 list.add(new LabelNode());
             method.insns().insert(block.label(), list);
 
-            if(block == safeBlock)
-                continue;
-
             for(var insn : block.insns()) {
+                if(method.isUnsafe(insn))
+                    continue;
+
                 if(ASMUtils.isIntPush(insn)) {
                     if (ASMUtils.isIconst(insn))
                         continue;
@@ -217,5 +201,7 @@ public class FlowIntsTransformer extends Transformer {
                 }
             }
         }
+
+        method.reinitUnsafeInstructions();
     }
 }
