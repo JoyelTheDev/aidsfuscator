@@ -27,7 +27,7 @@ public class FlowIntsTransformer extends Transformer {
     private final Setting<Boolean> obfuscateLongs = setting("obfuscateLongs", true);
     private final Setting<Boolean> separateBlocks = setting("separateBlocks", true);
 
-    public FlowIntsTransformer() {
+    public  FlowIntsTransformer() {
         super("Flow Ints", "flowInts");
     }
 
@@ -164,10 +164,13 @@ public class FlowIntsTransformer extends Transformer {
                         continue;
 
                     var num = ASMUtils.getInt(insn);
+                    var masked = value | method.seed();
 
                     list = new InsnList();
                     list.add(new VarInsnNode(ILOAD, variable));
-                    list.add(ASMUtils.pushInt(num ^ value));
+                    list.add(ASMUtils.pushInt(method.seed()));
+                    list.add(new InsnNode(IOR));
+                    list.add(ASMUtils.pushInt(masked ^ num));
                     list.add(new InsnNode(IXOR));
 
                     method.insns().insertBefore(insn, list);

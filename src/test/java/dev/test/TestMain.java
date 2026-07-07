@@ -18,14 +18,13 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.test.transform.DuplicateMethodCheckTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("snake.jar")
-                .libs("snakelibs")
+                .in("in.jar")
+                .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
 
@@ -34,8 +33,11 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                new MethodRenameTransformer(),
-                new DuplicateMethodCheckTransformer()
+                new LocalVariableNameTransformer(),
+                new LineNumberTransformer(),
+                new MethodSaltTransformer(),
+                new ClassSaltTransformer(),
+                new FlowIntsTransformer()
         );
     }
 }
