@@ -5,6 +5,7 @@ import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.pipeline.IProcessor;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.utils.Utils;
+import org.objectweb.asm.MethodTooLargeException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,18 +25,23 @@ public class ArtifactExportProcessor implements IProcessor {
             classes.addAll(context.artificials().values());
 
             for(var clazz : classes) {
-                var writer = new HierarchyClassWriter(context);
-
                 try {
-                    clazz.core().accept(writer);
-                } catch (Exception e) {
-                    Logger.error("Error writing class %s", clazz.name());
-                    e.printStackTrace();
-                }
+                    var writer = new HierarchyClassWriter(context);
 
-                jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
-                jos.write(writer.toByteArray());
-                jos.closeEntry();
+                    try {
+                        clazz.core().accept(writer);
+                    } catch (Exception e) {
+                        Logger.error("Error writing class %s", clazz.name());
+                        e.printStackTrace();
+                    }
+
+                    jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
+                    jos.write(writer.toByteArray());
+                    jos.closeEntry();
+                } catch (MethodTooLargeException e) {
+                    e.printStackTrace();
+                    System.err.printf("Method size: %s%n", e.getCodeSize());
+                }
             }
 
             context.resourceHandler().handle(jos);

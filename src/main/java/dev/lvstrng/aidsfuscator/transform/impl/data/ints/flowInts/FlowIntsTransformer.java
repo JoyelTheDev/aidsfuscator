@@ -41,6 +41,9 @@ public class FlowIntsTransformer extends Transformer {
                 if(Exclusions.FLOW_INTS.excluded(method))
                     continue;
 
+                if(ASMUtils.codeSize(method) > 20000)
+                    continue;
+
                 modify(context, method);
                 markChange();
             }

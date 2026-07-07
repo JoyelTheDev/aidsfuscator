@@ -131,5 +131,6 @@ public class DefaultIntegerInitializer implements IIntegerInitializer {
                 .jump(IF_ICMPLT, loop);
 
         clinit.insertSafe(builder.result());
+        clinit.reinitUnsafeInstructions();
     }
 }

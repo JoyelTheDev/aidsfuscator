@@ -140,5 +140,6 @@ public class DefaultStringInitializer implements IStringInitializer {
                 .field(PUTSTATIC, clazz.name(), cacheName, "[Ljava/lang/Object;");
 
         method.insertSafe(builder.result());
+        method.reinitUnsafeInstructions();
     }
 }

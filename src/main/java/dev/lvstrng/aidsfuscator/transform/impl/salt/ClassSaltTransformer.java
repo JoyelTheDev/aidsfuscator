@@ -112,6 +112,5 @@ public class ClassSaltTransformer extends Transformer {
 
         method.makeSalt(saltValue, saltLocal);
         method.addUnsafeInstructions(list.result());
-        method.insns().insert(list.result());
     }
 }

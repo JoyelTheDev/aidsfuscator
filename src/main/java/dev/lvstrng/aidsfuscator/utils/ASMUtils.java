@@ -1,5 +1,6 @@
 package dev.lvstrng.aidsfuscator.utils;
 
+import dev.lvstrng.aidsfuscator.analysis.SizeEvaluator;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -8,6 +9,12 @@ import org.objectweb.asm.tree.*;
 import java.util.Arrays;
 
 public class ASMUtils implements Opcodes {
+    public static int codeSize(JMethod method) {
+        var eval = new SizeEvaluator();
+        method.core().accept(eval);
+        return eval.getSize();
+    }
+
     public static boolean isReturn(int opcode) {
         return opcode >= IRETURN && opcode <= RETURN;
     }

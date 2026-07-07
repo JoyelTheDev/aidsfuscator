@@ -56,7 +56,7 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
             var list = new InsnBuilder();
             if(c.hasFirstInitializerClass()) {
                 //MethodHandles.lookup().lookupClass()
-                list.label(new LabelNode())
+                list
                         .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .method(INVOKEVIRTUAL, "java/lang/invoke/MethodHandles$Lookup", "lookupClass", "()Ljava/lang/Class;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         /*._const(clazz.type())*/
@@ -64,7 +64,7 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
                         .method(INVOKESTATIC, clazz.name(), retrieverOrder.name(), retrieverOrder.desc()).addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .add(c.salt().store());
             } else {
-                list.label(new LabelNode())
+                list
                         .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .method(INVOKEVIRTUAL, "java/lang/invoke/MethodHandles$Lookup", "lookupClass", "()Ljava/lang/Class;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         /*._const(clazz.type())*/
@@ -75,7 +75,6 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
 
             var clinit = c.findOrCreateClinit();
             clinit.addUnsafeInstructions(list.result());
-            clinit.insns().insert(list.result());
         }
     }
 

@@ -199,6 +199,7 @@ public class SecondStringInitializer implements IStringInitializer {
         body.add(loopBody);
 
         method.insertSafe(body.result());
+        method.reinitUnsafeInstructions();
     }
 
     private static String encrypt(String s, int key, int bits) {

@@ -38,7 +38,8 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     private String mappedName;
 
     private Set<JMethod> parents, children;
-    private List<AbstractInsnNode> unsafeInstructions;
+    private final List<AbstractInsnNode> unsafeInstructions;
+    private AbstractInsnNode safeInsn;
 
     public JMethod(MethodNode core) {
         this.properties = new PropertyContainer();
@@ -53,9 +54,8 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     }
 
     public void insertSafe(InsnList list) {
-        if(unsafeInstructions.isEmpty())
-            insns().insert(list);
-        else insns().insert(unsafeInstructions.getLast(), list);
+        if(safeInsn == null) insns().insert(list);
+        else insns().insert(safeInsn, list);
     }
 
     public void reinitUnsafeInstructions() {
@@ -65,6 +65,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     public void addUnsafeInstructions(InsnList list) {
         list.forEach(unsafeInstructions::add);
+        insns().insert(list);
     }
 
     public void clearUnsafeInstructions() {
@@ -73,6 +74,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     public boolean isUnsafe(AbstractInsnNode insn) {
         return unsafeInstructions.contains(insn);
+    }
+
+    public List<AbstractInsnNode> unsafeInstructions() {
+        return unsafeInstructions;
     }
 
     public String originalName() {
