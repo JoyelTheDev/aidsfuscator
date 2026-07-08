@@ -54,8 +54,8 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     }
 
     public void insertSafe(InsnList list) {
-        if(safeInsn == null) insns().insert(list);
-        else insns().insert(safeInsn, list);
+        if(unsafeInstructions.isEmpty()) insns().insert(list);
+        else insns().insert(unsafeInstructions.getLast(), list);
     }
 
     public void reinitUnsafeInstructions() {
