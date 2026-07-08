@@ -57,8 +57,6 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
 
         new InsnBuilder(method.insns())
                 .label()
-
-                .label()
                 .field(GETSTATIC, clazz.name(), fieldName, "[I")
                 ._var(ILOAD, idxVal)
                 ._int(idxXor)

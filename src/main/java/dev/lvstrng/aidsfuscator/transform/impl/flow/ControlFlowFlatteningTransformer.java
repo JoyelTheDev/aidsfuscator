@@ -116,6 +116,9 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                             if(ASMUtils.isIconst(insn))
                                 continue;
 
+                            if(method.isUnsafe(insn))
+                                continue;
+
                             var num = ASMUtils.getInt(insn);
                             method.insns().insertBefore(insn, new InsnBuilder()
                                     ._var(ILOAD, flattenerLocal)
