@@ -12,7 +12,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ReferenceObfuscationTransformer extends Transformer {
