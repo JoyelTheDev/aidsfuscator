@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.flowInts;
+package dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts;
 
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.context.Context;

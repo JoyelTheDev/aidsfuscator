@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.decryptors;
+package dev.lvstrng.aidsfuscator.transform.impl.data.integers.decryptors;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
@@ -8,7 +8,7 @@ import dev.lvstrng.aidsfuscator.polymorph.impl.AddMask;
 import dev.lvstrng.aidsfuscator.polymorph.impl.SubMask;
 import dev.lvstrng.aidsfuscator.polymorph.impl.XorMask;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.IIntegerDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
