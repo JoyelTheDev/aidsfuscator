@@ -23,7 +23,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("testing.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -33,7 +33,7 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                new TrimTransformer(),
+                //new TrimTransformer(),
 
                 new FieldRenameTransformer(),
                 new MethodRenameTransformer(),

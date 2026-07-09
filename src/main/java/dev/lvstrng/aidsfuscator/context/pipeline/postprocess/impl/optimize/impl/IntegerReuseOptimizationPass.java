@@ -15,6 +15,7 @@ import java.util.List;
 
 /**
  * Moves integer values that are reused multiple times via LDC instructions to a local variable to save a little bit of file size.
+ * Used mostly to move method.seed() values (not salt) to local variables.
  * @author lvstrng
  */
 public class IntegerReuseOptimizationPass implements IOptimizationPass {

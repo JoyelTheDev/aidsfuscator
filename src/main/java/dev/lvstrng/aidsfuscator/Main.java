@@ -2,6 +2,8 @@ package dev.lvstrng.aidsfuscator;
 
 import dev.lvstrng.aidsfuscator.cli.ArgumentParser;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
+import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.log.Logger;
 
 public class Main {
@@ -25,6 +27,12 @@ public class Main {
 
         var context = Context.newInstance();
         new ArgumentParser(context).parse(args);
-        context.run();
+        try {
+            context.run();
+        } catch (MissingMemberException | MissingWorkspaceItemException e) {
+            Logger.error(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
