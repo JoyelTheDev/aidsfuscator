@@ -12,7 +12,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ReferenceObfuscationTransformer extends Transformer {
@@ -221,17 +220,9 @@ public class ReferenceObfuscationTransformer extends Transformer {
     }
 
     private char[] getChars() {
-        var chars = new ArrayList<Character>();
-        for(char c = 0; c < (char) 0xffff; c++) {
-            chars.add(c);
-        }
-
         var out = new char[6];
-        Collections.shuffle(chars);
-        for(int i = 0; i < out.length; i++) {
-            out[i] = chars.get(i);
-        }
-
+        for(int i = 0; i < out.length; i++)
+            out[i] = (char) random.nextInt(Character.MAX_VALUE + 1);
         return out;
     }
 }

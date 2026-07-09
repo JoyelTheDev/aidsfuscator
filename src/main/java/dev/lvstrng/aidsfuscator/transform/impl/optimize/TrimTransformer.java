@@ -80,17 +80,19 @@ public class TrimTransformer extends Transformer {
         if(!method.tree().isEmpty())
             return false;
 
-        var refs = graph.refs(method).stream().filter(node -> node.caller() != node.method()).toList();
+        var refs = graph.refs(method).stream()
+                .filter(node -> node.caller() != node.method())
+                .toList();
         if(refs.isEmpty())
             return true;
 
+        var visited = new HashSet<JMethod>();
         for(var ref : refs) {
-            var otherRefs = graph.refs(ref.caller()).stream().filter(node -> node.caller() != node.method()).toList();
-            if(!otherRefs.isEmpty())
+            if(!isCallerChainDead(graph, ref.caller(), visited, 0))
                 return false;
         }
 
-        return false;
+        return true;
     }
 
     private boolean canTrimField(ReferenceGraph graph, JField field) {
@@ -98,13 +100,13 @@ public class TrimTransformer extends Transformer {
         if(refs.isEmpty())
             return true;
 
+        var visited = new HashSet<JMethod>();
         for(var ref : refs) {
-            var otherRefs = graph.refs(ref.caller()).stream().filter(node -> node.caller() != node.method()).toList();
-            if(!otherRefs.isEmpty())
+            if(!isCallerChainDead(graph, ref.caller(), visited, 0))
                 return false;
         }
 
-        return false;
+        return true;
     }
 
     private void registerClass(Set<JClass> toRemoveClasses, JClass clazz) {
@@ -113,5 +115,31 @@ public class TrimTransformer extends Transformer {
 
         if(classes.value() && canTrimClass.test(clazz))
             toRemoveClasses.add(clazz);
+    }
+
+
+    /**
+     * DFS to get to the last nodes in the tree and then check from there to make sure
+     * the entire chain/path is dead
+     */
+    private boolean isCallerChainDead(ReferenceGraph graph, JMethod method, Set<JMethod> visited, int depth) {
+
+        if(!visited.add(method)) return true;
+
+        if(cantEditMethod(method.owner(), method, true, false)) return false;
+
+        if(!method.tree().isEmpty()) return false;
+
+        var refs = graph.refs(method).stream()
+                .filter(node -> node.caller() != node.method())
+                .toList();
+        if(refs.isEmpty()) return true;
+
+        for(var ref : refs) {
+            if(!isCallerChainDead(graph, ref.caller(), visited, depth + 1))
+                return false;
+        }
+
+        return true;
     }
 }
