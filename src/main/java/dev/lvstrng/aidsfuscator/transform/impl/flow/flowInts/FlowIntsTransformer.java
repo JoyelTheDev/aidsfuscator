@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts;
 
 import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
+import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
@@ -16,6 +17,7 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -61,7 +63,51 @@ public class FlowIntsTransformer extends Transformer {
         }
 
         var variable = method.allocVar(Type.INT_TYPE);
+        var blockValues = new HashMap<Block, Integer>();
+        initializeValues(graph, blockValues);
+
+        for(var block : graph.blocks()) {
+            var list = new InsnList();
+            var predecessorValue = blockValues.get(block.predecessors().stream().findFirst().orElse(null));
+            var value = blockValues.get(block);
+            if(value == null)
+                continue;
+
+            if(!Objects.equals(value, predecessorValue)) {
+                if (predecessorValue == null) {
+                    if(method.hasSalt()) {
+                        var masked = method.salt().value() | method.seed();
+                        var xor = masked ^ value;
+
+                        list.add(method.salt().load());
+                        list.add(context.properties().add(ASMUtils.pushInt(method.seed()), Property.IGNORE_INTEGER));
+                        list.add(new InsnNode(IOR));
+                        list.add(ASMUtils.pushInt(xor));
+                        list.add(new InsnNode(IXOR));
+                    } else {
+                        list.add(context.properties().add(ASMUtils.pushInt(value), Property.SENSITIVE_CONSTANT));
+                    }
+                    list.add(new VarInsnNode(ISTORE, variable));
+                } else {
+                    list.add(new VarInsnNode(ILOAD, variable));
+                    list.add(context.properties().add(ASMUtils.pushInt(value ^ predecessorValue), Property.IGNORE_INTEGER));
+                    list.add(new InsnNode(IXOR));
+                    list.add(new VarInsnNode(ISTORE, variable));
+                }
+            }
+
+            if(separateBlocks.value()) list.add(new LabelNode());
+            method.insns().insert(block.label(), list);
+
+            obfuscateBlockValues(context, method, block, variable, value);
+        }
+
+        method.reinitUnsafeInstructions();
+    }
+
+    private void initializeValues(ControlFlowGraph graph, Map<Block, Integer> blockValues) {
         var parent = new HashMap<Block, Block>();
+        var rootValues = new HashMap<Block, Integer>();
 
         for (var block : graph.blocks()) {
             parent.put(block, block);
@@ -96,115 +142,77 @@ public class FlowIntsTransformer extends Transformer {
             }
         }
 
-        var rootValues = new HashMap<Block, Integer>();
-        var blockValues = new HashMap<Block, Integer>();
-
         for (var block : graph.blocks()) {
             var root = find.apply(block);
             rootValues.putIfAbsent(root, random.nextInt());
             blockValues.put(block, rootValues.get(root));
         }
+    }
 
-        for(var block : graph.blocks()) {
-            var list = new InsnList();
-            var predecessorValue = blockValues.get(block.predecessors().stream().findFirst().orElse(null));
-            var value = blockValues.get(block);
-            if(value == null)
+    private void obfuscateBlockValues(Context context, JMethod method, Block block, int variable, int value) {
+        for(var insn : block.insns()) {
+            if(method.isUnsafe(insn))
                 continue;
 
-            if(!Objects.equals(value, predecessorValue)) {
-                if (predecessorValue == null) {
-                    if(method.hasSalt()) {
-                        var masked = method.salt().value() | method.seed();
-                        var xor = masked ^ value;
-
-                        list.add(method.salt().load());
-                        list.add(context.properties().add(ASMUtils.pushInt(method.seed()), Property.IGNORE_INTEGER));
-                        list.add(new InsnNode(IOR));
-                        list.add(ASMUtils.pushInt(xor));
-                        list.add(new InsnNode(IXOR));
-                    } else {
-                        list.add(context.properties().add(ASMUtils.pushInt(value), Property.SENSITIVE_CONSTANT));
-                    }
-                    list.add(new VarInsnNode(ISTORE, variable));
-                } else {
-                    list.add(new VarInsnNode(ILOAD, variable));
-                    list.add(context.properties().add(ASMUtils.pushInt(value ^ predecessorValue), Property.IGNORE_INTEGER));
-                    list.add(new InsnNode(IXOR));
-                    list.add(new VarInsnNode(ISTORE, variable));
-                }
-            }
-
-            if(separateBlocks.value())
-                list.add(new LabelNode());
-            method.insns().insert(block.label(), list);
-
-            for(var insn : block.insns()) {
-                if(method.isUnsafe(insn))
+            if(ASMUtils.isIntPush(insn)) {
+                if (ASMUtils.isIconst(insn))
                     continue;
 
-                if(ASMUtils.isIntPush(insn)) {
-                    if (ASMUtils.isIconst(insn))
-                        continue;
+                if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
+                    continue;
 
-                    if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
-                        continue;
+                var num = ASMUtils.getInt(insn);
+                var masked = value | method.seed();
 
-                    var num = ASMUtils.getInt(insn);
-                    var masked = value | method.seed();
+                var list = new InsnList();
+                list.add(new VarInsnNode(ILOAD, variable));
+                list.add(ASMUtils.pushInt(method.seed()));
+                list.add(new InsnNode(IOR));
+                list.add(ASMUtils.pushInt(masked ^ num));
+                list.add(new InsnNode(IXOR));
 
-                    list = new InsnList();
-                    list.add(new VarInsnNode(ILOAD, variable));
-                    list.add(ASMUtils.pushInt(method.seed()));
-                    list.add(new InsnNode(IOR));
-                    list.add(ASMUtils.pushInt(masked ^ num));
-                    list.add(new InsnNode(IXOR));
+                method.insns().insertBefore(insn, list);
+                method.insns().remove(insn);
+            } else if(ASMUtils.isLongPush(insn) && obfuscateLongs.value()) {
+                if(ASMUtils.isLconst(insn))
+                    continue;
 
-                    method.insns().insertBefore(insn, list);
-                    method.insns().remove(insn);
-                } else if(ASMUtils.isLongPush(insn) && obfuscateLongs.value()) {
-                    if(ASMUtils.isLconst(insn))
-                        continue;
+                if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
+                    continue;
 
-                    if(context.properties().get(insn).has(Property.IGNORE_FLOW_INTS))
-                        continue;
+                var num = ASMUtils.getLong(insn);
+                long obf = ((num << 32 >>> 32) ^ (value & 0xFFFFFFFFL)) | (((num >>> 32) ^ (value & 0xFFFFFFFFL)) << 32);
+                // long deobf = ((obf << 32 >>> 32) ^ (value & 0xFFFFFFFFL)) | (((obf >>> 32) ^ (value & 0xFFFFFFFFL)) << 32);
+                var builder = new InsnBuilder()
+                        ._long(obf)
+                        .dup2() // obf, obf
+                        ._int(32) // obf, obf, 32
+                        .lshl() // obf, obf << 32
+                        ._int(32) // obf, obf << 32, 32
+                        .lushr() // obf, obf << 32 >>> 32
+                        ._var(ILOAD, variable) // obf, obf << 32 >>> 32, local
+                        .i2l() // obf, obf << 32 >>> 32, (long) local
+                        ._long(0xFFFFFFFFL) // long, long_2nd, long, long_2nd, local, local_2nd
+                        .land() // long, long_2nd, long, long_2nd, local, local_2nd
+                        .lxor() // long, long_2nd, firstPart, firstPart_2nd
+                        .dup2_x2() // firstPart(2), long(2), firstPart(2)
 
-                    var num = ASMUtils.getLong(insn);
-                    long obf = ((num << 32 >>> 32) ^ (value & 0xFFFFFFFFL)) | (((num >>> 32) ^ (value & 0xFFFFFFFFL)) << 32);
-                    // long deobf = ((obf << 32 >>> 32) ^ (value & 0xFFFFFFFFL)) | (((obf >>> 32) ^ (value & 0xFFFFFFFFL)) << 32);
-                    var builder = new InsnBuilder()
-                            ._long(obf)
-                            .dup2() // obf, obf
-                            ._int(32) // obf, obf, 32
-                            .lshl() // obf, obf << 32
-                            ._int(32) // obf, obf << 32, 32
-                            .lushr() // obf, obf << 32 >>> 32
-                            ._var(ILOAD, variable) // obf, obf << 32 >>> 32, local
-                            .i2l() // obf, obf << 32 >>> 32, (long) local
-                            ._long(0xFFFFFFFFL) // long, long_2nd, long, long_2nd, local, local_2nd
-                            .land() // long, long_2nd, long, long_2nd, local, local_2nd
-                            .lxor() // long, long_2nd, firstPart, firstPart_2nd
-                            .dup2_x2() // firstPart(2), long(2), firstPart(2)
+                        .pop2()  // firstPart(2), long(2)
+                        ._int(32) // firstPart(2), long(2), 32
+                        .lushr() // firstPart(2), long(2)
+                        ._var(ILOAD, variable) // firstPart(2), long(2), local
+                        .i2l() // firstPart(2), long(2), local(2)
+                        ._long(0xFFFFFFFFL) // firstPart(2), long(2), local(2), 0xFFFFFFFFL
+                        .land() // firstPart(2), long(2), local(2)
+                        .lxor() // firstPart(2), secondPart(2)
+                        ._int(32) // firstPart(2), secondPart(2), 32
+                        .lshl() // firstPart(2), secondPart(2)
+                        .lor()
+                        ;
 
-                            .pop2()  // firstPart(2), long(2)
-                            ._int(32) // firstPart(2), long(2), 32
-                            .lushr() // firstPart(2), long(2)
-                            ._var(ILOAD, variable) // firstPart(2), long(2), local
-                            .i2l() // firstPart(2), long(2), local(2)
-                            ._long(0xFFFFFFFFL) // firstPart(2), long(2), local(2), 0xFFFFFFFFL
-                            .land() // firstPart(2), long(2), local(2)
-                            .lxor() // firstPart(2), secondPart(2)
-                            ._int(32) // firstPart(2), secondPart(2), 32
-                            .lshl() // firstPart(2), secondPart(2)
-                            .lor()
-                            ;
-
-                    method.insns().insertBefore(insn, builder.result());
-                    method.insns().remove(insn);
-                }
+                method.insns().insertBefore(insn, builder.result());
+                method.insns().remove(insn);
             }
         }
-
-        method.reinitUnsafeInstructions();
     }
 }
