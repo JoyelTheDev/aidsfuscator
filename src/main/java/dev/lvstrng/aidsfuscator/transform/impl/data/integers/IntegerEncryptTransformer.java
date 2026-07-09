@@ -1,13 +1,13 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption;
+package dev.lvstrng.aidsfuscator.transform.impl.data.integers;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.decryptors.DefaultIntegerDecryptor;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers.DefaultIntegerInitializer;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers.VarlessIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.integers.decryptors.DefaultIntegerDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.integers.initializers.DefaultIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.integers.initializers.VarlessIntegerInitializer;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 
 import java.util.ArrayList;

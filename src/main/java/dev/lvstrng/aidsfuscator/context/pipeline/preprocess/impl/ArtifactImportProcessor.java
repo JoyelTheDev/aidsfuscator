@@ -53,6 +53,9 @@ public class ArtifactImportProcessor implements IProcessor {
                 // add resource
                 context.resourceHandler().add(name, bytes);
             }
-        } catch (IOException _) {}
+        } catch (IOException e) {
+            Logger.error("Error reading input JAR: %s", e);
+            throw new RuntimeException(e);
+        }
     }
 }

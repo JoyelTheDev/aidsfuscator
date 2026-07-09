@@ -1,8 +1,8 @@
-package dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.initializers;
+package dev.lvstrng.aidsfuscator.transform.impl.data.integers.initializers;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
-import dev.lvstrng.aidsfuscator.transform.impl.data.ints.encryption.IIntegerInitializer;
+import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IIntegerInitializer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
