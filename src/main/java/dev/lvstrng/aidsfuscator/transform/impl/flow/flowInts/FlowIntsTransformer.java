@@ -10,15 +10,14 @@ import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
+import dev.lvstrng.aidsfuscator.utils.SwitchUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -28,6 +27,7 @@ import java.util.function.Function;
 public class FlowIntsTransformer extends Transformer {
     private final Setting<Boolean> obfuscateLongs = setting("obfuscateLongs", true);
     private final Setting<Boolean> separateBlocks = setting("separateBlocks", true);
+    private final Setting<Boolean> confuseFlow = setting("confuseFlow", false);
 
     public  FlowIntsTransformer() {
         super("Flow Ints", "flowInts");
@@ -89,10 +89,12 @@ public class FlowIntsTransformer extends Transformer {
                     }
                     list.add(new VarInsnNode(ISTORE, variable));
                 } else {
-                    list.add(new VarInsnNode(ILOAD, variable));
-                    list.add(context.properties().add(ASMUtils.pushInt(value ^ predecessorValue), Property.IGNORE_INTEGER));
-                    list.add(new InsnNode(IXOR));
-                    list.add(new VarInsnNode(ISTORE, variable));
+                    if(!confuseFlow.value() || random.nextInt(101) >= 5) { // there's a 10% chance to spawn a flow confuse type switch
+                        list.add(new VarInsnNode(ILOAD, variable));
+                        list.add(context.properties().add(ASMUtils.pushInt(value ^ predecessorValue), Property.IGNORE_INTEGER));
+                        list.add(new InsnNode(IXOR));
+                        list.add(new VarInsnNode(ISTORE, variable));
+                    } else createFlowConfuser(context, list, variable, predecessorValue, value);
                 }
             }
 
@@ -103,6 +105,58 @@ public class FlowIntsTransformer extends Transformer {
         }
 
         method.reinitUnsafeInstructions();
+    }
+
+    private void createFlowConfuser(Context context, InsnList list, int variable, int predecessorValue, int value) {
+        var switchLabel = new LabelNode();
+        var targetLabel = new LabelNode();
+        var fakeLabel1 = new LabelNode();
+        var fakeLabel2 = new LabelNode();
+        var exitLabel = new LabelNode();
+
+        var targetBuilder = new InsnBuilder()
+                .label(targetLabel)
+                ._var(ILOAD, variable)
+                ._int(value ^ predecessorValue).addProps(context, Property.IGNORE_INTEGER)
+                .ixor()
+                ._var(ISTORE, variable)
+                ._goto(exitLabel);
+
+        var fake1Builder = new InsnBuilder()
+                .label(fakeLabel1)
+                ._var(ILOAD, variable)
+                ._int(random.nextInt()).addProps(context, Property.IGNORE_INTEGER)
+                .ixor()
+                ._var(ISTORE, variable)
+                ._goto(exitLabel)
+                ;
+
+        var fake2Builder = new InsnBuilder()
+                .label(fakeLabel2)
+                ._var(ILOAD, variable)
+                ._int(random.nextInt()).addProps(context, Property.IGNORE_INTEGER)
+                .ixor()
+                ._var(ISTORE, variable)
+                ._goto(switchLabel)
+                ;
+
+        var cases = Map.of(
+                predecessorValue, targetLabel,
+                random.nextInt(), fakeLabel1,
+                random.nextInt(), fakeLabel2
+        );
+        var labels = cases.values().stream().toList();
+
+        list.add(switchLabel);
+        list.add(new VarInsnNode(ILOAD, variable));
+        list.add(SwitchUtils.createLookup(labels.get(random.nextInt(labels.size())), cases));
+
+        var builders = new ArrayList<>(List.of(targetBuilder, fake1Builder, fake2Builder));
+        Collections.shuffle(builders);
+        for(var builder : builders) {
+            list.add(builder.result());
+        }
+        list.add(exitLabel);
     }
 
     private void initializeValues(ControlFlowGraph graph, Map<Block, Integer> blockValues) {
