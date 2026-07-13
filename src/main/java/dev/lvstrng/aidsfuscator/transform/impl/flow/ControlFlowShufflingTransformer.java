@@ -1,13 +1,12 @@
 package dev.lvstrng.aidsfuscator.transform.impl.flow;
 
+import dev.lvstrng.aidsfuscator.analysis.flow.graph.Block;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
-import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.*;
 
-import java.util.Collections;
+import java.util.*;
 
 public class ControlFlowShufflingTransformer extends Transformer {
     public ControlFlowShufflingTransformer() {
@@ -24,9 +23,6 @@ public class ControlFlowShufflingTransformer extends Transformer {
                 if(Exclusions.FLOW_SHUFFLE.excluded(method))
                     continue;
 
-                if(!method.traps().isEmpty())
-                    continue;
-
                 var graph = method.createFlowGraph(context);
                 if(graph.blocks().size() <= 3)
                     continue;
@@ -41,7 +37,9 @@ public class ControlFlowShufflingTransformer extends Transformer {
                 blocks.addFirst(firstBlock);
 
                 // ---- REBUILD ----
+                var oldTcbs = new ArrayList<>(method.traps());
                 var rebuilt = new InsnList();
+
                 for(var block : blocks) {
                     for(var insn : block.insns()) {
                         method.insns().remove(insn); // an insn node can only be child to ONE insn list, so remove it from the methods instructions, since we're rebuilding it anyway
@@ -51,21 +49,37 @@ public class ControlFlowShufflingTransformer extends Transformer {
                         rebuilt.add(insn);
                     }
 
-                    if(block.deadEnd() || block.ends())
-                        continue;
+                    if(block.inTrap()) {
+                        var end = new LabelNode();
+                        rebuilt.add(end);
+                        rebuilt.add(new JumpInsnNode(GOTO, block.defaultBlock().label()));
 
-                    var dfltIdx = blocks.indexOf(block.defaultBlock());
-                    var currIdx = blocks.indexOf(block);
-                    if((dfltIdx - currIdx) == 1) // if block is next one, skip adding a GOTO
-                        continue;
+                        for(var trap : block.traps()) {
+                            var handler = new LabelNode();
+                            rebuilt.add(handler);
+                            rebuilt.add(new JumpInsnNode(GOTO, trap.handler));
+                            method.traps().add(new TryCatchBlockNode(block.label(), end, handler, trap.type));
+                        }
+                    } else {
+                        if(block.deadEnd() || block.ends() || isNextBlock(blocks, block))
+                            continue;
 
-                    rebuilt.add(new JumpInsnNode(GOTO, block.defaultBlock().label()));
+                        rebuilt.add(new JumpInsnNode(GOTO, block.defaultBlock().label()));
+                    }
                 }
 
                 method.insns().clear();
                 method.insns().add(rebuilt);
+                method.traps().removeAll(oldTcbs);
                 markChange();
             }
         }
+    }
+
+    private boolean isNextBlock(List<Block> blocks, Block block) {
+        var dfltIdx = blocks.indexOf(block.defaultBlock());
+        var currIdx = blocks.indexOf(block);
+        // if block is next one, skip adding a GOTO
+        return (dfltIdx - currIdx) == 1;
     }
 }
