@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.api.data;
+package dev.lvstrng.aidsfuscator.api.flow;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,5 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExcludeStringEncryption {
+public @interface ExcludeFlowInts {
 }
