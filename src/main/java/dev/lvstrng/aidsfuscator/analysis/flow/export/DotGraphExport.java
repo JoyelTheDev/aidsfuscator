@@ -24,8 +24,21 @@ public class DotGraphExport {
             sb.append("\t").append(block).append(" [label=\"");
             sb.append(block).append("\\n");
 
+            // display try catches
+            if(block.inTrap()) {
+                sb.append("In Trap For: \\n");
+
+                for(var trap : block.trapHandlers()) {
+                    var start = cfg.get(trap.start);
+                    var end = cfg.get(trap.end);
+                    var handler = cfg.get(trap.handler);
+
+                    sb.append(trap.type).append("=").append("[").append(start).append(" - ").append(end).append("]; HANDLER = ").append(handler).append("\\n");
+                }
+            }
+
             // display handlers
-            if(!block.trapHandlers().isEmpty()) {
+            if(block.inTrapHandler()) {
                 sb.append("In Handler For: \\n");
 
                 for(var trap : block.trapHandlers()) {

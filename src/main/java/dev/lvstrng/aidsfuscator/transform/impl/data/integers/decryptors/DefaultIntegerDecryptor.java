@@ -99,7 +99,7 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
 
             builder
                     .add(method.salt().load())
-                    ._int(mask).addProps(context, Property.IGNORE_INTEGER)
+                    ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                     .iand()
                     ._int(masked ^ key).addProps(context, Property.IGNORE_INTEGER)
                     .ixor()

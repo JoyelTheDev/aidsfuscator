@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTrans
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
@@ -17,12 +18,14 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
+import dev.test.transform.SplitTryCatchTestTransformer;
+import dev.test.transform.TestTransformer;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("testing.jar")
+                .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -32,7 +35,7 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                //new TrimTransformer(),
+                new TrimTransformer(),
 
                 new FieldRenameTransformer(),
                 new MethodRenameTransformer(),

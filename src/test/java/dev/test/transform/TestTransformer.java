@@ -17,7 +17,7 @@ public class TestTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
-        auto(context);
+        graph(context);
     }
 
     private void graph(Context context) {

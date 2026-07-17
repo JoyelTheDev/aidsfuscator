@@ -87,7 +87,7 @@ public class ClassSaltTransformer extends Transformer {
             var masked = saltValue & mask;
 
             list.add(method.salt().load());
-            list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+            list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
             list.add(new InsnNode(IAND));
             list.add(context.properties().add(ASMUtils.pushInt(masked ^ n), Property.IGNORE_INTEGER));
             list.add(new InsnNode(IXOR));
@@ -104,7 +104,7 @@ public class ClassSaltTransformer extends Transformer {
 
         list
                 .add(clazz.salt().load())
-                ._int(mask).addProps(context, Property.IGNORE_INTEGER)
+                ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
                 ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER)
                 .ixor()

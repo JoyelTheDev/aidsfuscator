@@ -214,7 +214,7 @@ public class Poly1StringDecryptor implements IStringDecryptor {
                         var masked = method.salt().value() & mask;
 
                         list.add(method.salt().load());
-                        list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+                        list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
                         list.add(new InsnNode(IAND));
                         list.add(context.properties().add(ASMUtils.pushInt(masked ^ (key << 16)), Property.IGNORE_INTEGER));
                         list.add(new InsnNode(IXOR));

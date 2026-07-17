@@ -77,7 +77,7 @@ public class MethodSaltTransformer extends Transformer {
             var masked = caller.salt().value() & mask;
 
             list.add(caller.salt().load());
-            list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
+            list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
             list.add(new InsnNode(IAND));
             list.add(context.properties().add(ASMUtils.pushInt(masked ^ salt.value()), Property.IGNORE_INTEGER));
             list.add(new InsnNode(IXOR));

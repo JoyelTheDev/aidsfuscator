@@ -203,7 +203,7 @@ public class DefaultStringDecryptor implements IStringDecryptor {
 
             builder
                     .add(method.salt().load())
-                    ._int(mask)
+                    ._int(mask).addProps(context, Property.IGNORE_FLOW_INTS)
                     .iand()
                     ._int(masked ^ (key << 16))
                     .ixor();

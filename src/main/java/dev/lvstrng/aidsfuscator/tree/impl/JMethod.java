@@ -31,7 +31,7 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     private MethodNode core;
     private final PropertyContainer properties;
     private MethodSalt salt;
-    private int seed;
+    private final int seed;
 
     private boolean library;
     private final String originalName, originalDesc;
@@ -86,6 +86,10 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
 
     public String originalDesc() {
         return originalDesc;
+    }
+
+    public int idx(AbstractInsnNode insn) {
+        return insns().indexOf(insn);
     }
 
     public int allocParameter(Type type) {
