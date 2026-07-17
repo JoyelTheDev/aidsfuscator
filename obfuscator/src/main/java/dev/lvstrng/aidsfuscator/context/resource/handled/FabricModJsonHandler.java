@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
 
 public class FabricModJsonHandler implements HandledResource {
     private final List<String> entrypointTypes = List.of(
-            "main", "client"
+            "main", "client", "preLaunch"
     );
 
     @Override
