@@ -9,22 +9,18 @@ import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 public class FabricModJsonHandler implements HandledResource {
-    private final List<String> entrypointTypes = List.of(
-            "main", "client", "preLaunch"
-    );
-
     @Override
     public void handle(Context context, JarOutputStream jos, String name, byte[] bytes) throws IOException {
         var gson = new Gson();
         var modJson = gson.fromJson(new String(bytes), JsonObject.class);
 
         var entrypoints = modJson.getAsJsonObject("entrypoints");
-        if(entrypoints == null) {
+        if (entrypoints == null) {
             jos.putNextEntry(new ZipEntry(name));
             jos.write(bytes);
             jos.closeEntry();
@@ -32,19 +28,17 @@ public class FabricModJsonHandler implements HandledResource {
             return;
         }
 
-        for(var type : entrypointTypes) {
-            var p = entrypoints.get(type);
-            if(p == null)
+        for (Map.Entry<String, com.google.gson.JsonElement> typeEntry : entrypoints.entrySet()) {
+            var value = typeEntry.getValue();
+            if (value == null || !value.isJsonArray())
                 continue;
 
-            var entrypoint = p.getAsJsonArray();
-            if(entrypoint == null)
-                continue;
-
-            for(int i = 0; i < entrypoint.size(); i++) {
-                var className = entrypoint.get(i).getAsString().replace('.', '/');
+            var entrypointArray = value.getAsJsonArray();
+            for (int i = 0; i < entrypointArray.size(); i++) {
+                var element = entrypointArray.get(i);
+                var className = element.getAsString().replace('.', '/');
                 var newName = Mappings.CLASS.retrieve(className).value().replace('/', '.');
-                entrypoint.set(i, new JsonPrimitive(newName));
+                entrypointArray.set(i, new JsonPrimitive(newName));
             }
         }
 
