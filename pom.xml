@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>api</module>
-        <module>obfuscator</module>
+        <module>aidsfuscator-api</module>
+        <module>aidsfuscator-main</module>
     </modules>
 
     <properties>

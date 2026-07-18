@@ -1,10 +1,10 @@
 {
-  "in": "sigma.jar",
+  "in": "crackme.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",
   "computeFrames": true,
-  "watermark": "",
+  "watermark": "Aidsfuscator v2.10.0 Sample",
   "aggressiveOverload": true,
   "exclusionPresets": [
     "api",
@@ -12,7 +12,7 @@
   ],
   "transformers": {
     "trim": {
-      "enabled": false,
+      "enabled": true,
       "classes": true,
       "fields": true,
       "methods": true
@@ -20,7 +20,7 @@
     "renameFields": {
       "enabled": true,
       "preserveRecordNames": true,
-      "keepSerializableNames": true,
+      "keepSerializableNames": false,
       "prefix": "",
       "shuffle": true
     },
@@ -65,7 +65,8 @@
     "flowInts": {
       "enabled": true,
       "obfuscateLongs": true,
-      "separateBlocks": true
+      "separateBlocks": true,
+      "confuseFlow": true
     },
     "controlFlowFlatten": {
       "enabled": true,
