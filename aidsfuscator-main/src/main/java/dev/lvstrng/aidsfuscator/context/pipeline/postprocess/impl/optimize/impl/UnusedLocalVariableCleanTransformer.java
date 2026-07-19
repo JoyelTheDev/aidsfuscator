@@ -2,24 +2,14 @@ package dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.impl
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.IOptimizationPass;
-import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
-import dev.lvstrng.aidsfuscator.utils.NamedOpcodes;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
 
 import java.util.*;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
-/**
- * @see dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.OptimizationProcessor
- *
- * Will clean code from every unused variable. Mainly made to remove useless obfuscation artifacts, leaving behind unused pieces of code. E.g. Flow ints/Class Salting variable not in use.
- * FIXME collect(AbstractInsnNode, Set<AbstractInsnNode>, Map<AbstractInsnNode, Frame<SourceValue>>).
- * FIXME ADD IN OptimizationProcessor TO TEST
- */
 public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
     private static final BiPredicate<JMethod, AbstractInsnNode> badInsn = (method, insn) -> {
         var op = insn.getOpcode();
@@ -71,23 +61,19 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
                 var toRemove = new HashSet<AbstractInsnNode>();
                 collect(insn, toRemove, frames);
                 toRemove.forEach(method.insns()::remove);
-
-                System.out.println(method.fullName() + ": v%s".formatted(slot));
-                toRemove.stream().sorted(Comparator.comparingInt(method::idx)).forEach(e -> System.out.println("\t" + NamedOpcodes.map(e.getOpcode())));
             });
         }
     }
 
-    // FIXME imagine: IXOR insn, but we still only clear the last value added value in stack (frame.getStack(frame.getStackSize() - 1)). Remove all producers instead
     private void collect(AbstractInsnNode insn, Set<AbstractInsnNode> out, Map<AbstractInsnNode, Frame<SourceValue>> frames) {
         var frame = frames.get(insn);
         if(frame == null)
             return;
 
-        if(frame.getStackSize() <= 0)
+        if(!out.add(insn))
             return;
 
-        if(!out.add(insn))
+        if(frame.getStackSize() <= 0)
             return;
 
         var top = frame.getStack(frame.getStackSize() - 1);
