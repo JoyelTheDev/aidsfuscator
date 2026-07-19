@@ -90,7 +90,7 @@ public class FlowIntsTransformer extends Transformer {
                     list.add(new VarInsnNode(ISTORE, variable));
                 } else {
                     if(!confuseFlow.value() || random.nextInt(101) >= 5) { // there's a 10% chance to spawn a flow confuse type switch
-                        list.add(new VarInsnNode(ILOAD, variable));
+                        list.add(context.properties().add(new VarInsnNode(ILOAD, variable), Property.IGNORE_VAR_USAGE));
                         list.add(context.properties().add(ASMUtils.pushInt(value ^ predecessorValue), Property.IGNORE_INTEGER));
                         list.add(new InsnNode(IXOR));
                         list.add(new VarInsnNode(ISTORE, variable));
@@ -116,7 +116,7 @@ public class FlowIntsTransformer extends Transformer {
 
         var targetBuilder = new InsnBuilder()
                 .label(targetLabel)
-                ._var(ILOAD, variable)
+                ._var(ILOAD, variable).addProps(context, Property.IGNORE_VAR_USAGE)
                 ._int(value ^ predecessorValue).addProps(context, Property.IGNORE_INTEGER)
                 .ixor()
                 ._var(ISTORE, variable)
@@ -124,7 +124,7 @@ public class FlowIntsTransformer extends Transformer {
 
         var fake1Builder = new InsnBuilder()
                 .label(fakeLabel1)
-                ._var(ILOAD, variable)
+                ._var(ILOAD, variable).addProps(context, Property.IGNORE_VAR_USAGE)
                 ._int(random.nextInt()).addProps(context, Property.IGNORE_INTEGER)
                 .ixor()
                 ._var(ISTORE, variable)
@@ -133,7 +133,7 @@ public class FlowIntsTransformer extends Transformer {
 
         var fake2Builder = new InsnBuilder()
                 .label(fakeLabel2)
-                ._var(ILOAD, variable)
+                ._var(ILOAD, variable).addProps(context, Property.IGNORE_VAR_USAGE)
                 ._int(random.nextInt()).addProps(context, Property.IGNORE_INTEGER)
                 .ixor()
                 ._var(ISTORE, variable)

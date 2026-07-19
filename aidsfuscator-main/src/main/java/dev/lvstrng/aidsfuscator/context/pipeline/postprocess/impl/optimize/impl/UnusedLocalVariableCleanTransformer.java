@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.impl
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.IOptimizationPass;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import org.objectweb.asm.tree.*;
@@ -30,13 +31,19 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
         // ---- FIND USAGES ----
         for(var insn : method.insns()) {
             if(ASMUtils.isVarLoad(insn)) {
+                if(context.properties().get(insn).has(Property.IGNORE_VAR_USAGE))
+                    continue;
+
                 var loc = (VarInsnNode) insn;
                 loadsForSlot.compute(loc.var, (_, v) -> (v == null) ? 1 : v + 1);
             } else if(ASMUtils.isVarStore(insn)) {
+                if(context.properties().get(insn).has(Property.IGNORE_VAR_USAGE))
+                    continue;
+
                 var loc = (VarInsnNode) insn;
                 storesForSlot.compute(loc.var, (_, v) -> (v == null) ? 1 : v + 1);
             } else if(insn instanceof IincInsnNode iinc) {
-                loadsForSlot.compute(iinc.var, (_, v) -> (v == null) ? 1 : v + 1);
+                storesForSlot.compute(iinc.var, (_, v) -> (v == null) ? 1 : v + 1);
             }
         }
 
