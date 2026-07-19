@@ -9,6 +9,121 @@ import org.objectweb.asm.tree.*;
 import java.util.Arrays;
 
 public class ASMUtils implements Opcodes {
+    public static int getConsumedValueCount(AbstractInsnNode insn, int topSize) {
+        return switch (insn.getOpcode()) {
+            // Consumes nothing
+            case NOP,
+                 ACONST_NULL,
+                 ICONST_M1, ICONST_0, ICONST_1, ICONST_2, ICONST_3,
+                 ICONST_4, ICONST_5,
+                 LCONST_0, LCONST_1,
+                 FCONST_0, FCONST_1, FCONST_2,
+                 DCONST_0, DCONST_1,
+                 BIPUSH, SIPUSH,
+                 LDC,
+                 ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
+                 GETSTATIC,
+                 NEW,
+                 RET,
+                 GOTO,
+                 JSR,
+                 -1 -> 0;
+
+            // Consumes one value
+            case POP,
+                 ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
+                 IRETURN, LRETURN, FRETURN, DRETURN, ARETURN,
+                 ATHROW,
+                 ARRAYLENGTH,
+                 MONITORENTER, MONITOREXIT,
+                 IFNULL, IFNONNULL,
+                 TABLESWITCH, LOOKUPSWITCH,
+                 PUTSTATIC,
+                 NEWARRAY, ANEWARRAY,
+                 CHECKCAST, INSTANCEOF -> 1;
+
+            // Consumes two values
+            case POP2,
+                 IALOAD, LALOAD, FALOAD, DALOAD, AALOAD, BALOAD, CALOAD, SALOAD,
+                 IASTORE, LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE,
+                 PUTFIELD,
+                 IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE,
+                 IF_ACMPEQ, IF_ACMPNE -> 2;
+
+            // Unary arithmetic/conversions
+            case INEG, LNEG, FNEG, DNEG,
+                 I2L, I2F, I2D,
+                 L2I, L2F, L2D,
+                 F2I, F2L, F2D,
+                 D2I, D2L, D2F,
+                 I2B, I2C, I2S -> 1;
+
+            // Binary arithmetic
+            case IADD, LADD, FADD, DADD,
+                 ISUB, LSUB, FSUB, DSUB,
+                 IMUL, LMUL, FMUL, DMUL,
+                 IDIV, LDIV, FDIV, DDIV,
+                 IREM, LREM, FREM, DREM,
+                 ISHL, LSHL,
+                 ISHR, LSHR,
+                 IUSHR, LUSHR,
+                 IAND, LAND,
+                 IOR, LOR,
+                 IXOR, LXOR,
+                 LCMP,
+                 FCMPL, FCMPG,
+                 DCMPL, DCMPG -> 2;
+
+            // dup family
+            case DUP -> 1;
+            case DUP_X1 -> 2;
+            case DUP_X2 -> 2;
+            case DUP2 -> topSize == 2 ? 1 : 2;
+            case DUP2_X1 -> topSize == 2 ? 2 : 3;
+            case DUP2_X2 -> topSize == 2 ? 2 : 4;
+            case SWAP -> 2;
+
+            // Conditional branches
+            case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE -> 1;
+
+            // MultiANEWARRAY consumes dimensions
+            case MULTIANEWARRAY -> ((MultiANewArrayInsnNode) insn).dims;
+
+            // Field/method instructions require descriptor analysis
+            case GETFIELD -> 1;
+
+            case INVOKEVIRTUAL,
+                 INVOKESPECIAL,
+                 INVOKEINTERFACE -> {
+                var method = (MethodInsnNode) insn;
+                yield Type.getArgumentTypes(method.desc).length + 1;
+            }
+
+            case INVOKESTATIC -> {
+                var method = (MethodInsnNode) insn;
+                yield Type.getArgumentTypes(method.desc).length;
+            }
+
+            case INVOKEDYNAMIC -> {
+                var indy = (InvokeDynamicInsnNode) insn;
+                yield Type.getArgumentTypes(indy.desc).length;
+            }
+
+            default -> throw new IllegalArgumentException(
+                    "Unhandled opcode: " + insn.getOpcode());
+        };
+    }
+
+    public static boolean isVarLoad(AbstractInsnNode insn) {
+        var op = insn.getOpcode();
+        return op >= ILOAD && op <= ALOAD;
+    }
+
+    public static boolean isVarStore(AbstractInsnNode insn) {
+        var op = insn.getOpcode();
+        return op >= ISTORE && op <= ASTORE;
+    }
+
     public static int codeSize(JMethod method) {
         var eval = new SizeEvaluator();
         method.core().accept(eval);
