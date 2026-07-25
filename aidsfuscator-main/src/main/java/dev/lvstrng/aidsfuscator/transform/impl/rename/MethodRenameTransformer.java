@@ -68,7 +68,9 @@ public class MethodRenameTransformer extends Transformer {
     }
 
     private String findOrGenerateName(Context context, JClass clazz, Set<JClass> impactedClasses, JMethod method) {
-        for(var member : impactedClasses) {
+        var collisionScope = collisionScope(context, method);
+
+        for(var member : collisionScope) {
             var id = MemberUtils.fullMethod(member, method);
             if(Mappings.METHOD.containsOld(id))
                 return Mappings.METHOD.retrieve(id).value();
@@ -78,7 +80,44 @@ public class MethodRenameTransformer extends Transformer {
         if(Mappings.METHOD.containsOld(id))
             return Mappings.METHOD.retrieve(id).value();
 
-        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), impactedClasses);
+        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), collisionScope);
+    }
+
+    /**
+     * Walks the full override  for this method, not just clazz's own hierarchy.
+     * Needed because a class implementing two unrelated interfaces with matching name+desc
+     * bridges them, so a name picked from one interfaces side can still collide on the other
+     * @param context obfuscator context
+     * @param method method to find the collision scope for
+     * @author brownie
+     */
+    private Set<JClass> collisionScope(Context context, JMethod method) {
+        var visited = new HashSet<JClass>();
+        var queue = new ArrayDeque<JClass>();
+
+        visited.add(method.owner());
+        queue.add(method.owner());
+
+        while(!queue.isEmpty()) {
+            var current = queue.poll();
+
+            for(var child : current.children()) {
+                if(visited.add(child))
+                    queue.add(child);
+            }
+
+            for(var parent : current.parents()) {
+                if(visited.contains(parent))
+                    continue;
+
+                if(parent.hasMethodInTree(context, method)) {
+                    visited.add(parent);
+                    queue.add(parent);
+                }
+            }
+        }
+
+        return visited;
     }
 
     /**
