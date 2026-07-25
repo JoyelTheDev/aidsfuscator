@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -38,9 +39,25 @@ public class MethodSaltTransformer extends Transformer {
         var graph = context.referenceGraph().build();
         var saltedMethods = new HashSet<JMethod>();
 
-        // ---- REGISTER ALL METHODS ----
+        // ---- FIND DANGER METHODS (whole codebase, not just this class) ----
+        var danger = new HashSet<JMethod>();
         for(var clazz : context.classes()) {
-            registerClass(context, graph, clazz, saltedMethods);
+            for(var method : clazz.methods()) {
+                var scope = collisionScope(context, method);
+                if(skipMethodAndTree(graph, method, scope)) {
+                    danger.addAll(methodTreeClosure(method));
+                }
+            }
+        }
+
+        // ---- REGISTER SAFE METHODS ----
+        for(var clazz : context.classes()) {
+            for(var method : clazz.methods()) {
+                if(danger.contains(method) || collidesWithDanger(method, danger))
+                    continue;
+
+                registerMethodTree(context, clazz, method, saltedMethods);
+            }
         }
 
         // ---- MODIFY METHOD ----
@@ -87,54 +104,54 @@ public class MethodSaltTransformer extends Transformer {
         call.desc = call.desc.replace(")", "I)");
     }
 
-    private void registerClass(Context context, ReferenceGraph graph, JClass clazz, Set<JMethod> saltedMethods) {
-        var toCheck = new HashSet<JMethod>();
+    /**
+     * Checks if salting this method's override tree would collide with a danger method's descriptor
+     * @author brownie
+     */
+    private boolean collidesWithDanger(JMethod method, Set<JMethod> danger) {
+        for(var member : methodTreeClosure(method)) {
+            var saltedDesc = member.desc().replace(")", "I)");
+            var hit = danger.stream().anyMatch(d -> d.owner() == member.owner() && d.name().equals(member.name()) && d.desc().equals(saltedDesc));
+            if(hit)
+                return true;
+        }
 
-        // ---- SET DANGER METHODS ----
-        for(var method : clazz.methods()) {
-            var impactedClasses = impactedClasses(context, clazz, method);
+        return false;
+    }
 
-            if(skipMethodAndTree(graph, method, impactedClasses)) {
-                toCheck.addAll(method.tree());
-                toCheck.add(method);
+    /**
+     * method.tree() is one hop only, so walk it out to the full connected override chain
+     * @author brownie
+     */
+    private Set<JMethod> methodTreeClosure(JMethod method) {
+        var visited = new HashSet<JMethod>();
+        var queue = new ArrayDeque<JMethod>();
+
+        visited.add(method);
+        queue.add(method);
+
+        while(!queue.isEmpty()) {
+            var current = queue.poll();
+            for(var related : current.tree()) {
+                if(visited.add(related))
+                    queue.add(related);
             }
         }
 
-        // ---- REGISTER METHODS ----
-        for(var method : clazz.methods()) {
-            if(toCheck.contains(method)) // if danger method, skip...
-                continue;
-
-            var duplicateOpt = toCheck.stream()
-                    .filter(e -> e != method)                    // filter this method
-                    .filter(e -> e.name().equals(method.name())) // has same name
-                    .filter(e -> e.desc().equals(method.desc().replace(")", "I)"))) // has desired descriptor, causes collision if remapped
-                    .findAny();
-
-            if(duplicateOpt.isPresent()) // found duplicate, continue
-                continue;
-
-            registerMethodTree(context, clazz, method, saltedMethods);
-        }
+        return visited;
     }
 
     private void registerMethodTree(Context context, JClass clazz, JMethod method, Set<JMethod> saltedMethods) {
-        var impacted = impactedClasses(context, clazz, method);
-        var salt = findOrGenerateSalt(method, impacted);
+        var scope = collisionScope(context, method);
+        var salt = findOrGenerateSalt(method, scope);
 
-        for(var member : method.tree()) {
+        for(var member : methodTreeClosure(method)) {
             if(!saltedMethods.add(member))
                 continue;
 
             member.removeAccessFlags(ACC_VARARGS);
             member.makeSalt(salt, -1);
         }
-
-        if(!saltedMethods.add(method))
-            return;
-
-        method.removeAccessFlags(ACC_VARARGS);
-        method.makeSalt(salt, -1);
     }
 
     private int findOrGenerateSalt(JMethod method, Set<JClass> impactedClasses) {
@@ -179,18 +196,40 @@ public class MethodSaltTransformer extends Transformer {
         return false;
     }
 
-    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
-        var classes = new HashSet<>(clazz.children());
-        classes.add(clazz);
+    /**
+     * Walks the full override closure for this method, not just its owner's hierarchy.
+     * Needed since a class implementing two unrelated interfaces with matching name+desc
+     * bridges them, so a salt picked safely on one side can still miss an existing salt on the other
+     * @param context obfuscator context
+     * @param method method to find the collision scope for
+     * @author brownie
+     */
+    private Set<JClass> collisionScope(Context context, JMethod method) {
+        var visited = new HashSet<JClass>();
+        var queue = new ArrayDeque<JClass>();
 
-        for(var parent : clazz.tree()) {
-            if(!parent.hasMethodInTree(context, method))
-                continue;
+        visited.add(method.owner());
+        queue.add(method.owner());
 
-            classes.add(parent);
-            classes.addAll(parent.children());
+        while(!queue.isEmpty()) {
+            var current = queue.poll();
+
+            for(var child : current.children()) {
+                if(visited.add(child))
+                    queue.add(child);
+            }
+
+            for(var parent : current.parents()) {
+                if(visited.contains(parent) || parent.isLibrary())
+                    continue;
+
+                if(parent.hasMethodInTree(context, method)) {
+                    visited.add(parent);
+                    queue.add(parent);
+                }
+            }
         }
 
-        return classes;
+        return visited;
     }
 }
