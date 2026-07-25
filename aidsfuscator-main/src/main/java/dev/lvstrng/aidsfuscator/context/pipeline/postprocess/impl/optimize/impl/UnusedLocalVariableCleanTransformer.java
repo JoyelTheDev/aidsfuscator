@@ -2,6 +2,7 @@ package dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.impl
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl.optimize.IOptimizationPass;
+import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
@@ -11,13 +12,17 @@ import org.objectweb.asm.tree.analysis.*;
 import java.util.*;
 import java.util.function.BiPredicate;
 
+/**
+ * Clears all unused variables in a JMethod. (Doesn't check for reassigning or variables).
+ * TODO add pop and pop2 clearing.
+ */
 public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
     private static final BiPredicate<JMethod, AbstractInsnNode> badInsn = (method, insn) -> {
         var op = insn.getOpcode();
-        if(op <= DUP2_X2 && op >= DUP)
-            return true;
+        /*if(op <= DUP2_X2 && op >= DUP)
+            return true;*/
 
-        if(insn instanceof MethodInsnNode || (insn instanceof FieldInsnNode field && !field.owner.equals(method.name())))
+        if(insn instanceof MethodInsnNode || (insn instanceof FieldInsnNode field && !field.owner.equals(method.name())) || insn instanceof InvokeDynamicInsnNode)
             return true;
 
         return op == NEW || op == NEWARRAY || op == ANEWARRAY || op == MULTIANEWARRAY;
@@ -25,21 +30,18 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
 
     @Override
     public void optimize(Context context, JMethod method) {
+        if(!method.traps().isEmpty())
+            return;
+
         var loadsForSlot = new HashMap<Integer, Integer>();
         var storesForSlot = new HashMap<Integer, Integer>();
 
         // ---- FIND USAGES ----
         for(var insn : method.insns()) {
             if(ASMUtils.isVarLoad(insn)) {
-                if(context.properties().get(insn).has(Property.IGNORE_VAR_USAGE))
-                    continue;
-
                 var loc = (VarInsnNode) insn;
                 loadsForSlot.compute(loc.var, (_, v) -> (v == null) ? 1 : v + 1);
             } else if(ASMUtils.isVarStore(insn)) {
-                if(context.properties().get(insn).has(Property.IGNORE_VAR_USAGE))
-                    continue;
-
                 var loc = (VarInsnNode) insn;
                 storesForSlot.compute(loc.var, (_, v) -> (v == null) ? 1 : v + 1);
             } else if(insn instanceof IincInsnNode iinc) {
@@ -47,6 +49,7 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
             }
         }
 
+        var removed = new HashSet<Integer>();
         for(var slot : storesForSlot.keySet()) {
             var loadCount = loadsForSlot.get(slot);
             if(loadCount != null && loadCount != 0)
@@ -69,7 +72,16 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
                 collect(insn, toRemove, frames);
                 toRemove.forEach(method.insns()::remove);
             });
+            removed.add(slot);
         }
+
+        // DEBUG
+        /*if(!removed.isEmpty()) {
+            Logger.info("In method `%s`, removed local indices:", method.fullName());
+            for(var slot : removed) {
+                Logger.info("\t%s", slot);
+            }
+        }*/
     }
 
     private void collect(AbstractInsnNode insn, Set<AbstractInsnNode> out, Map<AbstractInsnNode, Frame<SourceValue>> frames) {
@@ -78,6 +90,10 @@ public class UnusedLocalVariableCleanTransformer implements IOptimizationPass {
             return;
 
         if(!out.add(insn))
+            return;
+
+        var op = insn.getOpcode();
+        if(op <= DUP2_X2 && op >= DUP) // avoid removal of dup instruction producer tree instead of excluding entire producer tree
             return;
 
         if(frame.getStackSize() <= 0)
