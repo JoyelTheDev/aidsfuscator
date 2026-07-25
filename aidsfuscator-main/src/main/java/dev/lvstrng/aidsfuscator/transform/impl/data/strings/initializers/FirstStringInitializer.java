@@ -16,7 +16,7 @@ import java.util.List;
  * String initializer that uses a loop and a switch with a set of keys to XOR strings.
  * @author lvstrng
  */
-public class XorStringInitializer implements IStringInitializer {
+public class FirstStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {
         // ---- PREP ----

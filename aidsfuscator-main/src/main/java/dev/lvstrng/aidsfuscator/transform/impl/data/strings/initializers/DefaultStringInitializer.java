@@ -15,6 +15,7 @@ import java.util.List;
  * The default string encryption initializer. It has hardly any security to it, but it does the job. It is planned to move away from this in the future (or update it to be more secure).
  * @author lvstrng
  */
+@Deprecated
 public class DefaultStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {
