@@ -116,8 +116,10 @@ public class SeenClassMethodVisitor extends MethodVisitor {
     }
 
     private void addInternal(String internalName) {
-        var type = Type.getObjectType(internalName);
+        if(internalName == null)
+            return;
 
+        var type = Type.getObjectType(internalName);
         if(type.getSort() == Type.OBJECT)
             seenClasses.add(type.getInternalName());
         else if (type.getSort() == Type.ARRAY) {
@@ -126,8 +128,10 @@ public class SeenClassMethodVisitor extends MethodVisitor {
     }
 
     private void addDescriptor(String descriptor) {
-        var type = Type.getType(descriptor);
+        if(descriptor == null)
+            return;
 
+        var type = Type.getType(descriptor);
         if(type.getSort() == Type.OBJECT)
             seenClasses.add(type.getInternalName());
         else if (type.getSort() == Type.ARRAY) {

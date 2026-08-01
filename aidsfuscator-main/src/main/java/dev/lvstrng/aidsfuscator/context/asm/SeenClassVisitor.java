@@ -49,24 +49,35 @@ public class SeenClassVisitor extends ClassVisitor {
 
     @Override
     public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        if(innerName == null)
+            return;
+
         add(Type.getObjectType(innerName));
         super.visitInnerClass(name, outerName, innerName, access);
     }
 
     @Override
     public void visitNestHost(String nestHost) {
+        if(nestHost == null)
+            return;
+
         add(Type.getObjectType(nestHost));
         super.visitNestHost(nestHost);
     }
 
     @Override
     public void visitOuterClass(String owner, String name, String descriptor) {
+        if(descriptor == null)
+            return;
         add(Type.getType(descriptor));
         super.visitOuterClass(owner, name, descriptor);
     }
 
     @Override
     public void visitNestMember(String nestMember) {
+        if(nestMember == null)
+            return;
+
         add(Type.getObjectType(nestMember));
         super.visitNestMember(nestMember);
     }
