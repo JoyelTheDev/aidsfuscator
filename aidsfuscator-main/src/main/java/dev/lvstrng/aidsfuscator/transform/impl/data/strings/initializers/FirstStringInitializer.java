@@ -20,7 +20,7 @@ public class FirstStringInitializer implements IStringInitializer {
     @Override
     public void generate(Context context, JClass clazz, String fieldName, String cacheName, List<String> strings) {
         // ---- PREP ----
-        var keys = CryptUtils.generateKeys(random, random.nextInt(5, 7), 127);
+        var keys = CryptUtils.generateKeys(random, random.nextInt(5, 7), 255);
         var key = random.nextInt(Short.MAX_VALUE);
 
         var strBuilder = new StringBuilder();

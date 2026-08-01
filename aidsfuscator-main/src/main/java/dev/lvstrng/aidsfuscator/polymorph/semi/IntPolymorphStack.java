@@ -1,6 +1,6 @@
-package dev.lvstrng.aidsfuscator.polymorph;
+package dev.lvstrng.aidsfuscator.polymorph.semi;
 
-import dev.lvstrng.aidsfuscator.polymorph.impl.*;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.*;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 

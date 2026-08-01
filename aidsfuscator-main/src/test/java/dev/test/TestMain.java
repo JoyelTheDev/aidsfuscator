@@ -18,18 +18,16 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.test.transform.SourceInstructionTestTransformer;
-import dev.test.transform.SplitTryCatchTestTransformer;
-import dev.test.transform.TestTransformer;
+import dev.test.transform.*;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("in.jar")
+                .in("eval.jar")
                 .libs("libs")
                 .out("out.jar")
-                .setAggressiveOverload(false);
+                .setAggressiveOverload(true);
 
         context.referenceManager().addFieldCandidate("*");
         context.referenceManager().addMethodCandidate("*");

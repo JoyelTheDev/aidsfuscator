@@ -2,13 +2,17 @@ package dev.lvstrng.aidsfuscator.transform.impl.optimize;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.context.asm.SeenClassMethodVisitor;
+import dev.lvstrng.aidsfuscator.context.asm.SeenClassVisitor;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
+import org.objectweb.asm.Type;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -18,7 +22,8 @@ public class TrimTransformer extends Transformer {
     private final Setting<Boolean> fields = setting("fields", true);
     private final Setting<Boolean> methods = setting("methods", true);
 
-    private final Predicate<JClass> canTrimClass = e -> e.methods().isEmpty() && e.fields().isEmpty();
+    private final Set<String> seenClasses = new HashSet<>();
+    private final Predicate<JClass> canTrimClass = e -> e.methods().isEmpty() && e.fields().isEmpty() && !seenClasses.contains(e.name());
 
     public TrimTransformer() {
         super("Trim Transformer", "trim");
@@ -64,9 +69,17 @@ public class TrimTransformer extends Transformer {
 
             toRemoveFields.forEach(clazz::remove);
             toRemoveMethods.forEach(clazz::remove);
-            registerClass(toRemoveClasses, clazz);
         }
 
+        for(var clazz : context.classes()) {
+            clazz.accept(new SeenClassVisitor(seenClasses), null);
+            for(var method : clazz.methods()) {
+                method.core().accept(new SeenClassMethodVisitor(seenClasses));
+            }
+        }
+        for(var clazz : context.classes()) {
+            registerClass(toRemoveClasses, clazz);
+        }
         toRemoveClasses.forEach(e -> {
             context.classMap().remove(e.name());
             markChange();

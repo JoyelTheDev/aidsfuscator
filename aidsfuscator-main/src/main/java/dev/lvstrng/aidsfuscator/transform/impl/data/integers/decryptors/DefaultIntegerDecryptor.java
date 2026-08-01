@@ -2,11 +2,11 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.integers.decryptors;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.polymorph.IntMask;
-import dev.lvstrng.aidsfuscator.polymorph.IntPolymorphStack;
-import dev.lvstrng.aidsfuscator.polymorph.impl.AddMask;
-import dev.lvstrng.aidsfuscator.polymorph.impl.SubMask;
-import dev.lvstrng.aidsfuscator.polymorph.impl.XorMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.IntMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.IntPolymorphStack;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.AddMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.SubMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.XorMask;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;

@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.polymorph;
+package dev.lvstrng.aidsfuscator.polymorph.semi;
 
 import org.objectweb.asm.tree.InsnList;
 

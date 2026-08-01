@@ -363,12 +363,14 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         core.accept(visitor);
 
         // ---- refresh member cores ----
-        for(int i = 0; i < methods.size(); i++) {
-            methods.get(i).setCore(remapped.methods.get(i));
-        }
+        if(remapped != null) {
+            for (int i = 0; i < methods.size(); i++) {
+                methods.get(i).setCore(remapped.methods.get(i));
+            }
 
-        for(int i = 0; i < fields.size(); i++) {
-            fields.get(i).setCore(remapped.fields.get(i));
+            for (int i = 0; i < fields.size(); i++) {
+                fields.get(i).setCore(remapped.fields.get(i));
+            }
         }
     }
 

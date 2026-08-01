@@ -2,9 +2,9 @@
   "in": "crackme.jar",
   "out": "out.jar",
   "libs": "libs/",
-  "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_",
+  "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
-  "watermark": "Aidsfuscator v2.10.0 Sample",
+  "watermark": "",
   "aggressiveOverload": true,
   "exclusionPresets": [
     "api",

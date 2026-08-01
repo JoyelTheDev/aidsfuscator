@@ -8,6 +8,7 @@ import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.DefaultStringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.Poly1StringDecryptor;
+import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.Poly2StringDecryptor;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.SecondStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.ThirdStringInitializer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.initializers.FirstStringInitializer;
@@ -29,8 +30,8 @@ public class StringEncryptTransformer extends Transformer {
     );
 
     private static final List<Supplier<IStringDecryptor>> decryptors = List.of(
-            DefaultStringDecryptor::new,
-            Poly1StringDecryptor::new
+
+            Poly2StringDecryptor::new
     );
 
     public StringEncryptTransformer() {
