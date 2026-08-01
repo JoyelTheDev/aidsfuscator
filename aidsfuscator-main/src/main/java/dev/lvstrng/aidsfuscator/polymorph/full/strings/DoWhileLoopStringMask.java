@@ -25,7 +25,6 @@ public class DoWhileLoopStringMask extends PolyMask<String> {
         this.childMasks = new ArrayList<>();
 
         List<Supplier<PolyMask<Integer>>> masks = new ArrayList<>(List.of(
-                context::randomUnusedMask,
                 () -> new XorIntMask(context, Character.MIN_VALUE, Character.MAX_VALUE),
                 () -> new LoopBasedXorIntMask(context, CryptUtils.generateKeys(random, random.nextInt(4, 32), 255)),
                 () -> new LoopXorIntMask(context)
@@ -33,6 +32,9 @@ public class DoWhileLoopStringMask extends PolyMask<String> {
 
         var n = random.nextInt(1, maxMasks + 1);
         for(int i = 0; i < n; i++) {
+            if(masks.isEmpty())
+                break;
+
             var sup = masks.get(random.nextInt(masks.size()));
             var mask = sup.get();
             if(mask == null) {
