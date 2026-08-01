@@ -120,12 +120,25 @@ public class Poly2StringDecryptor implements IStringDecryptor {
         strings.add(ctx.encrypt(str));
 
         var builder = new InsnBuilder();
+        int saltChance = 50;
         for(int i = 0; i < args.length; i++) {
             var value = args[i];
             var arg = ctx.args().list().get(i);
 
-            builder._int(value);
-            if(arg.type() != ArgType.INT && Utils.chance(random, 50)) {
+            if(!method.hasSalt() || !Utils.chance(random, saltChance)) {
+                builder._int(value);
+                saltChance += 25;
+            } else {
+                var masked = method.salt().value() | method.seed();
+                builder
+                        .add(method.salt().load())
+                        ._int(method.seed()).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
+                        .ior()
+                        ._int(masked ^ value)
+                        .ixor();
+                saltChance = 50;
+            }
+            if (arg.type() != ArgType.INT && Utils.chance(random, 50)) {
                 builder.add(new InsnNode(switch (arg.type()) {
                     case BYTE -> I2B;
                     case CHAR -> I2C;
