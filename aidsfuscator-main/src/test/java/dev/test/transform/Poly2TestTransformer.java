@@ -7,6 +7,7 @@ import dev.lvstrng.aidsfuscator.polymorph.full.args.KeyType;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.decryptors.Poly2StringDecryptor;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
+import org.objectweb.asm.tree.LdcInsnNode;
 
 import java.util.HashMap;
 
@@ -25,25 +26,35 @@ public class Poly2TestTransformer extends Transformer {
             dec.generate(context, clazz, "a", "a");
             prepareValues(dec.context(), clazz.methods().getFirst());
 
-            var str = "Hello, world!";
-            var encrypted = dec.context().encrypt(str);
-            var decrypted = dec.context().decrypt(encrypted);
+            for(var method : clazz.methods()) {
+                for(var insn : method.insns()) {
+                    if(!(insn instanceof LdcInsnNode ldc && ldc.cst instanceof String s))
+                        continue;
 
-            if(!str.equals(decrypted))
-                throw new IllegalStateException("Unequal strings: str = %s; encrypted = %s; decrypted = %s;".formatted(str, encrypted, decrypted));
-            else {
-                Logger.info("encrypted = %s; decrypted = %s;", encrypted, decrypted);
+                    if(s.isEmpty())
+                        continue;
+
+                    var encrypted = dec.context().encrypt(s);
+                    var decrypted = dec.context().decrypt(encrypted);
+
+                    if(!s.equals(decrypted))
+                        throw new IllegalStateException("Unequal strings: str = %s; encrypted = %s; decrypted = %s;".formatted(s, encrypted, decrypted));
+                    else {
+                        Logger.info("encrypted = %s; decrypted = %s;", encrypted, decrypted);
+                    }
+                }
             }
         }
     }
 
     private void prepareValues(PolymorphMethodContext context, JMethod method) {
-        var trace = ((method.owner().name().hashCode() ^ method.name().hashCode()) >> 16) ^ context.traceXorKey();
+        var className = method.owner().name().replace('/', '.');
+        var trace = ((className.hashCode() ^ method.name().hashCode()) >> 16) ^ context.traceXorKey();
 
         var vals = new HashMap<Integer, Integer>();
         for(var arg : context.args().list()) {
             if(arg.keyType() == KeyType.INDEX_KEY) {
-                vals.put(context.args().slot(arg), 0);
+                vals.put(context.args().slot(arg), context.indexXorKey());
                 continue;
             }
 

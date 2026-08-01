@@ -125,14 +125,14 @@ public class Poly2StringDecryptor implements IStringDecryptor {
             var arg = ctx.args().list().get(i);
 
             builder._int(value);
-            /*if(arg.type() != ArgType.INT && Utils.chance(random, 50)) {
+            if(arg.type() != ArgType.INT && Utils.chance(random, 50)) {
                 builder.add(new InsnNode(switch (arg.type()) {
                     case BYTE -> I2B;
                     case CHAR -> I2C;
                     case SHORT -> I2S;
                     default -> throw new RuntimeException("Unhandled type %s".formatted(arg.type()));
                 }));
-            }*/
+            }
         }
 
         builder.method(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()).addProps(context, Property.IGNORE_REF_OBFUSCATION);
@@ -140,7 +140,8 @@ public class Poly2StringDecryptor implements IStringDecryptor {
     }
 
     private int[] prepareValues(PolymorphMethodContext context, JMethod method, int index) {
-        var trace = ((method.owner().name().hashCode() ^ method.name().hashCode()) >> 16) ^ context.traceXorKey();
+        var className = method.owner().name().replace('/', '.');
+        var trace = ((className.hashCode() ^ method.name().hashCode()) >> 16) ^ context.traceXorKey();
         var args = new int[context.args().list().size()];
 
         var vals = new HashMap<Integer, Integer>();
