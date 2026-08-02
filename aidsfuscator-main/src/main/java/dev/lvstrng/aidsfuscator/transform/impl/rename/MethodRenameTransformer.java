@@ -40,7 +40,7 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            var impactedClasses = impactedClasses(context, clazz, method);
+            var impactedClasses = collisionScope(context, method);
             if(skipHierarchy(method, impactedClasses))
                 continue;
 
@@ -88,11 +88,11 @@ public class MethodRenameTransformer extends Transformer {
      * @return false if should continue, true if should skip
      */
     private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
-        if(method.owner().isLibMethod(method))
-            return true;
-
         // ---- CLASS TREE CHECKS ----
         for(var member : impactedClasses) {
+            if(member.isLibrary())
+                return true;
+
             var opt = member.findMethod(method.name(), method.desc());
             if(opt.isPresent())
                 method = opt.get();
@@ -110,18 +110,40 @@ public class MethodRenameTransformer extends Transformer {
         return false;
     }
 
-    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
-        var classes = new HashSet<>(clazz.children()); // children will obviously have this method in their tree
-        classes.add(clazz);
+    /**
+     * Walks the full override  for this method, not just clazz's own hierarchy.
+     * Needed because a class implementing two unrelated interfaces with matching name+desc
+     * bridges them, so a name picked from one interfaces side can still collide on the other
+     * @param context obfuscator context
+     * @param method method to find the collision scope for
+     * @author brownie
+     */
+    private Set<JClass> collisionScope(Context context, JMethod method) {
+        var visited = new HashSet<JClass>();
+        var queue = new ArrayDeque<JClass>();
 
-        for(var parent : clazz.parents()) {
-            if(!parent.hasMethodInTree(context, method))
-                continue;
+        visited.add(method.owner());
+        queue.add(method.owner());
 
-            classes.add(parent);
-            classes.addAll(parent.children());
+        while(!queue.isEmpty()) {
+            var current = queue.poll();
+
+            for(var child : current.children()) {
+                if(visited.add(child))
+                    queue.add(child);
+            }
+
+            for(var parent : current.parents()) {
+                if(visited.contains(parent))
+                    continue;
+
+                if(parent.hasMethodInTree(context, method)) {
+                    visited.add(parent);
+                    queue.add(parent);
+                }
+            }
         }
 
-        return classes;
+        return visited;
     }
 }

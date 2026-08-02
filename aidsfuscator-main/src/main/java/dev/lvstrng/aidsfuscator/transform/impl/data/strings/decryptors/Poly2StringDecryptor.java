@@ -134,7 +134,7 @@ public class Poly2StringDecryptor implements IStringDecryptor {
                         .add(method.salt().load())
                         ._int(method.seed()).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                         .ior()
-                        ._int(masked ^ value)
+                        ._int(masked ^ value).addProps(context, Property.IGNORE_INTEGER)
                         .ixor();
                 saltChance = 50;
             }
