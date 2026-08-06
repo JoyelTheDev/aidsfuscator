@@ -29,9 +29,6 @@ import java.util.function.BiPredicate;
 public class ControlFlowFlatteningTransformer extends Transformer {
     private final Setting<Boolean> obfuscateValues = setting("obfuscateValues", true);
 
-    private final BiFunction<Integer, Integer, Integer> or = (v1, v2) -> v1 | v2;
-    private final BiFunction<Integer, Integer, Integer> and = (v1, v2) -> v1 & v2;
-
     private final BiPredicate<ControlFlowGraph, Block> goodBlock = (graph, block) -> {
         if(block.inTrapHandler())   return false;
         if(block.inTrapEnd())       return false;
@@ -86,17 +83,19 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                     for(var block : group) {
                         var list = new InsnList();
                         var lbl = new LabelNode();
-                        var useOr = random.nextBoolean();
-                        var func = useOr ? or : and;
-                        var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE, func);
+                        var key = random.nextInt();
 
-                        if (method.hasSalt()) {
+                        if(method.hasSalt()) {
+                            var masked = method.salt().value() | method.seed();
                             list.add(method.salt().load());
-                            list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
-                            list.add(new InsnNode(useOr ? IOR : IAND));
-                            key = func.apply(method.salt().value(), key);
+                            list.add(ASMUtils.pushInt(method.seed()));
+                            list.add(new InsnNode(IOR));
+                            list.add(ASMUtils.pushInt(masked ^ key));
+                            list.add(new InsnNode(IXOR));
                         } else {
-                            list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
+                            list.add(context.properties().add(ASMUtils.pushInt(method.seed()), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
+                            list.add(ASMUtils.pushInt(key ^ method.seed()));
+                            list.add(new InsnNode(IXOR));
                         }
 
                         list.add(new VarInsnNode(ISTORE, flattenerLocal));
@@ -142,15 +141,6 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 method.reinitUnsafeInstructions();
             }
         }
-    }
-
-    private int uniqueInt(Map<LabelNode, Integer> cases, int mask, BiFunction<Integer, Integer, Integer> func) {
-        int res;
-        do {
-            res = random.nextInt();
-        } while (cases.containsValue(func.apply(res, mask)));
-
-        return res;
     }
 
     private List<List<Block>> grouped(ControlFlowGraph graph) {
