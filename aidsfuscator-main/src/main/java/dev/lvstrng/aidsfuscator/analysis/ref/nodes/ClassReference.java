@@ -14,4 +14,9 @@ public record ClassReference(JClass callerClass, JMethod caller, JClass clazz, A
     public String toString() {
         return "{ " + caller + " -> " + clazz + " }";
     }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
 }
