@@ -111,6 +111,7 @@ public class Poly2StringDecryptor implements IStringDecryptor {
                 .method(INVOKEVIRTUAL, "java/lang/String", "intern", "()Ljava/lang/String;")
                 ._areturn();
 
+        clazz.reinsertRandomly(random, method);
     }
 
     @Override

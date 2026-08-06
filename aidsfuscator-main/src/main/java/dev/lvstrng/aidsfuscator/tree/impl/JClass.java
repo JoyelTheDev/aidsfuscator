@@ -426,6 +426,30 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         return field;
     }
 
+    public void reinsertRandomly(Random random, JMethod method) {
+        remove(method);
+        if(methods.isEmpty()) {
+            add(method);
+            return;
+        }
+
+        var idx = random.nextInt(methods.size());
+        methods.add(idx, method);
+        core.methods.add(idx, method.core());
+    }
+
+    public void reinsertRandomly(Random random, JField field) {
+        remove(field);
+        if(fields.isEmpty()) {
+            add(field);
+            return;
+        }
+
+        var idx = random.nextInt(fields.size());
+        fields.add(idx, field);
+        core.fields.add(idx, field.core());
+    }
+
     @Override
     public Set<JClass> parents() {
         return parents;

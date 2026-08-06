@@ -91,13 +91,16 @@ public class StringEncryptTransformer extends Transformer {
             }
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
-            clazz.createField(access, fieldName, "[Ljava/lang/String;");
+            var field = clazz.createField(access, fieldName, "[Ljava/lang/String;");
 
             var cacheName = context.dictionary().newFieldName(clazz, "[Ljava/lang/Object;");
-            clazz.createField(access, cacheName, "[Ljava/lang/Object;");
+            var cacheField = clazz.createField(access, cacheName, "[Ljava/lang/Object;");
 
             initializer.generate(context, clazz, fieldName, cacheName, strings);
             decryptor.generate(context, clazz, fieldName, cacheName);
+
+            clazz.reinsertRandomly(random, field);
+            clazz.reinsertRandomly(random, cacheField);
         }
     }
 }

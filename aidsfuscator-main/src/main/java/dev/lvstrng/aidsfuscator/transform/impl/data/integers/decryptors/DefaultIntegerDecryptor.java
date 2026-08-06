@@ -71,6 +71,8 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
                 .add(stack.dumpWithList(() -> new InsnBuilder()._var(ISTORE, value)._var(ILOAD, value).result()))
                 ._ireturn()
         ;
+
+        clazz.reinsertRandomly(random, method);
     }
 
     @Override

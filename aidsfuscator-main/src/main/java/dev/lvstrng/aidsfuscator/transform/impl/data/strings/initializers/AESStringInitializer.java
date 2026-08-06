@@ -182,5 +182,6 @@ public class AESStringInitializer implements IStringInitializer {
         ;
 
         method.insertSafe(body.result());
+        clazz.reinsertRandomly(random, method);
     }
 }

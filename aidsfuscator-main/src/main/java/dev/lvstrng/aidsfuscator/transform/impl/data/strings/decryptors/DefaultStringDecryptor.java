@@ -181,6 +181,7 @@ public class DefaultStringDecryptor implements IStringDecryptor {
 
         method.insns().add(builder.result());
         method.properties().add(Property.STRING_DECRYPTOR);
+        clazz.reinsertRandomly(random, method);
     }
 
     @Override

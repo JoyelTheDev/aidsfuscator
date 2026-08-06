@@ -45,6 +45,7 @@ public class ClassSaltTransformer extends Transformer {
             var field = clazz.createField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I");
             field.properties().add(Property.SALT_ARTIFACT);
             clazz.setSalt(new ClassSalt(clazz, field, val));
+            clazz.reinsertRandomly(random, field);
 
             for(var method : clazz.methods()) {
                 if(Exclusions.CLASS_SALTING.excluded(method))

@@ -222,6 +222,7 @@ public class ThirdStringInitializer implements IStringInitializer {
 
         method.insertSafe(body.result());
         method.reinitUnsafeInstructions();
+        clazz.reinsertRandomly(random, method);
     }
 
     private static String encrypt(String s, int key, int bits, int[] keys) {

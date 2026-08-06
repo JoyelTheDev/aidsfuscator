@@ -142,5 +142,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
 
         clinit.insertSafe(builder.result());
         clinit.reinitUnsafeInstructions();
+
+        clazz.reinsertRandomly(random, clinit);
     }
 }

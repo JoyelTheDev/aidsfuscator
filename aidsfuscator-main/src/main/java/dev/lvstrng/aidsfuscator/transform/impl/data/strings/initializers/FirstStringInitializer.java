@@ -209,5 +209,6 @@ public class FirstStringInitializer implements IStringInitializer {
 
         method.insertSafe(builder.result());
         method.reinitUnsafeInstructions();
+        clazz.reinsertRandomly(random, method);
     }
 }
