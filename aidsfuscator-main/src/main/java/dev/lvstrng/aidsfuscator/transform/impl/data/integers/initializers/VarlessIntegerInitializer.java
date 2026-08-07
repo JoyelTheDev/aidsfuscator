@@ -45,9 +45,9 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 // load bytes
                 .label()
                 .baload() // idx, byte[], ptr, byte1
-                ._int(0xFF)
+                ._int(0xFF).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
-                ._int(24)
+                ._int(24).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .ishl() // idx, byte[], ptr, (byte1 & 0xFF) << 24
                 .dup_x2()
                 .pop() // idx, byte1, byte[], ptr
@@ -57,9 +57,9 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 ._int(1)
                 .iadd()
                 .baload() // idx, byte1, byte[], ptr, byte2
-                ._int(0xFF)
+                ._int(0xFF).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
-                ._int(16)
+                ._int(16).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .ishl() // idx, byte1, byte[], ptr, (byte2 & 0xFF) << 16
                 .dup_x2()
                 .pop() // idx, byte1, byte2, byte[], ptr
@@ -69,9 +69,9 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 ._int(2)
                 .iadd()
                 .baload() // idx, byte1, byte2, byte[], ptr, byte3
-                ._int(0xFF)
+                ._int(0xFF).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
-                ._int(8)
+                ._int(8).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .ishl() // idx, byte1, byte2, byte[], ptr, (byte3 & 0xFF) << 8
                 .dup_x2()
                 .pop() // idx, byte1, byte2, byte3, byte[], ptr
@@ -81,7 +81,7 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 ._int(3)
                 .iadd()
                 .baload() // idx, byte1, byte2, byte3, byte[], ptr, byte4
-                ._int(0xFF)
+                ._int(0xFF).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand() // idx, byte1, byte2, byte3, byte[], ptr, (byte4 & 0xFF)
                 .dup_x2()
                 .pop() // idx, byte1, byte2, byte3, byte4, byte[], ptr
