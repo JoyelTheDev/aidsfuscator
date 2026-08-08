@@ -40,74 +40,58 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            var impactedClasses = collisionScope(context, method);
-            if(skipHierarchy(method, impactedClasses))
+            var scope = collisionScope(context, method);
+            if(!doRename(method, scope))
                 continue;
 
-            var name = findOrGenerateName(context, clazz, impactedClasses, method);
-            clazz.methods().stream()
-                    .filter(e -> e.mappedName().equals(name))
-                    .filter(e -> e.desc().equals(method.desc()))
-                    .filter(e -> e != method)
-                    .findFirst().ifPresent(other -> Logger.error("[%s] %s (%s) -> %s (%s)", clazz.originalName(), method.simpleOriginalName(), name, other.simpleOriginalName(), other.mappedName()));
+            var newName = newName(context, clazz, method, scope);
+            for(var c : scope) {
+                var oldKey = MemberUtils.fullMethod(c, method);
+                var newKey = MemberUtils.fullMethod(c.name(), newName, method.desc());
+                Mappings.METHOD.register(oldKey, new Mapping(newKey, newName));
 
-            for(var member : impactedClasses) {
-                var opt = member.findMethod(method.name(), method.desc());
-                if(opt.isPresent()) {
-                    var mth = opt.get();
-                    mth.setMappedName(name);
-                }
+                var mOpt = c.findMethod(method.name(), method.desc());
+                if(mOpt.isEmpty())
+                    continue;
 
-                var oldId = MemberUtils.fullMethod(member, method);
-                var newId = MemberUtils.fullMethod(member.name(), name, method.desc());
-                Mappings.METHOD.register(oldId, new Mapping(newId, name));
-
-                markChange();
+                mOpt.get().setMappedName(newName);
             }
         }
     }
 
-    private String findOrGenerateName(Context context, JClass clazz, Set<JClass> impactedClasses, JMethod method) {
-        for(var member : impactedClasses) {
-            var id = MemberUtils.fullMethod(member, method);
-            if(Mappings.METHOD.containsOld(id))
-                return Mappings.METHOD.retrieve(id).value();
+    private String newName(Context context, JClass clazz, JMethod method, Set<JClass> scope) {
+        for(var c : scope) {
+            var key = MemberUtils.fullMethod(c, method);
+            if(!Mappings.METHOD.containsOld(key))
+                continue;
+
+            return Mappings.METHOD.retrieve(key).value();
         }
 
-        var id = MemberUtils.fullMethod(clazz, method);
-        if(Mappings.METHOD.containsOld(id))
-            return Mappings.METHOD.retrieve(id).value();
-
-        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), impactedClasses);
+        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), scope);
     }
 
-    /**
-     * Exclusion and invalid method check
-     * @param method method
-     * @param impactedClasses all impacted classes
-     * @return false if should continue, true if should skip
-     */
-    private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
-        // ---- CLASS TREE CHECKS ----
-        for(var member : impactedClasses) {
-            if(member.isLibrary())
-                return true;
+    private boolean doRename(JMethod root, Set<JClass> scope) {
+        for(var clazz : scope) {
+            if(Exclusions.RENAME_METHOD.excluded(clazz))
+                return false;
 
-            var opt = member.findMethod(method.name(), method.desc());
-            if(opt.isPresent())
-                method = opt.get();
+            if(Exclusions.RENAME_METHOD.excluded(clazz, root))
+                return false;
 
-            if(Exclusions.RENAME_METHOD.excluded(member))
-                return true;
+            if(clazz.isLibrary())
+                return false;
 
-            if(Exclusions.RENAME_METHOD.excluded(member, method))
-                return true;
+            var method = root;
+            var methodOpt = clazz.findMethod(root.name(), root.desc());
+            if(methodOpt.isPresent())
+                method = methodOpt.get();
 
-            if(cantEditMethod(member, method, false, true))
-                return true;
+            if(cantEditMethod(clazz, method, false, true))
+                return false;
         }
 
-        return false;
+        return true;
     }
 
     /**

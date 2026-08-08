@@ -61,14 +61,11 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
      * @param desc descriptor to check for
      */
     public boolean isMethodMappedExact(String name, String desc, Collection<JClass> classes) {
-        if(methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
-            return true;
-
         for(var member : classes) {
             if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
-        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
+        return false;
     }
 
     /**
