@@ -85,19 +85,7 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                         var lbl = new LabelNode();
                         var key = random.nextInt();
 
-                        if(method.hasSalt()) {
-                            var masked = method.salt().value() | method.seed();
-                            list.add(method.salt().load());
-                            list.add(ASMUtils.pushInt(method.seed()));
-                            list.add(new InsnNode(IOR));
-                            list.add(ASMUtils.pushInt(masked ^ key));
-                            list.add(new InsnNode(IXOR));
-                        } else {
-                            list.add(context.properties().add(ASMUtils.pushInt(method.seed()), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
-                            list.add(ASMUtils.pushInt(key ^ method.seed()));
-                            list.add(new InsnNode(IXOR));
-                        }
-
+                        list.add(method.protectedIntPush(context, key));
                         list.add(new VarInsnNode(ISTORE, flattenerLocal));
                         list.add(new JumpInsnNode(GOTO, dispatcher));
                         list.add(lbl);

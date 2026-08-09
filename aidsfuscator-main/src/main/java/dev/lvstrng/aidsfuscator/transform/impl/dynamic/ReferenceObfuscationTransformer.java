@@ -93,18 +93,7 @@ public class ReferenceObfuscationTransformer extends Transformer {
 
                             int xorIndex = idx ^ indexXor;
                             list.add(context.properties().add(ASMUtils.pushInt(xorIndex), Property.IGNORE_INTEGER));
-                            if(method.hasSalt()) {
-                                var mask = method.seed();
-                                var masked = method.salt().value() & mask;
-
-                                list.add(method.salt().load());
-                                list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER));
-                                list.add(new InsnNode(IAND));
-                                list.add(context.properties().add(ASMUtils.pushInt(masked ^ (decKey << 16)), Property.IGNORE_INTEGER));
-                                list.add(new InsnNode(IXOR));
-                            } else {
-                                list.add(context.properties().add(ASMUtils.pushInt((decKey << 16) | random.nextInt(Short.MAX_VALUE)), Property.IGNORE_INTEGER));
-                            }
+                            list.add(method.protectedIntPush(context, (decKey << 16) | (method.hasSalt() ? 0 : random.nextInt(Short.MAX_VALUE))));
                             list.add(indy);
 
                             method.insns().insertBefore(call, list);

@@ -8,12 +8,14 @@ import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleInterpreter;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleValue;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.property.PropertyContainer;
 import dev.lvstrng.aidsfuscator.salt.ISaltable;
 import dev.lvstrng.aidsfuscator.salt.impl.MethodSalt;
 import dev.lvstrng.aidsfuscator.tree.IAccessFlags;
 import dev.lvstrng.aidsfuscator.tree.IAnnotatable;
 import dev.lvstrng.aidsfuscator.tree.IHierarchical;
+import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -66,6 +68,26 @@ public class JMethod implements IAccessFlags, ISaltable<MethodSalt>, IHierarchic
     public void addUnsafeInstructions(InsnList list) {
         list.forEach(unsafeInstructions::add);
         insns().insert(list);
+    }
+
+    public InsnList protectedIntPush(Context ctx, int value) {
+        var builder = new InsnBuilder();
+
+        if(hasSalt()) {
+            var masked = salt.value() | seed;
+
+            builder.add(salt.load())
+                    ._int(seed).addProps(ctx, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
+                    .ior()
+                    ._int(masked ^ value).addProps(ctx, Property.IGNORE_INTEGER)
+                    .ixor();
+        } else {
+            builder._int(seed).addProps(ctx, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
+                    ._int(value ^ seed)
+                    .ixor();
+        }
+
+        return builder.result();
     }
 
     public void clearUnsafeInstructions() {

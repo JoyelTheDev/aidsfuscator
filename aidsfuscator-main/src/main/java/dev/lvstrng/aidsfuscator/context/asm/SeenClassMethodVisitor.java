@@ -92,16 +92,20 @@ public class SeenClassMethodVisitor extends MethodVisitor {
         Arrays.stream(Type.getArgumentTypes(descriptor)).forEach(this::add);
         add(Type.getReturnType(descriptor));
 
-        Arrays.stream(Type.getArgumentTypes(bootstrapMethodHandle.getDesc())).forEach(this::add);
-        add(Type.getReturnType(bootstrapMethodHandle.getDesc()));
+        try {
+            Arrays.stream(Type.getArgumentTypes(bootstrapMethodHandle.getDesc())).forEach(this::add);
+            add(Type.getReturnType(bootstrapMethodHandle.getDesc()));
+        } catch (StringIndexOutOfBoundsException _) {}
         addInternal(bootstrapMethodHandle.getOwner());
 
         for(var obj : bootstrapMethodArguments) {
             if(!(obj instanceof Handle h))
                 continue;
 
-            Arrays.stream(Type.getArgumentTypes(h.getDesc())).forEach(this::add);
-            add(Type.getReturnType(h.getDesc()));
+            try {
+                Arrays.stream(Type.getArgumentTypes(h.getDesc())).forEach(this::add);
+                add(Type.getReturnType(h.getDesc()));
+            } catch (StringIndexOutOfBoundsException _) {}
             addInternal(h.getOwner());
         }
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);

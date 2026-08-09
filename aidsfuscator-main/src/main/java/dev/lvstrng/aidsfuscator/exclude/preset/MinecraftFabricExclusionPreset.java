@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.exclude.preset;
 
 import dev.lvstrng.aidsfuscator.exclude.IExclusionPreset;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusion;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 
 public class MinecraftFabricExclusionPreset implements IExclusionPreset {
@@ -23,6 +24,7 @@ public class MinecraftFabricExclusionPreset implements IExclusionPreset {
         Exclusions.LINE_NUMBERS.addAnnotation(MIXIN);
         Exclusions.LOCAL_NAMES.addAnnotation(MIXIN);
         Exclusions.TRIM.addAnnotation(MIXIN);
+        Exclusions.FLOW_INTS.addAnnotation(MIXIN);
 
         Exclusions.RENAME_METHOD.addAnnotation(SHADOW);
         Exclusions.RENAME_METHOD.addAnnotation(OVERWRITE);

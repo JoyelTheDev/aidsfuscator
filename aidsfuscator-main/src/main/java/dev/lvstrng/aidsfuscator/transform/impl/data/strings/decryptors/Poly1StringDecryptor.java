@@ -204,28 +204,15 @@ public class Poly1StringDecryptor implements IStringDecryptor {
         var idxVal = idx ^ idxXor;
         var firstKey = random.nextInt(Character.MAX_VALUE);
 
-        var list = new InsnList();
+        var list = new InsnBuilder();
         for(var arg : args) {
             switch (arg) {
-                case INDEX -> list.add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
-                case KEY1 -> list.add(context.properties().add(ASMUtils.pushInt(firstKey), Property.IGNORE_INTEGER));
-                case KEY2 -> {
-                    if(method.hasSalt()) {
-                        var mask = method.seed();
-                        var masked = method.salt().value() & mask;
-
-                        list.add(method.salt().load());
-                        list.add(context.properties().add(ASMUtils.pushInt(mask), Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS));
-                        list.add(new InsnNode(IAND));
-                        list.add(context.properties().add(ASMUtils.pushInt(masked ^ (key << 16)), Property.IGNORE_INTEGER));
-                        list.add(new InsnNode(IXOR));
-                    } else {
-                        list.add(context.properties().add(ASMUtils.pushInt((key << 16) | random.nextInt(Short.MAX_VALUE)) /*add useless bits*/, Property.IGNORE_INTEGER));
-                    }
-                }
+                case INDEX -> list._int(idxVal).addProps(context, Property.IGNORE_INTEGER);
+                case KEY1 -> list._int(firstKey).addProps(context, Property.IGNORE_INTEGER);
+                case KEY2 -> list.add(method.protectedIntPush(context, (key << 16) | (method.hasSalt() ? 0 : random.nextInt(Short.MAX_VALUE))));
             }
         }
-        list.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION));
+        list.method(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()).addProps(context, Property.IGNORE_REF_OBFUSCATION);
 
         var chars = str.toCharArray();
         for(int i = 0; i < chars.length; i++) {
@@ -234,7 +221,7 @@ public class Poly1StringDecryptor implements IStringDecryptor {
         }
 
         strings.add(new String(chars));
-        return list;
+        return list.result();
     }
 
     @Override

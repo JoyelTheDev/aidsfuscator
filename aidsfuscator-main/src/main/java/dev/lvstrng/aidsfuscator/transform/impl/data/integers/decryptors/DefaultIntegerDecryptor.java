@@ -94,24 +94,11 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
         numbers.add(num);
 
         // ---- INSTRUCTIONS ----
-        var builder = new InsnBuilder()._int(idxValue);
-        if(method.hasSalt()) {
-            var mask = method.seed();
-            var masked = method.salt().value() & mask;
+        var builder = new InsnBuilder()
+                ._int(idxValue)
+                .add(method.protectedIntPush(context, key));
 
-            builder
-                    .add(method.salt().load())
-                    ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
-                    .iand()
-                    ._int(masked ^ key).addProps(context, Property.IGNORE_INTEGER)
-                    .ixor()
-            ;
-        } else {
-            builder._int(key);
-        }
-        builder.add(context.properties().add(
-                new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION
-        ));
+        builder.method(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()).addProps(context, Property.IGNORE_REF_OBFUSCATION);
         return builder.result();
     }
 }
