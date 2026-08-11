@@ -34,8 +34,7 @@ public class ClassSaltTransformer extends Transformer {
                 if(!unifyAccess.value())
                     continue;
 
-                clazz.removeAccessFlags(ACC_PRIVATE);
-                clazz.removeAccessFlags(ACC_PROTECTED);
+                clazz.removeAccessFlags(ACC_PRIVATE | ACC_PROTECTED);
                 clazz.addAccessFlags(ACC_PUBLIC);
             }
 
