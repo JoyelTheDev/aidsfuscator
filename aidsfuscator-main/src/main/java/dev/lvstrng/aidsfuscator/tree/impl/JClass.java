@@ -68,6 +68,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
+
         return false;
     }
 
@@ -92,7 +93,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
                 return true;
         }
 
-        return fields().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
+        return false;
     }
 
     /**
@@ -112,7 +113,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
                 return true;
         }
 
-        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findFirst().isPresent();
+        return false;
     }
 
     public boolean isFieldMapped(String name, String desc) {
