@@ -50,11 +50,7 @@ public class MethodRenameTransformer extends Transformer {
                 var newKey = MemberUtils.fullMethod(c.name(), newName, method.desc());
                 Mappings.METHOD.register(oldKey, new Mapping(newKey, newName));
 
-                var mOpt = c.findMethod(method.name(), method.desc());
-                if(mOpt.isEmpty())
-                    continue;
-
-                mOpt.get().setMappedName(newName);
+                c.findMethod(method.name(), method.desc()).ifPresent(e -> e.setMappedName(newName));
             }
         }
     }
