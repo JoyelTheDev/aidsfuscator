@@ -1,7 +1,7 @@
 package dev.lvstrng.aidsfuscator.context;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
-import dev.lvstrng.aidsfuscator.classgen.impl.StrictSaltDispatcherClassGenerator;
+import dev.lvstrng.aidsfuscator.classgen.impl.salt.StrictSaltDispatcherClassGenerator;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;

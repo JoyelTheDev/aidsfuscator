@@ -1,4 +1,4 @@
-package dev.lvstrng.aidsfuscator.classgen.impl;
+package dev.lvstrng.aidsfuscator.classgen.impl.salt;
 
 import dev.lvstrng.aidsfuscator.classgen.IClassGen;
 import dev.lvstrng.aidsfuscator.context.Context;
