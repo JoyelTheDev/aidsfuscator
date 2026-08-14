@@ -1,14 +1,15 @@
 package dev.test;
 
+import dev.lvstrng.aidsfuscator.classgen.impl.hash.BasicHashIntegrityClass;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IntegerEncryptTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts.FlowIntsTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts.FlowIntsTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
@@ -24,7 +25,7 @@ public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("eval.jar")
+                .in("in.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -34,7 +35,7 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                new StringEncryptTransformer()
+                new TestTransformer()
         );
     }
 }

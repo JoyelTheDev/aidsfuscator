@@ -2,6 +2,7 @@ package dev.test.transform;
 
 import dev.lvstrng.aidsfuscator.analysis.flow.export.DotGraphExport;
 import dev.lvstrng.aidsfuscator.analysis.ref.nodes.ClassReference;
+import dev.lvstrng.aidsfuscator.classgen.impl.hash.BasicHashIntegrityClass;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
@@ -17,7 +18,10 @@ public class TestTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
-        graph(context);
+        //graph(context);
+        var integrity = new BasicHashIntegrityClass(context);
+        integrity.init();
+        context.addArtificial(integrity.get());
     }
 
     private void graph(Context context) {
