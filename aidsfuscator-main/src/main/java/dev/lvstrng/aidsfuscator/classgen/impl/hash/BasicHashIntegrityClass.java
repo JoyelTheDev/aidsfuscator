@@ -28,8 +28,38 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
         this.stringField = clazz.createField(ACC_PRIVATE, context.dictionary().newFieldName(clazz, "Ljava/lang/String;"), "Ljava/lang/String;");
         this.valueField = clazz.createField(ACC_PRIVATE, context.dictionary().newFieldName(clazz, "I"), "I");
 
+        this.createInitializer();
         this.createHasher();
         this.createRetriever();
+    }
+
+    private void createInitializer() {
+        var name = "<init>";
+        var desc = "(Ljava/lang/String;I)V";
+        var method = clazz.createMethod(0, name, desc);
+
+        var thisVar = method.allocVar();
+        var hashVar = method.allocVar();
+        var valueVar = method.allocVar();
+
+        new InsnBuilder(method.insns())
+                .label()
+                ._var(ALOAD, thisVar)
+                .method(INVOKESPECIAL, clazz.superName(), "<init>", "()V")
+
+                .label()
+                ._var(ALOAD, thisVar)
+                ._var(ALOAD, hashVar)
+                .field(PUTFIELD, clazz.name(), stringField.name(), stringField.desc())
+
+                .label()
+                ._var(ALOAD, thisVar)
+                ._var(ILOAD, valueVar)
+                .field(PUTFIELD, clazz.name(), valueField.name(), valueField.desc())
+
+                .label()
+                ._return()
+        ;
     }
 
     private void createHasher() {
@@ -113,7 +143,7 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
         var list = new InsnBuilder(retrieverMethod.insns())
                 .label()
                 ._var(ALOAD, classVar)
-                .method(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/Class;")
+                .method(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;")
                 ._int('.')
                 ._int('/')
                 .method(INVOKEVIRTUAL, "java/lang/String", "replace", "(CC)Ljava/lang/String;")
