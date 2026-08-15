@@ -8,22 +8,17 @@ import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.LabelNode;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.lang.invoke.StringConcatFactory;
-
 import static org.objectweb.asm.Opcodes.*;
 
+@SuppressWarnings("all")
 public class BasicHashIntegrityClass implements IHashIntegrityClass {
     private final Context context;
     private JClass clazz;
     private JMethod retrieverMethod, hashMethod;
     private JField mapField, stringField, valueField;
-    private ByteArrayOutputStream hashFile;
 
     public BasicHashIntegrityClass(Context context) {
         this.context = context;
-        this.hashFile = new ByteArrayOutputStream();
     }
 
     @Override
@@ -33,7 +28,71 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
         this.stringField = clazz.createField(ACC_PRIVATE, context.dictionary().newFieldName(clazz, "Ljava/lang/String;"), "Ljava/lang/String;");
         this.valueField = clazz.createField(ACC_PRIVATE, context.dictionary().newFieldName(clazz, "I"), "I");
 
+        this.createHasher();
         this.createRetriever();
+    }
+
+    private void createHasher() {
+        var desc = "([B)Ljava/lang/String;";
+        this.hashMethod = clazz.createMethod(ACC_PUBLIC | ACC_STATIC, context.dictionary().newMethodName(clazz, desc), desc);
+
+        var byteArrVar = hashMethod.allocVar();
+        var hashVar = hashMethod.allocVar();
+        var sbVar = hashMethod.allocVar();
+        var iVar = hashMethod.allocVar(Type.INT_TYPE);
+
+        var loopLbl = new LabelNode();
+        var list = new InsnBuilder(hashMethod.insns())
+                .label()
+                ._const("SHA-256")
+                .method(INVOKESTATIC, "java/security/MessageDigest", "getInstance", "(Ljava/lang/String;)Ljava/security/MessageDigest;")
+                ._var(ALOAD, byteArrVar)
+                .method(INVOKEVIRTUAL, "java/security/MessageDigest", "digest", "([B)[B")
+                ._var(ASTORE, hashVar)
+
+                .label()
+                .type(NEW, "java/lang/StringBuilder")
+                .dup()
+                .method(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V")
+                ._var(ASTORE, sbVar)
+
+                .label()
+                ._int(0)
+                ._var(ISTORE, iVar)
+
+                .label(loopLbl)
+                ._var(ALOAD, sbVar)
+                ._const("%02x")
+                ._int(1)
+                .anewarray("java/lang/Object")
+                .dup()
+                ._int(0)
+                ._var(ALOAD, hashVar)
+                ._var(ILOAD, iVar)
+                .baload()
+                ._int(0xff)
+                .iand()
+                .i2b()
+                .method(INVOKESTATIC, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;")
+                .aastore()
+                .method(INVOKESTATIC, "java/lang/String", "format", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;")
+                .method(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;")
+                .pop()
+
+                .label()
+                .iinc(iVar, 1)
+
+                .label()
+                ._var(ILOAD, iVar)
+                ._var(ALOAD, hashVar)
+                .arraylength()
+                .jump(IF_ICMPLT, loopLbl)
+
+                .label()
+                ._var(ALOAD, sbVar)
+                .method(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;")
+                ._areturn()
+                ;
     }
 
     private void createRetriever() {
@@ -97,7 +156,7 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
                 .field(GETSTATIC, clazz.name(), mapField.name(), mapField.desc())
                 ._var(ALOAD, inVar)
                 .method(INVOKEVIRTUAL, "java/io/InputStream", "readAllBytes", "()[B")
-                .method(INVOKESTATIC, clazz.name(), /*hashMethod.name()*/ "a", /*hashMethod.desc()*/ "([B)Ljava/lang/String;")
+                .method(INVOKESTATIC, clazz.name(), hashMethod.name() /*"a"*/, hashMethod.desc() /*"([B)Ljava/lang/String;"*/)
                 .method(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;")
                 .type(CHECKCAST, clazz.name())
                 ._var(ASTORE, instanceVar)
