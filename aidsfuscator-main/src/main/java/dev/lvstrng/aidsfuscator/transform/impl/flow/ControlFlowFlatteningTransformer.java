@@ -48,8 +48,8 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 continue;
 
             for(var method : clazz.methods()) {
-                if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
-                    continue;
+                /*if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
+                    continue;*/
 
                 if(Exclusions.FLOW_FLATTEN.excluded(method))
                     continue;

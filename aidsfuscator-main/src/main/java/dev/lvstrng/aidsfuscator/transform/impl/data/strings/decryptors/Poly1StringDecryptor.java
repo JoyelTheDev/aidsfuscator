@@ -190,6 +190,7 @@ public class Poly1StringDecryptor implements IStringDecryptor {
         ;
 
         clazz.reinsertRandomly(random, method);
+        clazz.properties().add(Property.STRING_DECRYPTOR);
     }
 
     @Override
