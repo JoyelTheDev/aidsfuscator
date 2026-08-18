@@ -1,6 +1,7 @@
 package dev.lvstrng.aidsfuscator.transform.impl.integrity;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
@@ -41,8 +42,13 @@ public class HashIntegrityTransformer extends Transformer {
             return addedField.get();
         };
         var value = context.hashIntegrityClass().classValue(clazz);
+        if(Exclusions.HASH_INTEGRITY.excluded(clazz))
+            return;
 
         for(var method : clazz.methods()) {
+            if(Exclusions.HASH_INTEGRITY.excluded(method))
+                continue;
+
             for(var insn : method.insns()) {
                 if(!ASMUtils.isIntPush(insn))
                     continue;

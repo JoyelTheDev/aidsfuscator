@@ -382,11 +382,13 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
 
         var content = new ByteArrayOutputStream();
         for(var entry : classHashes.entrySet()) {
-            content.write(entry.getValue().getBytes(StandardCharsets.UTF_8));
-
             var hashVal = hashValues.get(entry.getKey());
+            if(hashVal == null)
+                continue;
+
             var paramVal = paramValue(entry.getKey());
             var hashHash = entry.getValue().hashCode();
+            content.write(entry.getValue().getBytes(StandardCharsets.UTF_8));
             content.write(intToBytes(hashVal ^ paramVal ^ hashHash));
         }
 

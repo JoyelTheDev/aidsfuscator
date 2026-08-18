@@ -1,5 +1,5 @@
 {
-  "in": "crackme.jar",
+  "in": "in.jar",
   "out": "out.jar",
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -31,7 +31,7 @@
     },
     "renameClasses": {
       "enabled": true,
-      "prefix": "",
+      "prefix": "a.",
       "mixinPrefix": "b.",
       "renameSourceFile": true,
       "randomize": true
@@ -79,6 +79,9 @@
       "enabled": true
     },
     "referenceObfuscate": {
+      "enabled": true
+    },
+    "hashIntegrity": {
       "enabled": true
     }
   }
