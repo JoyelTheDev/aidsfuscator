@@ -1,7 +1,9 @@
 package dev.lvstrng.aidsfuscator.context;
 
 import dev.lvstrng.aidsfuscator.analysis.ref.ReferenceGraph;
-import dev.lvstrng.aidsfuscator.classgen.impl.StrictSaltDispatcherClassGenerator;
+import dev.lvstrng.aidsfuscator.classgen.impl.hash.BasicHashIntegrityClass;
+import dev.lvstrng.aidsfuscator.classgen.impl.hash.IHashIntegrityClass;
+import dev.lvstrng.aidsfuscator.classgen.impl.salt.StrictSaltDispatcherClassGenerator;
 import dev.lvstrng.aidsfuscator.context.exception.MissingMemberException;
 import dev.lvstrng.aidsfuscator.context.exception.MissingWorkspaceItemException;
 import dev.lvstrng.aidsfuscator.context.hierarchy.IHierarchy;
@@ -53,6 +55,7 @@ public class Context {
     private final StrictSaltDispatcherClassGenerator saltDispatcherGen;
     private final ResourceHandler resourceHandler;
     private final ClassInitOrderHandler initOrder;
+    private final IHashIntegrityClass hashIntegrityClass;
 
     private final IHierarchy hierarchy;
     private IDictionary dictionary;
@@ -83,6 +86,7 @@ public class Context {
         this.referenceManager   = new ReferenceManager(this);
         this.saltDispatcherGen  = new StrictSaltDispatcherClassGenerator();
         this.initOrderLoader    = new ClassInitOrderLoader(this, "");
+        this.hashIntegrityClass = new BasicHashIntegrityClass(this);
 
         this.writerFlags = ClassWriter.COMPUTE_MAXS;
     }
@@ -151,6 +155,10 @@ public class Context {
 
     public ClassInitOrderLoader initOrderLoader() {
         return initOrderLoader;
+    }
+
+    public IHashIntegrityClass hashIntegrityClass() {
+        return hashIntegrityClass;
     }
 
     public int writerFlags() {

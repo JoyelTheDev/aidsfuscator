@@ -1,6 +1,6 @@
-package dev.lvstrng.aidsfuscator.polymorph.impl;
+package dev.lvstrng.aidsfuscator.polymorph.semi.impl;
 
-import dev.lvstrng.aidsfuscator.polymorph.IntMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.IntMask;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.tree.InsnList;
 

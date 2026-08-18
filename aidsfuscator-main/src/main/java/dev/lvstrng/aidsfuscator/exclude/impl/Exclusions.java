@@ -32,7 +32,8 @@ public enum Exclusions {
     FLOW_INTS("flowInts", true, false, true),
 
     FLOW_FLATTEN("controlFlowFlatten", true, false, true),
-    FLOW_SHUFFLE("controlFlowShuffle", true, false, true)
+    FLOW_SHUFFLE("controlFlowShuffle", true, false, true),
+    HASH_INTEGRITY("hashIntegrity", true, false, true)
 
     ;
 

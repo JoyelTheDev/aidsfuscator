@@ -4,7 +4,6 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.IStringInitializer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
-import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.LabelNode;
@@ -52,7 +51,7 @@ public class SecondStringInitializer implements IStringInitializer {
         var keyBuilder = new InsnBuilder().label();
         if(clazz.hasSalt()) {
             keyBuilder
-                    ._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER)
+                    ._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                     .add(clazz.salt().load())
                     .ixor();
         } else {
@@ -200,6 +199,7 @@ public class SecondStringInitializer implements IStringInitializer {
 
         method.insertSafe(body.result());
         method.reinitUnsafeInstructions();
+        clazz.reinsertRandomly(random, method);
     }
 
     private static String encrypt(String s, int key, int bits) {

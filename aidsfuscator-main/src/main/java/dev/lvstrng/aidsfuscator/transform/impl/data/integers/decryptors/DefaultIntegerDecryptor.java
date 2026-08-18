@@ -2,11 +2,11 @@ package dev.lvstrng.aidsfuscator.transform.impl.data.integers.decryptors;
 
 import dev.lvstrng.aidsfuscator.analysis.interpreter.SimpleFrame;
 import dev.lvstrng.aidsfuscator.context.Context;
-import dev.lvstrng.aidsfuscator.polymorph.IntMask;
-import dev.lvstrng.aidsfuscator.polymorph.IntPolymorphStack;
-import dev.lvstrng.aidsfuscator.polymorph.impl.AddMask;
-import dev.lvstrng.aidsfuscator.polymorph.impl.SubMask;
-import dev.lvstrng.aidsfuscator.polymorph.impl.XorMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.IntMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.IntPolymorphStack;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.AddMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.SubMask;
+import dev.lvstrng.aidsfuscator.polymorph.semi.impl.XorMask;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IIntegerDecryptor;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
@@ -71,6 +71,8 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
                 .add(stack.dumpWithList(() -> new InsnBuilder()._var(ISTORE, value)._var(ILOAD, value).result()))
                 ._ireturn()
         ;
+
+        clazz.reinsertRandomly(random, method);
     }
 
     @Override
@@ -92,24 +94,11 @@ public class DefaultIntegerDecryptor implements IIntegerDecryptor {
         numbers.add(num);
 
         // ---- INSTRUCTIONS ----
-        var builder = new InsnBuilder()._int(idxValue);
-        if(method.hasSalt()) {
-            var mask = method.seed();
-            var masked = method.salt().value() & mask;
+        var builder = new InsnBuilder()
+                ._int(idxValue)
+                .add(method.protectedIntPush(context, key));
 
-            builder
-                    .add(method.salt().load())
-                    ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
-                    .iand()
-                    ._int(masked ^ key).addProps(context, Property.IGNORE_INTEGER)
-                    .ixor()
-            ;
-        } else {
-            builder._int(key);
-        }
-        builder.add(context.properties().add(
-                new MethodInsnNode(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION
-        ));
+        builder.method(INVOKESTATIC, method.owner().name(), name, getDescriptor(), method.owner().isInterface()).addProps(context, Property.IGNORE_REF_OBFUSCATION);
         return builder.result();
     }
 }

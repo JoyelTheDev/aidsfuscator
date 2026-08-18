@@ -10,8 +10,8 @@ import java.util.List;
 
 public class OptimizationProcessor implements IProcessor {
     private static final List<IOptimizationPass> optimizationPasses = List.of(
-            new IntegerReuseOptimizationPass()/*,
-            new UnusedLocalVariableCleanTransformer()*/
+            new IntegerReuseOptimizationPass(),
+            new UnusedLocalVariableCleanTransformer()
     );
 
     @Override

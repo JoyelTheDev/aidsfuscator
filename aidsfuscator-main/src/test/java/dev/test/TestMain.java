@@ -1,14 +1,16 @@
 package dev.test;
 
+import dev.lvstrng.aidsfuscator.classgen.impl.hash.BasicHashIntegrityClass;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 import dev.lvstrng.aidsfuscator.transform.impl.data.ConstantsFixTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.integers.IntegerEncryptTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts.FlowIntsTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.StringEncryptTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts.FlowIntsTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.integrity.HashIntegrityTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
@@ -18,14 +20,13 @@ import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LocalVariableNameTransformer;
-import dev.test.transform.SplitTryCatchTestTransformer;
-import dev.test.transform.TestTransformer;
+import dev.test.transform.*;
 
 public class TestMain {
     public static void main(String[] args) {
         var context = Context.newInstance()
                 .computeFrames()
-                .in("eval.jar")
+                .in("in.jar")
                 .libs("libs")
                 .out("out.jar")
                 .setAggressiveOverload(true);
@@ -54,7 +55,9 @@ public class TestMain {
                 new ControlFlowFlatteningTransformer(),
                 new ControlFlowShufflingTransformer(),
                 new DeadCodeCleanTransformer(),
-                new ReferenceObfuscationTransformer()
+                new ReferenceObfuscationTransformer(),
+                new StringEncryptTransformer(),
+                new HashIntegrityTransformer()
         );
     }
 }

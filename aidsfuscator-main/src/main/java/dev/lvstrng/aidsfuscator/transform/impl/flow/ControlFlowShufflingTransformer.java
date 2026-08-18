@@ -27,6 +27,9 @@ public class ControlFlowShufflingTransformer extends Transformer {
                 if (Exclusions.FLOW_SHUFFLE.excluded(method))
                     continue;
 
+                if(!method.traps().isEmpty()) //TODO REMOVE ON RELEASE AFTER FIXING java.lang.ClassFormatError: Illegal exception table range in class file X
+                    continue;
+
                 var graph = method.createFlowGraph(context);
                 if (graph.blocks().size() <= 3)
                     continue;

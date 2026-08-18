@@ -21,4 +21,9 @@ public record FieldReference(JClass callerClass, JMethod caller, JField field, A
     public String toString() {
         return "{ " + caller + " -> " + field + " }";
     }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
 }

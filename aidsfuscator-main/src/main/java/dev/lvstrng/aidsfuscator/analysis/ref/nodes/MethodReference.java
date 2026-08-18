@@ -29,4 +29,9 @@ public record MethodReference(JClass callerClass, JMethod caller, JMethod method
     public String toString() {
         return "{ " + caller + " -> " + method + " }";
     }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
 }

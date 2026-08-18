@@ -79,7 +79,8 @@ public class IntegerEncryptTransformer extends Transformer {
             }
 
             int access = (clazz.isInterface() ? ACC_PUBLIC : ACC_PRIVATE) | ACC_STATIC | ACC_FINAL;
-            clazz.createField(access, fieldName, "[I");
+            var f = clazz.createField(access, fieldName, "[I");
+            clazz.reinsertRandomly(random, f);
 
             decryptor.generate(clazz, fieldName);
             initializer.generate(context, clazz, fieldName, numbers);

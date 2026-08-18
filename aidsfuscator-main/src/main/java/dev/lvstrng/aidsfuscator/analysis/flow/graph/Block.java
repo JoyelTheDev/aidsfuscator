@@ -25,7 +25,7 @@ public class Block {
     private final List<AbstractInsnNode> insns;
     private final Map<AbstractInsnNode, SimpleFrame> frames;
 
-    private int lineNumber;
+    private int lineNumber = -1;
     private Block defaultBlock;
     private final List<Block> predecessors, successors;
     private final List<TryCatchBlockNode> traps, trapEnds, trapHandlers;

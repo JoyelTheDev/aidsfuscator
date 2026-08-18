@@ -35,8 +35,11 @@ public class ArtifactExportProcessor implements IProcessor {
                         e.printStackTrace();
                     }
 
+                    var classBytes = writer.toByteArray();
+                    context.hashIntegrityClass().add(clazz, classBytes);
+
                     jos.putNextEntry(new ZipEntry(clazz.name() + ".class"));
-                    jos.write(writer.toByteArray());
+                    jos.write(classBytes);
                     jos.closeEntry();
                 } catch (MethodTooLargeException e) {
                     e.printStackTrace();
@@ -44,6 +47,7 @@ public class ArtifactExportProcessor implements IProcessor {
                 }
             }
 
+            context.hashIntegrityClass().postExport();
             context.resourceHandler().handle(jos);
         } catch (IOException e) {
             Logger.error("Error writing output JAR: %s", e);

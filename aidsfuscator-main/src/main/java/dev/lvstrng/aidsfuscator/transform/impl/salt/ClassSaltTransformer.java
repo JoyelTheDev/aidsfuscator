@@ -34,8 +34,7 @@ public class ClassSaltTransformer extends Transformer {
                 if(!unifyAccess.value())
                     continue;
 
-                clazz.removeAccessFlags(ACC_PRIVATE);
-                clazz.removeAccessFlags(ACC_PROTECTED);
+                clazz.removeAccessFlags(ACC_PRIVATE | ACC_PROTECTED);
                 clazz.addAccessFlags(ACC_PUBLIC);
             }
 
@@ -45,6 +44,7 @@ public class ClassSaltTransformer extends Transformer {
             var field = clazz.createField(ACC_PUBLIC | ACC_STATIC | ACC_FINAL, name, "I");
             field.properties().add(Property.SALT_ARTIFACT);
             clazz.setSalt(new ClassSalt(clazz, field, val));
+            clazz.reinsertRandomly(random, field);
 
             for(var method : clazz.methods()) {
                 if(Exclusions.CLASS_SALTING.excluded(method))
@@ -106,7 +106,7 @@ public class ClassSaltTransformer extends Transformer {
                 .add(clazz.salt().load())
                 ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
-                ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER)
+                ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                 .ixor()
                 ._var(ISTORE, saltLocal);
 

@@ -17,6 +17,7 @@ import java.util.Map;
  * @see Block
  * @author lvstrng
  */
+@SuppressWarnings("all")
 public class ControlFlowGraph {
     private final Context context;
     private final JMethod method;

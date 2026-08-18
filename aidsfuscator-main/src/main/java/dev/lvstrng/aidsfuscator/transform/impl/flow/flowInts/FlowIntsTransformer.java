@@ -27,7 +27,7 @@ import java.util.function.Function;
 public class FlowIntsTransformer extends Transformer {
     private final Setting<Boolean> obfuscateLongs = setting("obfuscateLongs", true);
     private final Setting<Boolean> separateBlocks = setting("separateBlocks", true);
-    private final Setting<Boolean> confuseFlow = setting("confuseFlow", false);
+    private final Setting<Boolean> confuseFlow = setting("confuseFlow", true);
 
     public  FlowIntsTransformer() {
         super("Flow Ints", "flowInts");

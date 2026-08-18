@@ -2,7 +2,6 @@ package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
-import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Setting;
@@ -40,46 +39,59 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            var impactedClasses = impactedClasses(context, clazz, method);
-            if(skipHierarchy(method, impactedClasses))
+            var identity = identityScope(context, method);
+            if(!doRename(method, identity))
                 continue;
 
-            var identity = identityScope(context, method);
             var collision = new HashSet<>(identity);
             collision.addAll(clazz.tree()); // extra classes to avoid colliding with, not to propagate to
 
-            var name = findOrGenerateName(context, clazz, identity, collision, method);
-            clazz.methods().stream()
-                    .filter(e -> e.mappedName().equals(name))
-                    .filter(e -> e.desc().equals(method.desc()))
-                    .filter(e -> e != method)
-                    .findFirst().ifPresent(other -> Logger.error("[%s] %s (%s) -> %s (%s)", clazz.originalName(), method.simpleOriginalName(), name, other.simpleOriginalName(), other.mappedName()));
-
+            var newName = newName(context, clazz, method, identity, collision);
             // every member of identity actually shares this method (declared or inherited)
             for(var member : identity) {
-                member.findMethod(method.name(), method.desc()).ifPresent(mth -> mth.setMappedName(name));
+                var oldKey = MemberUtils.fullMethod(member, method);
+                var newKey = MemberUtils.fullMethod(member.name(), newName, method.desc());
+                Mappings.METHOD.register(oldKey, new Mapping(newKey, newName));
 
-                var oldId = MemberUtils.fullMethod(member, method);
-                var newId = MemberUtils.fullMethod(member.name(), name, method.desc());
-                Mappings.METHOD.register(oldId, new Mapping(newId, name));
-
-                markChange();
+                member.findMethod(method.name(), method.desc()).ifPresent(e -> e.setMappedName(newName));
             }
         }
     }
 
-    private String findOrGenerateName(Context context, JClass clazz, Set<JClass> identity, Set<JClass> collisionScope, JMethod method) {
+    private String newName(Context context, JClass clazz, JMethod method, Set<JClass> identity, Set<JClass> collisionScope) {
         for(var member : identity) {
             var id = MemberUtils.fullMethod(member, method);
             if(Mappings.METHOD.containsOld(id))
                 return Mappings.METHOD.retrieve(id).value();
         }
 
-        var id = MemberUtils.fullMethod(clazz, method);
-        if(Mappings.METHOD.containsOld(id))
-            return Mappings.METHOD.retrieve(id).value();
-
         return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), collisionScope);
+    }
+
+    private boolean doRename(JMethod root, Set<JClass> scope) {
+        if(root.owner().isLibMethod(root))
+            return false;
+
+        for(var clazz : scope) {
+            if(Exclusions.RENAME_METHOD.excluded(clazz))
+                return false;
+
+            if(clazz.isLibrary())
+                return false;
+
+            var method = root;
+            var methodOpt = clazz.findMethod(root.name(), root.desc());
+            if(methodOpt.isPresent())
+                method = methodOpt.get();
+
+            if(Exclusions.RENAME_METHOD.excluded(clazz, method))
+                return false;
+
+            if(cantEditMethod(clazz, method, false, true))
+                return false;
+        }
+
+        return true;
     }
 
     /**
@@ -118,49 +130,5 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         return visited;
-    }
-
-    /**
-     * Exclusion and invalid method check
-     * @param method method
-     * @param impactedClasses all impacted classes
-     * @return false if should continue, true if should skip
-     */
-    private boolean skipHierarchy(JMethod method, Set<JClass> impactedClasses) {
-        if(method.owner().isLibMethod(method))
-            return true;
-
-        // ---- CLASS TREE CHECKS ----
-        for(var member : impactedClasses) {
-            var opt = member.findMethod(method.name(), method.desc());
-            if(opt.isPresent())
-                method = opt.get();
-
-            if(Exclusions.RENAME_METHOD.excluded(member))
-                return true;
-
-            if(Exclusions.RENAME_METHOD.excluded(member, method))
-                return true;
-
-            if(cantEditMethod(member, method, false, true))
-                return true;
-        }
-
-        return false;
-    }
-
-    private Set<JClass> impactedClasses(Context context, JClass clazz, JMethod method) {
-        var classes = new HashSet<>(clazz.children()); // children will obviously have this method in their tree
-        classes.add(clazz);
-
-        for(var parent : clazz.parents()) {
-            if(!parent.hasMethodInTree(context, method))
-                continue;
-
-            classes.add(parent);
-            classes.addAll(parent.children());
-        }
-
-        return classes;
     }
 }

@@ -68,7 +68,8 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             if(member.methods().stream().anyMatch(e -> e.mappedName().equals(name) && e.desc().equals(desc)))
                 return true;
         }
-        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
+
+        return false;
     }
 
     /**
@@ -92,7 +93,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
                 return true;
         }
 
-        return fields().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findAny().isPresent();
+        return false;
     }
 
     /**
@@ -112,7 +113,7 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
                 return true;
         }
 
-        return methods().stream().filter(e -> e.mappedName().equals(name)).filter(e -> e.desc().equals(desc)).findFirst().isPresent();
+        return false;
     }
 
     public boolean isFieldMapped(String name, String desc) {
@@ -363,12 +364,14 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
         core.accept(visitor);
 
         // ---- refresh member cores ----
-        for(int i = 0; i < methods.size(); i++) {
-            methods.get(i).setCore(remapped.methods.get(i));
-        }
+        if(remapped != null) {
+            for (int i = 0; i < methods.size(); i++) {
+                methods.get(i).setCore(remapped.methods.get(i));
+            }
 
-        for(int i = 0; i < fields.size(); i++) {
-            fields.get(i).setCore(remapped.fields.get(i));
+            for (int i = 0; i < fields.size(); i++) {
+                fields.get(i).setCore(remapped.fields.get(i));
+            }
         }
     }
 
@@ -422,6 +425,30 @@ public class JClass implements IAccessFlags, ISaltable<ClassSalt>, IHierarchical
             field.setLibrary();
         field.setOwner(this);
         return field;
+    }
+
+    public void reinsertRandomly(Random random, JMethod method) {
+        remove(method);
+        if(methods.isEmpty()) {
+            add(method);
+            return;
+        }
+
+        var idx = random.nextInt(methods.size());
+        methods.add(idx, method);
+        core.methods.add(idx, method.core());
+    }
+
+    public void reinsertRandomly(Random random, JField field) {
+        remove(field);
+        if(fields.isEmpty()) {
+            add(field);
+            return;
+        }
+
+        var idx = random.nextInt(fields.size());
+        fields.add(idx, field);
+        core.fields.add(idx, field.core());
     }
 
     @Override

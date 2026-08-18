@@ -181,6 +181,7 @@ public class DefaultStringDecryptor implements IStringDecryptor {
 
         method.insns().add(builder.result());
         method.properties().add(Property.STRING_DECRYPTOR);
+        clazz.reinsertRandomly(random, method);
     }
 
     @Override
@@ -196,23 +197,12 @@ public class DefaultStringDecryptor implements IStringDecryptor {
         var idx = strings.size();
         var idxVal = idx ^ idxXor;
 
-        var builder = new InsnBuilder().add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER));
-        if(method.hasSalt()) {
-            var mask = method.seed();
-            var masked = method.salt().value() & mask;
+        var builder = new InsnBuilder()
+                .add(context.properties().add(ASMUtils.pushInt(idxVal), Property.IGNORE_INTEGER))
+                .add(method.protectedIntPush(context, (key << 16) | (method.hasSalt() ? 0 : random.nextInt(Short.MAX_VALUE))))
+                .method(INVOKESTATIC, method.owner().name(), decryptorName, "(II)Ljava/lang/String;", method.owner().isInterface()).addProps(context, Property.IGNORE_REF_OBFUSCATION);
 
-            builder
-                    .add(method.salt().load())
-                    ._int(mask).addProps(context, Property.IGNORE_FLOW_INTS)
-                    .iand()
-                    ._int(masked ^ (key << 16))
-                    .ixor();
-        } else {
-            builder._int((key << 16) | random.nextInt(Short.MAX_VALUE)).addProps(context, Property.IGNORE_INTEGER);
-        }
-        builder.add(context.properties().add(new MethodInsnNode(INVOKESTATIC, method.owner().name(), decryptorName, "(II)Ljava/lang/String;", method.owner().isInterface()), Property.IGNORE_REF_OBFUSCATION));
         strings.add(encryptedString);
-
         return builder.result();
     }
 

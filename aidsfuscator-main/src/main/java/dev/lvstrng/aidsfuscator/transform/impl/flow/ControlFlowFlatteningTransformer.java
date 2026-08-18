@@ -5,7 +5,6 @@ import dev.lvstrng.aidsfuscator.analysis.flow.graph.ControlFlowGraph;
 import dev.lvstrng.aidsfuscator.analysis.interpreter.FrameString;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
-import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.Setting;
 import dev.lvstrng.aidsfuscator.transform.Transformer;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
@@ -18,8 +17,6 @@ import org.objectweb.asm.tree.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
 /**
@@ -28,9 +25,6 @@ import java.util.function.BiPredicate;
  */
 public class ControlFlowFlatteningTransformer extends Transformer {
     private final Setting<Boolean> obfuscateValues = setting("obfuscateValues", true);
-
-    private final BiFunction<Integer, Integer, Integer> or = (v1, v2) -> v1 | v2;
-    private final BiFunction<Integer, Integer, Integer> and = (v1, v2) -> v1 & v2;
 
     private final BiPredicate<ControlFlowGraph, Block> goodBlock = (graph, block) -> {
         if(block.inTrapHandler())   return false;
@@ -51,8 +45,8 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 continue;
 
             for(var method : clazz.methods()) {
-                if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
-                    continue;
+                /*if(method.properties().has(Property.STRING_DECRYPTOR, Property.INTEGER_DECRYPTOR))
+                    continue;*/
 
                 if(Exclusions.FLOW_FLATTEN.excluded(method))
                     continue;
@@ -86,19 +80,9 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                     for(var block : group) {
                         var list = new InsnList();
                         var lbl = new LabelNode();
-                        var useOr = random.nextBoolean();
-                        var func = useOr ? or : and;
-                        var key = uniqueInt(cases, method.hasSalt() ? method.salt().value() : Integer.MAX_VALUE, func);
+                        var key = random.nextInt();
 
-                        if (method.hasSalt()) {
-                            list.add(method.salt().load());
-                            list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
-                            list.add(new InsnNode(useOr ? IOR : IAND));
-                            key = func.apply(method.salt().value(), key);
-                        } else {
-                            list.add(context.properties().add(ASMUtils.pushInt(key), Property.IGNORE_INTEGER));
-                        }
-
+                        list.add(method.protectedIntPush(context, key));
                         list.add(new VarInsnNode(ISTORE, flattenerLocal));
                         list.add(new JumpInsnNode(GOTO, dispatcher));
                         list.add(lbl);
@@ -142,15 +126,6 @@ public class ControlFlowFlatteningTransformer extends Transformer {
                 method.reinitUnsafeInstructions();
             }
         }
-    }
-
-    private int uniqueInt(Map<LabelNode, Integer> cases, int mask, BiFunction<Integer, Integer, Integer> func) {
-        int res;
-        do {
-            res = random.nextInt();
-        } while (cases.containsValue(func.apply(res, mask)));
-
-        return res;
     }
 
     private List<List<Block>> grouped(ControlFlowGraph graph) {
