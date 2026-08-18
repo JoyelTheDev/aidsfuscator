@@ -106,7 +106,7 @@ public class ClassSaltTransformer extends Transformer {
                 .add(clazz.salt().load())
                 ._int(mask).addProps(context, Property.IGNORE_INTEGER, Property.IGNORE_FLOW_INTS)
                 .iand()
-                ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER)
+                ._int(maskedSalt ^ saltValue).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                 .ixor()
                 ._var(ISTORE, saltLocal);
 

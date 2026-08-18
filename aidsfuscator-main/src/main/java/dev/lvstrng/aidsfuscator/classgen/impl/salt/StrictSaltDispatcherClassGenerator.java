@@ -60,7 +60,7 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
                         .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .method(INVOKEVIRTUAL, "java/lang/invoke/MethodHandles$Lookup", "lookupClass", "()Ljava/lang/Class;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         /*._const(clazz.type())*/
-                        ._int(fakeValues.get(c)).addProps(context, Property.IGNORE_INTEGER)
+                        ._int(fakeValues.get(c)).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                         .method(INVOKESTATIC, clazz.name(), retrieverOrder.name(), retrieverOrder.desc()).addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .add(c.salt().store());
             } else {
@@ -68,7 +68,7 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
                         .method(INVOKESTATIC, "java/lang/invoke/MethodHandles", "lookup", "()Ljava/lang/invoke/MethodHandles$Lookup;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .method(INVOKEVIRTUAL, "java/lang/invoke/MethodHandles$Lookup", "lookupClass", "()Ljava/lang/Class;").addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         /*._const(clazz.type())*/
-                        ._int(fakeValues.get(c)).addProps(context, Property.IGNORE_INTEGER)
+                        ._int(fakeValues.get(c)).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                         .method(INVOKESTATIC, clazz.name(), retriever.name(), retriever.desc()).addProps(context, Property.IGNORE_REF_OBFUSCATION)
                         .add(c.salt().store());
             }

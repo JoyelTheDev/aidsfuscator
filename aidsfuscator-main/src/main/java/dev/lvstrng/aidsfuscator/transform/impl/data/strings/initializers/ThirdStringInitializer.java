@@ -46,7 +46,7 @@ public class ThirdStringInitializer implements IStringInitializer {
         var keyBuilder = new InsnBuilder().label();
         if(clazz.hasSalt()) {
             keyBuilder
-                    ._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER)
+                    ._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                     .add(clazz.salt().load())
                     .ixor();
         } else {

@@ -10,6 +10,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.dynamic.ReferenceObfuscationTrans
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowFlatteningTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.ControlFlowShufflingTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.flow.flowInts.FlowIntsTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.integrity.HashIntegrityTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
@@ -35,7 +36,28 @@ public class TestMain {
 
         Exclusions.GLOBAL.addClass("dev/lvstrng/aidsfuscator/api/*");
         context.run(
-                new TestTransformer()
+                new TrimTransformer(),
+
+                new FieldRenameTransformer(),
+                new MethodRenameTransformer(),
+                new ClassRenameTransformer(),
+
+                new LocalVariableNameTransformer(),
+                new LineNumberTransformer(),
+                new MethodSaltTransformer(),
+                new ClassSaltTransformer(),
+
+                new ConstantsFixTransformer(),
+                new IntegerEncryptTransformer(),
+                new StringEncryptTransformer(),
+                new FlowIntsTransformer(),
+
+                new ControlFlowFlatteningTransformer(),
+                new ControlFlowShufflingTransformer(),
+                new DeadCodeCleanTransformer(),
+                new ReferenceObfuscationTransformer(),
+                new StringEncryptTransformer(),
+                new HashIntegrityTransformer()
         );
     }
 }

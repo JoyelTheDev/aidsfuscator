@@ -109,12 +109,13 @@ public class VarlessIntegerInitializer implements IIntegerInitializer {
                 .swap() // ptr, byte[], idx, idx, int
                 .label();
         if(clazz.hasSalt()) {
-            builder._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER)
+            builder._int(key ^ clazz.salt().value()).addProps(context, Property.IGNORE_INTEGER, Property.SENSITIVE_CONSTANT)
                     .add(clazz.salt().load())
                     .ixor().label()
             ;
         } else {
-            builder._int(key).label();
+            builder._int(key).addProps(context, Property.SENSITIVE_CONSTANT)
+                    .label();
         }
 
         builder

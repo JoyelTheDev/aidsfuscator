@@ -1,14 +1,26 @@
 package dev.lvstrng.aidsfuscator.classgen.impl.hash;
 
 import dev.lvstrng.aidsfuscator.context.Context;
+import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
 import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.tree.impl.JMethod;
+import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -19,6 +31,9 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
     private JMethod retrieverMethod, hashMethod;
     private JField mapField, stringField, valueField;
     private final String hashFileName;
+    private final Map<JClass, String> classHashes = new HashMap<>();
+    private final Map<JClass, Integer> hashValues = new HashMap<>();
+    private final Map<JClass, Integer> parameterValues = new HashMap<>();
 
     public BasicHashIntegrityClass(Context context) {
         this.context = context;
@@ -48,6 +63,10 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
         var keyBytesVar = method.allocVar();
         var hashStringVar = method.allocVar();
 
+        var ln0 = new LabelNode();
+        var ln1 = new LabelNode();
+        var ln2 = new LabelNode();
+        var ln3 = new LabelNode();
         var loopLabel = new LabelNode();
         var list = new InsnBuilder()
                 .label()
@@ -72,21 +91,23 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
                 ._var(ISTORE, iVar)
 
                 .label(loopLabel)
+                .add(new LineNumberNode(69, loopLabel))
                 ._var(ALOAD, bytesVar)
                 ._var(ILOAD, iVar)
                 ._var(ILOAD, iVar)
-                ._int(32)
+                ._int(64)
                 .iadd()
                 .method(INVOKESTATIC, "java/util/Arrays", "copyOfRange", "([BII)[B")
                 ._var(ASTORE, hashBytesVar)
 
-                .label()
+                .label(ln0)
+                .add(new LineNumberNode(420, ln0))
                 ._var(ALOAD, bytesVar)
                 ._var(ILOAD, iVar)
-                ._int(32)
+                ._int(64)
                 .iadd()
                 ._var(ILOAD, iVar)
-                ._int(36)
+                ._int(68)
                 .iadd()
                 .method(INVOKESTATIC, "java/util/Arrays", "copyOfRange", "([BII)[B")
                 ._var(ASTORE, keyBytesVar)
@@ -140,13 +161,13 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
                 .pop()
 
                 .label()
-                .iinc(iVar, 36)
+                .iinc(iVar, 68)
 
                 .label()
                 ._var(ILOAD, iVar)
                 ._var(ALOAD, bytesVar)
                 .arraylength()
-                .jump(IF_ICMPNE, loopLabel)
+                .jump(IF_ICMPLT, loopLabel)
 
                 .label()
                 ._return()
@@ -324,8 +345,6 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
                 .ixor()
                 ._ireturn()
                 ;
-
-
     }
 
     @Override
@@ -334,12 +353,67 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
     }
 
     @Override
-    public void add(JClass clazz) {
-
+    public JMethod retriever() {
+        return retrieverMethod;
     }
 
     @Override
-    public void obfuscate(JClass clazz) {
+    public void add(JClass clazz, byte[] bytes) {
+        classHashes.put(clazz, hash(bytes));
 
+        hashValues.computeIfAbsent(clazz, _ -> random.nextInt());
+        parameterValues.computeIfAbsent(clazz, _ -> random.nextInt());
+    }
+
+    @Override
+    public int classValue(JClass clazz) {
+        return hashValues.computeIfAbsent(clazz, _ -> random.nextInt());
+    }
+
+    @Override
+    public int paramValue(JClass clazz) {
+        return parameterValues.computeIfAbsent(clazz, _ -> random.nextInt());
+    }
+
+    @Override
+    public void postExport() throws IOException {
+        if(classHashes.isEmpty())
+            return;
+
+        var content = new ByteArrayOutputStream();
+        for(var entry : classHashes.entrySet()) {
+            content.write(entry.getValue().getBytes(StandardCharsets.UTF_8));
+
+            var hashVal = hashValues.get(entry.getKey());
+            var paramVal = paramValue(entry.getKey());
+            var hashHash = entry.getValue().hashCode();
+            content.write(intToBytes(hashVal ^ paramVal ^ hashHash));
+        }
+
+        content.close();
+        context.resourceHandler().add(hashFileName, content.toByteArray());
+    }
+
+    public static String hash(byte[] byArray) {
+        try {
+            var byArray2 = MessageDigest.getInstance("SHA-256").digest(byArray);
+            var stringBuilder = new StringBuilder();
+
+            var n = 0;
+            do {
+                stringBuilder.append(String.format("%02x", (byte)(byArray2[n] & 0xFF)));
+            } while (++n < byArray2.length);
+
+            return stringBuilder.toString();
+        } catch (NoSuchAlgorithmException _) {
+            return null;
+        }
+    }
+
+    public static byte[] intToBytes(int i) {
+        return new byte[] {
+                (byte) (i >> 24), (byte) (i >> 16),
+                (byte) (i >> 8), (byte) (i)
+        };
     }
 }
