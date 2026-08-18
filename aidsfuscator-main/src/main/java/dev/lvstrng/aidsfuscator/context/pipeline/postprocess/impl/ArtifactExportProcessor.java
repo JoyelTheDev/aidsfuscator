@@ -1,6 +1,5 @@
 package dev.lvstrng.aidsfuscator.context.pipeline.postprocess.impl;
 
-import dev.lvstrng.aidsfuscator.classgen.impl.hash.BasicHashIntegrityClass;
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.context.asm.HierarchyClassWriter;
 import dev.lvstrng.aidsfuscator.context.pipeline.IProcessor;

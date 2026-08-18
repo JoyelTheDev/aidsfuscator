@@ -26,7 +26,6 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
     private static final SecureRandom random = new SecureRandom();
 
     private JField indyDispatcherClassField;
-    private JClass indyClass;
     private JClass clazz;
 
     private final Map<JClass, Integer> fakeValues = new HashMap<>();
@@ -269,7 +268,6 @@ public class StrictSaltDispatcherClassGenerator implements IClassGen, Opcodes {
     }
 
     public void setIndyField(JClass indyClass) {
-        this.indyClass = indyClass;
         if(clazz == null)
             return;
 

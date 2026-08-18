@@ -4,7 +4,6 @@ import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.property.Property;
 import dev.lvstrng.aidsfuscator.transform.impl.data.strings.IStringInitializer;
 import dev.lvstrng.aidsfuscator.tree.impl.JClass;
-import dev.lvstrng.aidsfuscator.utils.CryptUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.LabelNode;
