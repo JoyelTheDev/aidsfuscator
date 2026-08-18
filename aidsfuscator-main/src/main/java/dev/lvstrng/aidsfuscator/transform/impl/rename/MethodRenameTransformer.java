@@ -2,7 +2,6 @@ package dev.lvstrng.aidsfuscator.transform.impl.rename;
 
 import dev.lvstrng.aidsfuscator.context.Context;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
-import dev.lvstrng.aidsfuscator.log.Logger;
 import dev.lvstrng.aidsfuscator.naming.Mapping;
 import dev.lvstrng.aidsfuscator.naming.Mappings;
 import dev.lvstrng.aidsfuscator.transform.Setting;
@@ -40,39 +39,41 @@ public class MethodRenameTransformer extends Transformer {
         }
 
         for(var method : clazz.methods()) {
-            var scope = collisionScope(context, method);
-            if(!doRename(method, scope))
+            var identity = identityScope(context, method);
+            if(!doRename(method, identity))
                 continue;
 
-            var newName = newName(context, clazz, method, scope);
-            for(var c : scope) {
-                var oldKey = MemberUtils.fullMethod(c, method);
-                var newKey = MemberUtils.fullMethod(c.name(), newName, method.desc());
+            var collision = new HashSet<>(identity);
+            collision.addAll(clazz.tree()); // extra classes to avoid colliding with, not to propagate to
+
+            var newName = newName(context, clazz, method, identity, collision);
+            // every member of identity actually shares this method (declared or inherited)
+            for(var member : identity) {
+                var oldKey = MemberUtils.fullMethod(member, method);
+                var newKey = MemberUtils.fullMethod(member.name(), newName, method.desc());
                 Mappings.METHOD.register(oldKey, new Mapping(newKey, newName));
 
-                c.findMethod(method.name(), method.desc()).ifPresent(e -> e.setMappedName(newName));
+                member.findMethod(method.name(), method.desc()).ifPresent(e -> e.setMappedName(newName));
             }
         }
     }
 
-    private String newName(Context context, JClass clazz, JMethod method, Set<JClass> scope) {
-        for(var c : scope) {
-            var key = MemberUtils.fullMethod(c, method);
-            if(!Mappings.METHOD.containsOld(key))
-                continue;
-
-            return Mappings.METHOD.retrieve(key).value();
+    private String newName(Context context, JClass clazz, JMethod method, Set<JClass> identity, Set<JClass> collisionScope) {
+        for(var member : identity) {
+            var id = MemberUtils.fullMethod(member, method);
+            if(Mappings.METHOD.containsOld(id))
+                return Mappings.METHOD.retrieve(id).value();
         }
 
-        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), scope);
+        return context.dictionary().newMethodName(prefix.value(), clazz, method.desc(), collisionScope);
     }
 
     private boolean doRename(JMethod root, Set<JClass> scope) {
+        if(root.owner().isLibMethod(root))
+            return false;
+
         for(var clazz : scope) {
             if(Exclusions.RENAME_METHOD.excluded(clazz))
-                return false;
-
-            if(Exclusions.RENAME_METHOD.excluded(clazz, root))
                 return false;
 
             if(clazz.isLibrary())
@@ -83,6 +84,9 @@ public class MethodRenameTransformer extends Transformer {
             if(methodOpt.isPresent())
                 method = methodOpt.get();
 
+            if(Exclusions.RENAME_METHOD.excluded(clazz, method))
+                return false;
+
             if(cantEditMethod(clazz, method, false, true))
                 return false;
         }
@@ -91,14 +95,15 @@ public class MethodRenameTransformer extends Transformer {
     }
 
     /**
-     * Walks the full override  for this method, not just clazz's own hierarchy.
+     * Walks the full override closure for this method, not just clazz's own hierarchy.
      * Needed because a class implementing two unrelated interfaces with matching name+desc
-     * bridges them, so a name picked from one interfaces side can still collide on the other
+     * bridges them, so a name picked from one interface's side can still collide on the other.
+     * Used for propagation - every member here genuinely shares this method's identity.
      * @param context obfuscator context
-     * @param method method to find the collision scope for
+     * @param method method to find the identity scope for
      * @author brownie
      */
-    private Set<JClass> collisionScope(Context context, JMethod method) {
+    private Set<JClass> identityScope(Context context, JMethod method) {
         var visited = new HashSet<JClass>();
         var queue = new ArrayDeque<JClass>();
 
@@ -114,7 +119,7 @@ public class MethodRenameTransformer extends Transformer {
             }
 
             for(var parent : current.parents()) {
-                if(visited.contains(parent))
+                if(visited.contains(parent) || parent.isLibrary())
                     continue;
 
                 if(parent.hasMethodInTree(context, method)) {
