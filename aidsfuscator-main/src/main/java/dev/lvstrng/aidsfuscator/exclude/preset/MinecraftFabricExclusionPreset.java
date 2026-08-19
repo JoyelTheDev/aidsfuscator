@@ -32,5 +32,6 @@ public class MinecraftFabricExclusionPreset implements IExclusionPreset {
         Exclusions.RENAME_METHOD.addAnnotation(INVOKER);
 
         Exclusions.RENAME_FIELD.addAnnotation(SHADOW);
+        Exclusions.HASH_INTEGRITY.addAnnotation(MIXIN);
     }
 }

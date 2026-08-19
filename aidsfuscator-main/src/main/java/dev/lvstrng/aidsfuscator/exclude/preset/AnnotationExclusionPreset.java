@@ -7,6 +7,7 @@ import dev.lvstrng.aidsfuscator.api.data.ExcludeStringEncryption;
 import dev.lvstrng.aidsfuscator.api.dynamic.ExcludeReferenceObfuscation;
 import dev.lvstrng.aidsfuscator.api.flow.ExcludeFlattening;
 import dev.lvstrng.aidsfuscator.api.flow.ExcludeShuffling;
+import dev.lvstrng.aidsfuscator.api.integrity.ExcludeHashIntegrity;
 import dev.lvstrng.aidsfuscator.api.optimize.ExcludeTrim;
 import dev.lvstrng.aidsfuscator.api.rename.ExcludeClassRename;
 import dev.lvstrng.aidsfuscator.api.rename.ExcludeFieldRename;
@@ -46,5 +47,8 @@ public class AnnotationExclusionPreset implements IExclusionPreset {
 
         Exclusions.FLOW_FLATTEN.addAnnotation(internal(ExcludeFlattening.class));
         Exclusions.FLOW_SHUFFLE.addAnnotation(internal(ExcludeShuffling.class));
+
+        // INTEGRITY
+        Exclusions.HASH_INTEGRITY.addAnnotation(internal(ExcludeHashIntegrity.class));
     }
 }
