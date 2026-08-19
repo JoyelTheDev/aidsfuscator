@@ -9,6 +9,7 @@ import dev.lvstrng.aidsfuscator.tree.impl.JField;
 import dev.lvstrng.aidsfuscator.utils.ASMUtils;
 import dev.lvstrng.aidsfuscator.utils.InsnBuilder;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -27,6 +28,11 @@ public class HashIntegrityTransformer extends Transformer {
 
         if(changes() != 0) {
             context.addArtificial(context.hashIntegrityClass().get());
+            try {
+                context.hashIntegrityClass().addResource();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

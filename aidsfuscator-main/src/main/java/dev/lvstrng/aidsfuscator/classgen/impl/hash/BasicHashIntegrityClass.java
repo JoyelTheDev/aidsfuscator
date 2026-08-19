@@ -372,7 +372,7 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
     }
 
     @Override
-    public void postExport() throws IOException {
+    public void addResource() throws IOException {
         if(classHashes.isEmpty())
             return;
 

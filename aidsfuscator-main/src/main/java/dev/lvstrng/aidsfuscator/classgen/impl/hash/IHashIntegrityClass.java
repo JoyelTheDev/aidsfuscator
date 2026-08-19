@@ -21,5 +21,5 @@ public interface IHashIntegrityClass {
 
     int paramValue(JClass clazz);
 
-    void postExport() throws IOException;
+    void addResource() throws IOException;
 }
