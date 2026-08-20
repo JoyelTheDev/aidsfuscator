@@ -28,11 +28,6 @@ public class HashIntegrityTransformer extends Transformer {
 
         if(changes() != 0) {
             context.addArtificial(context.hashIntegrityClass().get());
-            try {
-                context.hashIntegrityClass().addResource();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

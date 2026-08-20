@@ -47,6 +47,7 @@ public class ArtifactExportProcessor implements IProcessor {
                 }
             }
 
+            context.hashIntegrityClass().addResource();
             context.resourceHandler().handle(jos);
         } catch (IOException e) {
             Logger.error("Error writing output JAR: %s", e);
