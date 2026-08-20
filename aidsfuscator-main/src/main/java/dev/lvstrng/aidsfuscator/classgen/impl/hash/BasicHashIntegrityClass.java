@@ -373,7 +373,7 @@ public class BasicHashIntegrityClass implements IHashIntegrityClass {
 
     @Override
     public void addResource() throws IOException {
-        if(classHashes.isEmpty())
+        if(hashValues.isEmpty())
             return;
 
         var content = new ByteArrayOutputStream();
