@@ -29,7 +29,7 @@ public class FlowIntsTransformer extends Transformer {
     private final Setting<Boolean> separateBlocks = setting("separateBlocks", true);
     private final Setting<Boolean> confuseFlow = setting("confuseFlow", true);
 
-    public  FlowIntsTransformer() {
+    public FlowIntsTransformer() {
         super("Flow Ints", "flowInts");
     }
 

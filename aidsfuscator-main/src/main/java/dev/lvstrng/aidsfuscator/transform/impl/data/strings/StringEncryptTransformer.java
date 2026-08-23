@@ -22,6 +22,9 @@ import java.util.function.Supplier;
 public class StringEncryptTransformer extends Transformer {
     private final Setting<Boolean> translateConcat = setting("translateConcat", true);
     private final Setting<Integer> minLength = setting("minLength", 1);
+    private final Setting<Boolean> useDefault = setting("useDefault", true);
+    private final Setting<Boolean> usePoly1 = setting("usePoly1", true);
+    private final Setting<Boolean> usePoly2 = setting("usePoly2", true);
 
     private static final List<Supplier<IStringInitializer>> initializers = List.of(
             FirstStringInitializer::new,
@@ -29,10 +32,7 @@ public class StringEncryptTransformer extends Transformer {
             ThirdStringInitializer::new
     );
 
-    private static final List<Supplier<IStringDecryptor>> decryptors = List.of(
-
-            Poly2StringDecryptor::new
-    );
+    private final List<Supplier<IStringDecryptor>> decryptors = new ArrayList<>();
 
     public StringEncryptTransformer() {
         super("Encrypt String Constants", "encryptStrings");
@@ -40,6 +40,13 @@ public class StringEncryptTransformer extends Transformer {
 
     @Override
     public void transform(Context context) {
+        if(useDefault.value())  decryptors.add(DefaultStringDecryptor::new);
+        if(usePoly1.value())    decryptors.add(Poly1StringDecryptor::new);
+        if(usePoly2.value())    decryptors.add(Poly2StringDecryptor::new);
+
+        if(decryptors.isEmpty())
+            throw new RuntimeException("Must enable at least 1 decryptor type");
+
         for(var clazz : context.classes()) {
             if(clazz.isInterface() && clazz.version() < V1_8)
                 continue;
