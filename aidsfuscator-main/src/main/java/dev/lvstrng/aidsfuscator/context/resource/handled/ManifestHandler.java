@@ -20,11 +20,16 @@ public class ManifestHandler implements HandledResource {
 
             var attributes = manifest.getMainAttributes();
             var main = attributes.getValue("Main-Class");
-            if(main != null){
-                var newName = Mappings.CLASS.retrieve(
-                        main.replace('.', '/')
-                ).value().replace('/', '.');
-                attributes.put(new Attributes.Name("Main-Class"), newName);
+            if (main != null) {
+                var resolved = main.replace('.', '/');
+                String next;
+                int limit = 64;
+                while (Mappings.CLASS.containsOld(resolved) && limit-- > 0) {
+                    next = Mappings.CLASS.retrieve(resolved).value();
+                    if (next.equals(resolved)) break;
+                    resolved = next;
+                }
+                attributes.put(new Attributes.Name("Main-Class"), resolved.replace('/', '.'));
             }
             jos.putNextEntry(new ZipEntry(name));
             manifest.write(jos);
