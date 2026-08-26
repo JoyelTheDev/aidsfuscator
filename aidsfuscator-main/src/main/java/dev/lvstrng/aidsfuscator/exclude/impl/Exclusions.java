@@ -33,6 +33,7 @@ public enum Exclusions {
 
     FLOW_FLATTEN("controlFlowFlatten", true, false, true),
     FLOW_SHUFFLE("controlFlowShuffle", true, false, true),
+    OPAQUE_PREDICATES("opaquePredicates", true, false, true),
     HASH_INTEGRITY("hashIntegrity", true, false, true)
 
     ;

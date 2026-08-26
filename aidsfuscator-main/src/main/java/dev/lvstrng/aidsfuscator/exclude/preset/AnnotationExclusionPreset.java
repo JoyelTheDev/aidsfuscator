@@ -1,21 +1,14 @@
 package dev.lvstrng.aidsfuscator.exclude.preset;
 
 import dev.lvstrng.aidsfuscator.api.ExcludeGlobal;
-import dev.lvstrng.aidsfuscator.api.data.ExcludeConstantFix;
-import dev.lvstrng.aidsfuscator.api.data.ExcludeIntegerEncryption;
-import dev.lvstrng.aidsfuscator.api.data.ExcludeStringEncryption;
+import dev.lvstrng.aidsfuscator.api.data.*;
 import dev.lvstrng.aidsfuscator.api.dynamic.ExcludeReferenceObfuscation;
-import dev.lvstrng.aidsfuscator.api.flow.ExcludeFlattening;
-import dev.lvstrng.aidsfuscator.api.flow.ExcludeShuffling;
+import dev.lvstrng.aidsfuscator.api.flow.*;
 import dev.lvstrng.aidsfuscator.api.integrity.ExcludeHashIntegrity;
 import dev.lvstrng.aidsfuscator.api.optimize.ExcludeTrim;
-import dev.lvstrng.aidsfuscator.api.rename.ExcludeClassRename;
-import dev.lvstrng.aidsfuscator.api.rename.ExcludeFieldRename;
-import dev.lvstrng.aidsfuscator.api.rename.ExcludeMethodRename;
-import dev.lvstrng.aidsfuscator.api.salt.ExcludeClassSalting;
-import dev.lvstrng.aidsfuscator.api.salt.ExcludeMethodSalting;
-import dev.lvstrng.aidsfuscator.api.strip.ExcludeLineNumbers;
-import dev.lvstrng.aidsfuscator.api.strip.ExcludeLocalVariableNames;
+import dev.lvstrng.aidsfuscator.api.rename.*;
+import dev.lvstrng.aidsfuscator.api.salt.*;
+import dev.lvstrng.aidsfuscator.api.strip.*;
 import dev.lvstrng.aidsfuscator.exclude.IExclusionPreset;
 import dev.lvstrng.aidsfuscator.exclude.impl.Exclusions;
 
@@ -44,7 +37,8 @@ public class AnnotationExclusionPreset implements IExclusionPreset {
         Exclusions.FIX_CONSTANTS.addAnnotation(internal(ExcludeConstantFix.class));
         Exclusions.INTEGER_ENCRYPTION.addAnnotation(internal(ExcludeIntegerEncryption.class));
         Exclusions.STRING_ENCRYPTION.addAnnotation(internal(ExcludeStringEncryption.class));
-
+        
+        Exclusions.OPAQUE_PREDICATES.addAnnotation(internal(ExcludeOpaquePredicates.class));
         Exclusions.FLOW_FLATTEN.addAnnotation(internal(ExcludeFlattening.class));
         Exclusions.FLOW_SHUFFLE.addAnnotation(internal(ExcludeShuffling.class));
 
