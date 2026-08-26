@@ -29,6 +29,13 @@
       "prefix": "",
       "shuffle": true
     },
+    "packageObfuscate": {
+      "enabled": false,
+      "mode": "EXPLODE",
+      "flatPackage": "",
+      "explodeDepth": 6,
+      "mixinSafe": true
+    },
     "renameClasses": {
       "enabled": true,
       "prefix": "a.",

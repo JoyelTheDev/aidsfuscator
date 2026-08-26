@@ -22,6 +22,7 @@ public class AnnotationExclusionPreset implements IExclusionPreset {
         Exclusions.GLOBAL.addAnnotation(internal(ExcludeGlobal.class));
 
         Exclusions.RENAME_CLASS.addAnnotation(internal(ExcludeClassRename.class));
+        Exclusions.PACKAGE_OBFUSCATION.addAnnotation(internal(ExcludePackageObfuscation.class));
         Exclusions.RENAME_FIELD.addAnnotation(internal(ExcludeFieldRename.class));
         Exclusions.RENAME_METHOD.addAnnotation(internal(ExcludeMethodRename.class));
 

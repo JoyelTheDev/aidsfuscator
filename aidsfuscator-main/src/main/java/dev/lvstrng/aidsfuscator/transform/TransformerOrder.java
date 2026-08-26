@@ -11,9 +11,7 @@ import dev.lvstrng.aidsfuscator.transform.impl.integrity.HashIntegrityTransforme
 import dev.lvstrng.aidsfuscator.transform.impl.flow.OpaquePredicateTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.DeadCodeCleanTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.optimize.TrimTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.ClassRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.FieldRenameTransformer;
-import dev.lvstrng.aidsfuscator.transform.impl.rename.MethodRenameTransformer;
+import dev.lvstrng.aidsfuscator.transform.impl.rename.*;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.ClassSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.salt.MethodSaltTransformer;
 import dev.lvstrng.aidsfuscator.transform.impl.strip.LineNumberTransformer;
@@ -35,6 +33,7 @@ public final class TransformerOrder {
             new FieldRenameTransformer(),
             new MethodRenameTransformer(),
             new ClassRenameTransformer(),
+            new PackageObfuscationTransformer(),
 
             new LocalVariableNameTransformer(),
             new LineNumberTransformer(),

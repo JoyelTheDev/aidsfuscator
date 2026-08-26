@@ -14,6 +14,7 @@ public enum Exclusions {
     GLOBAL("global", true, false, false),
 
     RENAME_CLASS("renameClass", true, true, true),
+    PACKAGE_OBFUSCATION("packageObfuscate", true, true, false),
     RENAME_FIELD("renameField", true, true, false),
     RENAME_METHOD("renameMethod", true, false, true),
 
