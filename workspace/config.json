@@ -4,7 +4,7 @@
   "libs": "libs/",
   "dictionary": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
   "computeFrames": true,
-  "watermark": "",
+  "watermark": "i like kuzhi mandi",
   "aggressiveOverload": true,
   "exclusionPresets": [
     "api",
@@ -67,6 +67,9 @@
       "obfuscateLongs": true,
       "separateBlocks": true,
       "confuseFlow": true
+    },
+    "opaquePredicates": {
+      "enabled": true
     },
     "controlFlowFlatten": {
       "enabled": true,
